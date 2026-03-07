@@ -1,0 +1,9 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Api/">
+    <Project Path="src/Api/CommerceHub.Api/CommerceHub.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/CommerceHub.BuildingBlocks/CommerceHub.BuildingBlocks.csproj" />
+  </Folder>
+</Solution>
