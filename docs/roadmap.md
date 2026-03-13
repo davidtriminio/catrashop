@@ -1,0 +1,39 @@
+# CommerceHub — Build Roadmap (24 phases)
+
+Built incrementally. Each phase must leave the system compiling; infra-dependent runtime checks require Docker.
+Legend: ✅ done · 🚧 in progress · ⬜ pending · 🔷 partially scaffolded
+
+| # | Phase | Status | Notes |
+|---|-------|--------|-------|
+| 0 | Repo + architecture + Git + docs baseline | 🚧 | .gitignore, README, ADRs, docs tree, branch strategy |
+| 1 | Backend bootstrap (solution, BuildingBlocks, Api) | 🚧 | Modular-monolith skeleton that builds |
+| 2 | Database + infrastructure (EF, Postgres, migrations) | ⬜ | |
+| 3 | Identity (auth, roles, permissions, refresh tokens) | ⬜ | |
+| 4 | Catalog (products, categories, variants, SKUs) | ⬜ | |
+| 5 | Inventory (available/reserved/sold, movements) | ⬜ | |
+| 6 | Customers (profile, addresses, wishlist) | ⬜ | |
+| 7 | Cart (persistence, captured prices, expiry) | ⬜ | |
+| 8 | Orders (state machine, totals, history) | ⬜ | |
+| 9 | Payments (provider abstraction, idempotency) | ⬜ | |
+| 10 | Shipping (methods, shipments, tracking) | ⬜ | |
+| 11 | Promotions (coupons, rules, usage limits) | ⬜ | |
+| 12 | Notifications (email/in-app, preferences) | ⬜ | |
+| 13 | Angular customer experience | ⬜ | |
+| 14 | Angular administration | ⬜ | |
+| 15 | Messaging (RabbitMQ, Outbox publisher/consumers) | ⬜ | |
+| 16 | n8n automations | ⬜ | |
+| 17 | AI Agent (bounded tools, RAG, guardrails) | ⬜ | |
+| 18 | Testing (unit, integration, E2E, architecture) | ⬜ | |
+| 19 | Observability (logging, tracing, metrics, health) | ⬜ | |
+| 20 | Security hardening | ⬜ | |
+| 21 | CI/CD (GitHub Actions, security pipeline) | ⬜ | |
+| 22 | Performance review | ⬜ | |
+| 23 | Documentation polish | ⬜ | |
+| 24 | Final architectural review | ⬜ | |
+
+## Environment constraints recorded at kickoff (2026-03-05)
+- .NET SDK 10.0.400 ✅, Node 24.18 ✅, pnpm 11.24 ✅, Angular CLI 22.1.6 ✅
+- Docker installed (28.4.0) but **Docker Desktop engine not running** → containers cannot start until the user
+  launches Docker Desktop. Code and compose files are authored ready; runtime verification of
+  Postgres/Redis/RabbitMQ/n8n is deferred until the engine is up.
+- No local `psql`/`redis-cli` clients (not required; access is via containers/EF).

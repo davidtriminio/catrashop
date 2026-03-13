@@ -1,0 +1,15 @@
+<Project>
+  <!-- Central Package Management: single source of truth for versions. -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- API surface -->
+    <PackageVersion Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0" />
+    <!-- Pinned above the transitive 2.0.0 to clear advisory GHSA-v5pm-xwqc-g5wc (NU1903). -->
+    <PackageVersion Include="Microsoft.OpenApi" Version="2.12.2" />
+    <!-- Validation -->
+    <PackageVersion Include="FluentValidation" Version="11.11.0" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.11.0" />
+  </ItemGroup>
+</Project>

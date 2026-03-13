@@ -1,0 +1,11 @@
+# Simulated Pull Request history
+
+> **These PRs are local workflow simulations.** No human reviewer approved this code. They exist to demonstrate a
+> professional branch → commit → review → merge workflow, including a few deliberate `REQUEST CHANGES` cycles
+> followed by corrective commits. Every review comment below was authored as part of the simulation.
+
+Index:
+
+| PR | Title | Branch | Merged to |
+|----|-------|--------|-----------|
+| [PR-001](PR-001-project-bootstrap.md) | Project bootstrap & architecture baseline | `feature/project-bootstrap` | `develop` |
