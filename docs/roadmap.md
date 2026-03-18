@@ -5,9 +5,9 @@ Legend: ✅ done · 🚧 in progress · ⬜ pending · 🔷 partially scaffolded
 
 | # | Phase | Status | Notes |
 |---|-------|--------|-------|
-| 0 | Repo + architecture + Git + docs baseline | 🚧 | .gitignore, README, ADRs, docs tree, branch strategy |
-| 1 | Backend bootstrap (solution, BuildingBlocks, Api) | 🚧 | Modular-monolith skeleton that builds |
-| 2 | Database + infrastructure (EF, Postgres, migrations) | ⬜ | |
+| 0 | Repo + architecture + Git + docs baseline | ✅ | gitflow, .gitignore, README, ADRs, docs tree |
+| 1 | Backend bootstrap (solution, BuildingBlocks, Api) | ✅ | Builds clean; API health/OpenAPI verified running |
+| 2 | Database + infrastructure (EF, Postgres, migrations) | ✅ | EF10+Npgsql infra, Outbox, ModuleDbContext, compose (first migration lands with Identity) |
 | 3 | Identity (auth, roles, permissions, refresh tokens) | ⬜ | |
 | 4 | Catalog (products, categories, variants, SKUs) | ⬜ | |
 | 5 | Inventory (available/reserved/sold, movements) | ⬜ | |
