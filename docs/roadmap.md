@@ -8,7 +8,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ pending · 🔷 partially scaffolded
 | 0 | Repo + architecture + Git + docs baseline | ✅ | gitflow, .gitignore, README, ADRs, docs tree |
 | 1 | Backend bootstrap (solution, BuildingBlocks, Api) | ✅ | Builds clean; API health/OpenAPI verified running |
 | 2 | Database + infrastructure (EF, Postgres, migrations) | ✅ | EF10+Npgsql infra, Outbox, ModuleDbContext, compose (first migration lands with Identity) |
-| 3 | Identity (auth, roles, permissions, refresh tokens) | ⬜ | |
+| 3 | Identity (auth, roles, permissions, refresh tokens) | ✅ | Full module; builds 0/0; migration validates; API boots, 7 endpoints, /me→401. DB round-trips deferred to Docker |
 | 4 | Catalog (products, categories, variants, SKUs) | ⬜ | |
 | 5 | Inventory (available/reserved/sold, movements) | ⬜ | |
 | 6 | Customers (profile, addresses, wishlist) | ⬜ | |
