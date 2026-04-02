@@ -27,6 +27,9 @@ public class Result
 
     public static Result<TValue> Success<TValue>(TValue value) => new(value, true, Error.None);
     public static Result<TValue> Failure<TValue>(Error error) => new(default, false, error);
+
+    /// <summary>Lets a use case `return someError;` where a non-generic <see cref="Result"/> is expected.</summary>
+    public static implicit operator Result(Error error) => Failure(error);
 }
 
 /// <summary>A <see cref="Result"/> that carries a value on success.</summary>
