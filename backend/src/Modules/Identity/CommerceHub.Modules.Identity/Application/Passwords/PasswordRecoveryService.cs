@@ -1,4 +1,3 @@
-using CommerceHub.BuildingBlocks.Persistence;
 using CommerceHub.BuildingBlocks.Results;
 using CommerceHub.Modules.Identity.Application.Abstractions;
 using CommerceHub.Modules.Identity.Application.Configuration;
@@ -22,7 +21,7 @@ public sealed class PasswordRecoveryService
     private readonly ITokenHasher _tokenHasher;
     private readonly IIntegrationEventPublisher _events;
     private readonly ISecurityAuditLogger _audit;
-    private readonly IUnitOfWork _unitOfWork;
+    private readonly IIdentityUnitOfWork _unitOfWork;
     private readonly TimeProvider _clock;
     private readonly IdentitySecurityOptions _security;
 
@@ -33,7 +32,7 @@ public sealed class PasswordRecoveryService
         ITokenHasher tokenHasher,
         IIntegrationEventPublisher events,
         ISecurityAuditLogger audit,
-        IUnitOfWork unitOfWork,
+        IIdentityUnitOfWork unitOfWork,
         TimeProvider clock,
         IOptions<IdentitySecurityOptions> security)
     {

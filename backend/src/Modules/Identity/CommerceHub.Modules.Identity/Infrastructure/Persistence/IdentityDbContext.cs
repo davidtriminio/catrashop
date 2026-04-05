@@ -1,11 +1,12 @@
 using CommerceHub.Infrastructure.Persistence;
+using CommerceHub.Modules.Identity.Application.Abstractions;
 using CommerceHub.Modules.Identity.Domain;
 using Microsoft.EntityFrameworkCore;
 
 namespace CommerceHub.Modules.Identity.Infrastructure.Persistence;
 
 /// <summary>EF Core context for the Identity module. Owns the "identity" PostgreSQL schema.</summary>
-public sealed class IdentityDbContext : ModuleDbContext
+public sealed class IdentityDbContext : ModuleDbContext, IIdentityUnitOfWork
 {
     public IdentityDbContext(DbContextOptions<IdentityDbContext> options) : base(options) { }
 

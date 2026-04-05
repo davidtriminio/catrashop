@@ -45,7 +45,7 @@ public sealed class IdentityModule : IModule
 
         // Persistence & infrastructure.
         services.AddScoped<IUserRepository, UserRepository>();
-        services.AddScoped<CommerceHub.BuildingBlocks.Persistence.IUnitOfWork>(sp => sp.GetRequiredService<IdentityDbContext>());
+        services.AddScoped<IIdentityUnitOfWork>(sp => sp.GetRequiredService<IdentityDbContext>());
         services.AddScoped<IIntegrationEventPublisher, OutboxIntegrationEventPublisher>();
         services.AddScoped<ISecurityAuditLogger, SecurityAuditLogger>();
 
