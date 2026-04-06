@@ -1,3 +1,4 @@
+using CommerceHub.BuildingBlocks.Security;
 using CommerceHub.Modules.Identity.Infrastructure.Security;
 using Microsoft.AspNetCore.Authorization;
 
@@ -32,7 +33,7 @@ public sealed class PermissionAuthorizationHandler : AuthorizationHandler<Permis
 /// </summary>
 public sealed class PermissionPolicyProvider : IAuthorizationPolicyProvider
 {
-    public const string Prefix = "perm:";
+    private const string Prefix = PermissionPolicy.Prefix;
 
     private readonly DefaultAuthorizationPolicyProvider _fallback;
 
@@ -55,12 +56,4 @@ public sealed class PermissionPolicyProvider : IAuthorizationPolicyProvider
 
         return _fallback.GetPolicyAsync(policyName);
     }
-}
-
-public static class PermissionEndpointExtensions
-{
-    /// <summary>Require a specific permission (e.g. Permissions.UsersRead) to call this endpoint.</summary>
-    public static TBuilder RequirePermission<TBuilder>(this TBuilder builder, string permission)
-        where TBuilder : IEndpointConventionBuilder =>
-        builder.RequireAuthorization(PermissionPolicyProvider.Prefix + permission);
 }
