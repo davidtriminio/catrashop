@@ -8,6 +8,9 @@
     <Project Path="src/BuildingBlocks/CommerceHub.Infrastructure/CommerceHub.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/Catalog/">
+    <Project Path="src/Modules/Catalog/CommerceHub.Modules.Catalog/CommerceHub.Modules.Catalog.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Identity/">
     <Project Path="src/Modules/Identity/CommerceHub.Modules.Identity/CommerceHub.Modules.Identity.csproj" />
   </Folder>

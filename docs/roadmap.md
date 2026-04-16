@@ -9,7 +9,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ pending · 🔷 partially scaffolded
 | 1 | Backend bootstrap (solution, BuildingBlocks, Api) | ✅ | Builds clean; API health/OpenAPI verified running |
 | 2 | Database + infrastructure (EF, Postgres, migrations) | ✅ | EF10+Npgsql infra, Outbox, ModuleDbContext, compose (first migration lands with Identity) |
 | 3 | Identity (auth, roles, permissions, refresh tokens) | ✅ | Full module; builds 0/0; migration validates; API boots, 7 endpoints, /me→401. DB round-trips deferred to Docker |
-| 4 | Catalog (products, categories, variants, SKUs) | ⬜ | |
+| 4 | Catalog (products, categories, variants, SKUs) | ✅ | Full module + FTS search; builds 0/0; migration validates (7 tables, unique SKU/slug, FKs); API boots, 8 endpoints, admin→401. DB queries deferred to Docker |
 | 5 | Inventory (available/reserved/sold, movements) | ⬜ | |
 | 6 | Customers (profile, addresses, wishlist) | ⬜ | |
 | 7 | Cart (persistence, captured prices, expiry) | ⬜ | |
