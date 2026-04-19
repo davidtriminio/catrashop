@@ -14,4 +14,10 @@
   <Folder Name="/src/Modules/Identity/">
     <Project Path="src/Modules/Identity/CommerceHub.Modules.Identity/CommerceHub.Modules.Identity.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Inventory/">
+    <Project Path="src/Modules/Inventory/CommerceHub.Modules.Inventory/CommerceHub.Modules.Inventory.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/CommerceHub.Modules.Inventory.Tests/CommerceHub.Modules.Inventory.Tests.csproj" />
+  </Folder>
 </Solution>

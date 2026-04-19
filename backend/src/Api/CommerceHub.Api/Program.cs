@@ -4,6 +4,7 @@ using CommerceHub.BuildingBlocks.Modularity;
 using CommerceHub.BuildingBlocks.Security;
 using CommerceHub.Modules.Catalog;
 using CommerceHub.Modules.Identity;
+using CommerceHub.Modules.Inventory;
 using CommerceHub.Modules.Identity.Application.Configuration;
 using CommerceHub.Modules.Identity.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -16,7 +17,8 @@ var builder = WebApplication.CreateBuilder(args);
 // --- Module registry: the explicit list of modules composing this monolith. -----------------
 var modules = new ModuleRegistry()
     .Add(new IdentityModule())
-    .Add(new CatalogModule());
+    .Add(new CatalogModule())
+    .Add(new InventoryModule());
 
 // --- Cross-cutting services ------------------------------------------------------------------
 builder.Services.AddProblemDetails();
