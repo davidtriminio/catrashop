@@ -12,3 +12,4 @@ Index:
 | [PR-002](PR-002-database-infrastructure.md) | Database & infrastructure foundation | `feature/database-infrastructure` | `develop` |
 | [PR-003](PR-003-identity.md) | Identity module (auth, roles, permissions, sessions) | `feature/identity` | `develop` |
 | [PR-004](PR-004-catalog.md) | Catalog module (products, categories, brands, FTS) | `feature/catalog` | `develop` |
+| [PR-005](PR-005-inventory.md) | Inventory module (stock, reservations, idempotency) | `feature/inventory` | `develop` |

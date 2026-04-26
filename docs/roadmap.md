@@ -10,7 +10,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ pending · 🔷 partially scaffolded
 | 2 | Database + infrastructure (EF, Postgres, migrations) | ✅ | EF10+Npgsql infra, Outbox, ModuleDbContext, compose (first migration lands with Identity) |
 | 3 | Identity (auth, roles, permissions, refresh tokens) | ✅ | Full module; builds 0/0; migration validates; API boots, 7 endpoints, /me→401. DB round-trips deferred to Docker |
 | 4 | Catalog (products, categories, variants, SKUs) | ✅ | Full module + FTS search; builds 0/0; migration validates (7 tables, unique SKU/slug, FKs); API boots, 8 endpoints, admin→401. DB queries deferred to Docker |
-| 5 | Inventory (available/reserved/sold, movements) | ⬜ | |
+| 5 | Inventory (available/reserved/sold, movements) | ✅ | Module + idempotent reservations, overselling prevention, low-stock events; **12 unit tests pass**; migration validates (4 tables); API boots (3 modules), admin→401. ADR-011 |
 | 6 | Customers (profile, addresses, wishlist) | ⬜ | |
 | 7 | Cart (persistence, captured prices, expiry) | ⬜ | |
 | 8 | Orders (state machine, totals, history) | ⬜ | |
