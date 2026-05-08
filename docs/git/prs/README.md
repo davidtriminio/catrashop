@@ -13,3 +13,4 @@ Index:
 | [PR-003](PR-003-identity.md) | Identity module (auth, roles, permissions, sessions) | `feature/identity` | `develop` |
 | [PR-004](PR-004-catalog.md) | Catalog module (products, categories, brands, FTS) | `feature/catalog` | `develop` |
 | [PR-005](PR-005-inventory.md) | Inventory module (stock, reservations, idempotency) | `feature/inventory` | `develop` |
+| [PR-006](PR-006-customers.md) | Customers module (profile, addresses, wishlist) | `feature/customers` | `develop` |

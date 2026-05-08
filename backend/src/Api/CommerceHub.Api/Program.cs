@@ -3,6 +3,7 @@ using CommerceHub.Api.Security;
 using CommerceHub.BuildingBlocks.Modularity;
 using CommerceHub.BuildingBlocks.Security;
 using CommerceHub.Modules.Catalog;
+using CommerceHub.Modules.Customers;
 using CommerceHub.Modules.Identity;
 using CommerceHub.Modules.Inventory;
 using CommerceHub.Modules.Identity.Application.Configuration;
@@ -18,7 +19,8 @@ var builder = WebApplication.CreateBuilder(args);
 var modules = new ModuleRegistry()
     .Add(new IdentityModule())
     .Add(new CatalogModule())
-    .Add(new InventoryModule());
+    .Add(new InventoryModule())
+    .Add(new CustomersModule());
 
 // --- Cross-cutting services ------------------------------------------------------------------
 builder.Services.AddProblemDetails();

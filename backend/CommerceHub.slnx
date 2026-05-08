@@ -11,6 +11,9 @@
   <Folder Name="/src/Modules/Catalog/">
     <Project Path="src/Modules/Catalog/CommerceHub.Modules.Catalog/CommerceHub.Modules.Catalog.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Customers/">
+    <Project Path="src/Modules/Customers/CommerceHub.Modules.Customers/CommerceHub.Modules.Customers.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Identity/">
     <Project Path="src/Modules/Identity/CommerceHub.Modules.Identity/CommerceHub.Modules.Identity.csproj" />
   </Folder>
@@ -18,6 +21,7 @@
     <Project Path="src/Modules/Inventory/CommerceHub.Modules.Inventory/CommerceHub.Modules.Inventory.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/CommerceHub.Modules.Customers.Tests/CommerceHub.Modules.Customers.Tests.csproj" />
     <Project Path="tests/CommerceHub.Modules.Inventory.Tests/CommerceHub.Modules.Inventory.Tests.csproj" />
   </Folder>
 </Solution>
