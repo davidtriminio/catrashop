@@ -346,6 +346,12 @@ namespace CommerceHub.Modules.Catalog.Infrastructure.Persistence.Migrations
                                 .HasColumnType("uuid")
                                 .HasColumnName("id");
 
+                            b1.Property<string>("Currency")
+                                .IsRequired()
+                                .HasMaxLength(3)
+                                .HasColumnType("character varying(3)")
+                                .HasColumnName("currency");
+
                             b1.Property<bool>("IsActive")
                                 .HasColumnType("boolean")
                                 .HasColumnName("is_active");
@@ -355,6 +361,11 @@ namespace CommerceHub.Modules.Catalog.Infrastructure.Persistence.Migrations
                                 .HasMaxLength(150)
                                 .HasColumnType("character varying(150)")
                                 .HasColumnName("name");
+
+                            b1.Property<decimal>("Price")
+                                .HasPrecision(18, 2)
+                                .HasColumnType("numeric(18,2)")
+                                .HasColumnName("price");
 
                             b1.Property<Guid>("ProductId")
                                 .HasColumnType("uuid")

@@ -6,7 +6,7 @@ public sealed record CreateCategoryRequest(string Name, string? Description, Gui
 
 public sealed record CreateBrandRequest(string Name, string? Description);
 
-public sealed record ProductVariantInput(string Sku, string Name);
+public sealed record ProductVariantInput(string Sku, string Name, decimal UnitPrice, string Currency);
 public sealed record ProductAttributeInput(string Name, string Value);
 public sealed record ProductImageInput(string Url, string? AltText, int SortOrder, bool IsPrimary);
 
@@ -21,7 +21,7 @@ public sealed record CreateProductRequest(
 
 public sealed record UpdateProductRequest(string Name, string Description, Guid CategoryId, Guid? BrandId);
 
-public sealed record AddVariantRequest(string Sku, string Name);
+public sealed record AddVariantRequest(string Sku, string Name, decimal UnitPrice, string Currency);
 
 // --- Responses ----------------------------------------------------------------------------------
 
@@ -41,7 +41,7 @@ public sealed record ProductListItem(
     int VariantCount,
     string Status);
 
-public sealed record ProductVariantResponse(Guid Id, string Sku, string Name, bool IsActive);
+public sealed record ProductVariantResponse(Guid Id, string Sku, string Name, decimal UnitPrice, string Currency, bool IsActive);
 public sealed record ProductAttributeResponse(string Name, string Value);
 public sealed record ProductImageResponse(string Url, string? AltText, int SortOrder, bool IsPrimary);
 

@@ -33,6 +33,8 @@ public sealed class CreateProductRequestValidator : AbstractValidator<CreateProd
         {
             v.RuleFor(i => i.Sku).NotEmpty().MaximumLength(64);
             v.RuleFor(i => i.Name).NotEmpty().MaximumLength(150);
+            v.RuleFor(i => i.UnitPrice).GreaterThanOrEqualTo(0);
+            v.RuleFor(i => i.Currency).NotEmpty().Length(3);
         });
         RuleForEach(x => x.Images).ChildRules(img =>
             img.RuleFor(i => i.Url).NotEmpty().MaximumLength(2048));
@@ -55,5 +57,7 @@ public sealed class AddVariantRequestValidator : AbstractValidator<AddVariantReq
     {
         RuleFor(x => x.Sku).NotEmpty().MaximumLength(64);
         RuleFor(x => x.Name).NotEmpty().MaximumLength(150);
+        RuleFor(x => x.UnitPrice).GreaterThanOrEqualTo(0);
+        RuleFor(x => x.Currency).NotEmpty().Length(3);
     }
 }
