@@ -17,12 +17,14 @@ public sealed class ProductVariant
 {
     private ProductVariant() { } // EF
 
-    internal ProductVariant(Guid id, Guid productId, string sku, string name)
+    internal ProductVariant(Guid id, Guid productId, string sku, string name, decimal price, string currency)
     {
         Id = id;
         ProductId = productId;
         Sku = sku;
         Name = name;
+        Price = price;
+        Currency = currency;
         IsActive = true;
     }
 
@@ -30,6 +32,13 @@ public sealed class ProductVariant
     public Guid ProductId { get; private set; }
     public string Sku { get; private set; } = default!;
     public string Name { get; private set; } = default!;
+
+    /// <summary>List price for this variant. A future Pricing module may layer rules on top (ADR-012).</summary>
+    public decimal Price { get; private set; }
+
+    /// <summary>ISO 4217 currency code for <see cref="Price"/>.</summary>
+    public string Currency { get; private set; } = default!;
+
     public bool IsActive { get; private set; }
 
     internal void Deactivate() => IsActive = false;

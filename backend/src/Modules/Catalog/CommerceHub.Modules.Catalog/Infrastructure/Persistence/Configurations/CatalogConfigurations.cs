@@ -58,6 +58,8 @@ public sealed class ProductConfiguration : IEntityTypeConfiguration<Product>
             variant.HasKey(v => v.Id);
             variant.Property(v => v.Sku).HasMaxLength(64).IsRequired();
             variant.Property(v => v.Name).HasMaxLength(150).IsRequired();
+            variant.Property(v => v.Price).HasPrecision(18, 2);
+            variant.Property(v => v.Currency).HasMaxLength(3).IsRequired();
             // SKU is globally unique across the whole catalog.
             variant.HasIndex(v => v.Sku).IsUnique().HasDatabaseName("ix_product_variants_sku");
         });

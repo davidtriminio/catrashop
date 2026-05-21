@@ -109,7 +109,7 @@ public sealed class CatalogReadStore : ICatalogReadStore
             product.BrandId,
             brandName,
             product.Variants.Where(v => v.IsActive)
-                .Select(v => new ProductVariantResponse(v.Id, v.Sku, v.Name, v.IsActive)).ToArray(),
+                .Select(v => new ProductVariantResponse(v.Id, v.Sku, v.Name, v.Price, v.Currency, v.IsActive)).ToArray(),
             product.Attributes.Select(a => new ProductAttributeResponse(a.Name, a.Value)).ToArray(),
             product.Images.OrderBy(i => i.SortOrder)
                 .Select(i => new ProductImageResponse(i.Url, i.AltText, i.SortOrder, i.IsPrimary)).ToArray());

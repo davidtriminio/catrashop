@@ -56,13 +56,13 @@ public sealed class Product : AggregateRoot<Guid>
         Touch();
     }
 
-    public Result<ProductVariant> AddVariant(string sku, string name)
+    public Result<ProductVariant> AddVariant(string sku, string name, decimal price, string currency)
     {
         var normalizedSku = sku.Trim().ToUpperInvariant();
         if (_variants.Any(v => v.Sku == normalizedSku))
             return CatalogErrors.DuplicateSkuInProduct;
 
-        var variant = new ProductVariant(Guid.NewGuid(), Id, normalizedSku, name.Trim());
+        var variant = new ProductVariant(Guid.NewGuid(), Id, normalizedSku, name.Trim(), price, currency.Trim().ToUpperInvariant());
         _variants.Add(variant);
         Touch();
         return variant;

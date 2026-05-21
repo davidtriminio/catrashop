@@ -28,6 +28,9 @@ public sealed class CatalogModule : IModule
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ICatalogReadStore, CatalogReadStore>();
 
+        // Public in-process query consumed by the Cart module to capture prices at add-to-cart.
+        services.AddScoped<Contracts.IProductCatalogQuery, ProductCatalogQuery>();
+
         services.AddScoped<CategoryService>();
         services.AddScoped<BrandService>();
         services.AddScoped<ProductService>();

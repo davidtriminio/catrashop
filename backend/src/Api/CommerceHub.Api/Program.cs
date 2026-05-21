@@ -2,6 +2,7 @@ using System.Text;
 using CommerceHub.Api.Security;
 using CommerceHub.BuildingBlocks.Modularity;
 using CommerceHub.BuildingBlocks.Security;
+using CommerceHub.Modules.Cart;
 using CommerceHub.Modules.Catalog;
 using CommerceHub.Modules.Customers;
 using CommerceHub.Modules.Identity;
@@ -20,7 +21,8 @@ var modules = new ModuleRegistry()
     .Add(new IdentityModule())
     .Add(new CatalogModule())
     .Add(new InventoryModule())
-    .Add(new CustomersModule());
+    .Add(new CustomersModule())
+    .Add(new CartModule());
 
 // --- Cross-cutting services ------------------------------------------------------------------
 builder.Services.AddProblemDetails();

@@ -8,5 +8,9 @@
   <ItemGroup>
     <ProjectReference Include="..\..\BuildingBlocks\CommerceHub.BuildingBlocks\CommerceHub.BuildingBlocks.csproj" />
     <ProjectReference Include="..\..\Modules\Identity\CommerceHub.Modules.Identity\CommerceHub.Modules.Identity.csproj" />
+    <ProjectReference Include="..\..\Modules\Catalog\CommerceHub.Modules.Catalog\CommerceHub.Modules.Catalog.csproj" />
+    <ProjectReference Include="..\..\Modules\Inventory\CommerceHub.Modules.Inventory\CommerceHub.Modules.Inventory.csproj" />
+    <ProjectReference Include="..\..\Modules\Customers\CommerceHub.Modules.Customers\CommerceHub.Modules.Customers.csproj" />
+    <ProjectReference Include="..\..\Modules\Cart\CommerceHub.Modules.Cart\CommerceHub.Modules.Cart.csproj" />
   </ItemGroup>
 </Project>

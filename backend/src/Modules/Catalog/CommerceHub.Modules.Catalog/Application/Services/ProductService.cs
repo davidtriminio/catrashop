@@ -46,7 +46,7 @@ public sealed class ProductService
             if (await _products.SkuExistsAsync(normalizedSku, ct))
                 return CatalogErrors.SkuInUse(normalizedSku);
 
-            var added = product.AddVariant(variant.Sku, variant.Name);
+            var added = product.AddVariant(variant.Sku, variant.Name, variant.UnitPrice, variant.Currency);
             if (added.IsFailure)
                 return added.Error; // duplicate SKU within the request
         }
@@ -91,13 +91,13 @@ public sealed class ProductService
         if (await _products.SkuExistsAsync(normalizedSku, ct))
             return CatalogErrors.SkuInUse(normalizedSku);
 
-        var result = product.AddVariant(request.Sku, request.Name);
+        var result = product.AddVariant(request.Sku, request.Name, request.UnitPrice, request.Currency);
         if (result.IsFailure)
             return result.Error;
 
         await _unitOfWork.SaveChangesAsync(ct);
         var v = result.Value;
-        return new ProductVariantResponse(v.Id, v.Sku, v.Name, v.IsActive);
+        return new ProductVariantResponse(v.Id, v.Sku, v.Name, v.Price, v.Currency, v.IsActive);
     }
 
     public async Task<Result> PublishAsync(Guid id, CancellationToken ct = default)
