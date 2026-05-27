@@ -13,7 +13,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ pending · 🔷 partially scaffolded
 | 5 | Inventory (available/reserved/sold, movements) | ✅ | Module + idempotent reservations, overselling prevention, low-stock events; **12 unit tests pass**; migration validates (4 tables); API boots (3 modules), admin→401. ADR-011 |
 | 6 | Customers (profile, addresses, wishlist) | ✅ | Module (id=userId, IDOR-safe); default-address & wishlist rules; **8 unit tests pass**; migration validates (4 tables); API boots (4 modules), /me→401 |
 | 7 | Cart (persistence, captured prices, expiry) | ✅ | Module + Catalog variant pricing/price-query; captured prices, currency guard, sliding expiry, one-active-cart index; **8 unit tests**; migrations validate; API boots (5 modules), /cart→401. ADR-012 |
-| 8 | Orders (state machine, totals, history) | ⬜ | |
+| 8 | Orders (state machine, totals, history) | ✅ | Checkout orchestration (cart→reserve→order→events), guarded state machine, totals+sim.tax, cancel/refund paths, IOrderWorkflow for Payments; **13 unit tests**; migration validates (unique cart idempotency); API boots (6 modules), 10 endpoints. ADR-013 |
 | 9 | Payments (provider abstraction, idempotency) | ⬜ | |
 | 10 | Shipping (methods, shipments, tracking) | ⬜ | |
 | 11 | Promotions (coupons, rules, usage limits) | ⬜ | |
