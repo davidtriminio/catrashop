@@ -15,3 +15,4 @@ Index:
 | [PR-005](PR-005-inventory.md) | Inventory module (stock, reservations, idempotency) | `feature/inventory` | `develop` |
 | [PR-006](PR-006-customers.md) | Customers module (profile, addresses, wishlist) | `feature/customers` | `develop` |
 | [PR-007](PR-007-cart.md) | Cart module + Catalog variant pricing | `feature/cart` | `develop` |
+| [PR-008](PR-008-orders.md) | Orders module (checkout + state machine) | `feature/orders` | `develop` |
