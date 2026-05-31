@@ -23,9 +23,13 @@
   <Folder Name="/src/Modules/Inventory/">
     <Project Path="src/Modules/Inventory/CommerceHub.Modules.Inventory/CommerceHub.Modules.Inventory.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Orders/">
+    <Project Path="src/Modules/Orders/CommerceHub.Modules.Orders/CommerceHub.Modules.Orders.csproj" />
+  </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/CommerceHub.Modules.Cart.Tests/CommerceHub.Modules.Cart.Tests.csproj" />
     <Project Path="tests/CommerceHub.Modules.Customers.Tests/CommerceHub.Modules.Customers.Tests.csproj" />
     <Project Path="tests/CommerceHub.Modules.Inventory.Tests/CommerceHub.Modules.Inventory.Tests.csproj" />
+    <Project Path="tests/CommerceHub.Modules.Orders.Tests/CommerceHub.Modules.Orders.Tests.csproj" />
   </Folder>
 </Solution>
