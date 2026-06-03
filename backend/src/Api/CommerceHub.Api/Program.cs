@@ -8,6 +8,7 @@ using CommerceHub.Modules.Customers;
 using CommerceHub.Modules.Identity;
 using CommerceHub.Modules.Inventory;
 using CommerceHub.Modules.Orders;
+using CommerceHub.Modules.Payments;
 using CommerceHub.Modules.Identity.Application.Configuration;
 using CommerceHub.Modules.Identity.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -24,7 +25,8 @@ var modules = new ModuleRegistry()
     .Add(new InventoryModule())
     .Add(new CustomersModule())
     .Add(new CartModule())
-    .Add(new OrdersModule());
+    .Add(new OrdersModule())
+    .Add(new PaymentsModule());
 
 // --- Cross-cutting services ------------------------------------------------------------------
 builder.Services.AddProblemDetails();

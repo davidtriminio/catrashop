@@ -10,9 +10,17 @@ namespace CommerceHub.Modules.Orders.Contracts;
 /// </summary>
 public interface IOrderWorkflow
 {
+    /// <summary>What the Payments module needs to charge an order: amount, currency, owner, and whether it awaits payment.</summary>
+    Task<PayableOrder?> GetPayableAsync(Guid orderId, CancellationToken ct = default);
+
     Task<Result> ConfirmPaymentAsync(Guid orderId, CancellationToken ct = default);
     Task<Result> FailPaymentAsync(Guid orderId, string? reason, CancellationToken ct = default);
+
+    /// <summary>Move a paid/fulfilling order through RefundRequested → Refunded after a payment refund. Idempotent.</summary>
+    Task<Result> RefundAsync(Guid orderId, CancellationToken ct = default);
 }
+
+public sealed record PayableOrder(Guid OrderId, Guid CustomerId, string Currency, decimal Amount, bool IsAwaitingPayment, bool IsPaid);
 
 // --- Integration events (published via the outbox) ----------------------------------------------
 
