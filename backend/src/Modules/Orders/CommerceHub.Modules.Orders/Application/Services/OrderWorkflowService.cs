@@ -33,6 +33,42 @@ public sealed class OrderWorkflowService : IOrderWorkflow
         _clock = clock;
     }
 
+    public async Task<PayableOrder?> GetPayableAsync(Guid orderId, CancellationToken ct = default)
+    {
+        var order = await _orders.GetByIdAsync(orderId, ct);
+        if (order is null)
+            return null;
+
+        var awaiting = order.Status is OrderStatus.Pending or OrderStatus.PaymentPending or OrderStatus.PaymentFailed;
+        var paid = order.Status is OrderStatus.Paid or OrderStatus.Processing or OrderStatus.Shipped or OrderStatus.Delivered;
+        return new PayableOrder(order.Id, order.CustomerId, order.Currency, order.GrandTotal, awaiting, paid);
+    }
+
+    public async Task<Result> RefundAsync(Guid orderId, CancellationToken ct = default)
+    {
+        var order = await _orders.GetByIdAsync(orderId, ct);
+        if (order is null)
+            return OrderErrors.NotFound;
+
+        if (order.Status == OrderStatus.Refunded)
+            return Result.Success(); // idempotent
+
+        var now = _clock.GetUtcNow();
+        if (order.Status != OrderStatus.RefundRequested)
+        {
+            var requested = order.RequestRefund("Payment refunded", now);
+            if (requested.IsFailure)
+                return requested;
+        }
+
+        var completed = order.CompleteRefund(now);
+        if (completed.IsFailure)
+            return completed;
+
+        await _unitOfWork.SaveChangesAsync(ct);
+        return Result.Success();
+    }
+
     public async Task<Result> ConfirmPaymentAsync(Guid orderId, CancellationToken ct = default)
     {
         var order = await _orders.GetByIdAsync(orderId, ct);
