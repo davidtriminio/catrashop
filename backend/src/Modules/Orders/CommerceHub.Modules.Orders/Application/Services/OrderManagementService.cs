@@ -6,9 +6,23 @@ using CommerceHub.Modules.Orders.Domain;
 
 namespace CommerceHub.Modules.Orders.Application.Services;
 
-/// <summary>Customer cancellation and admin fulfillment transitions, each validated by the order state machine.</summary>
-public sealed class OrderManagementService
+/// <summary>
+/// Customer cancellation and fulfillment transitions, each validated by the order state machine. Implements the
+/// public <see cref="IOrderFulfillment"/> contract so the Shipping module can drive Processing/Shipped/Delivered.
+/// </summary>
+public sealed class OrderManagementService : IOrderFulfillment
 {
+    public async Task<FulfillableOrder?> GetFulfillmentAsync(Guid orderId, CancellationToken ct = default)
+    {
+        var order = await _orders.GetByIdAsync(orderId, ct);
+        if (order is null)
+            return null;
+
+        var a = order.ShippingAddress;
+        return new FulfillableOrder(order.Id, order.CustomerId, order.Status.ToString(),
+            a.RecipientName, a.Line1, a.Line2, a.City, a.Region, a.PostalCode, a.Country);
+    }
+
     private readonly IOrderRepository _orders;
     private readonly IInventoryOperations _inventory;
     private readonly IIntegrationEventPublisher _events;

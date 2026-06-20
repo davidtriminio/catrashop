@@ -15,7 +15,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ pending · 🔷 partially scaffolded
 | 7 | Cart (persistence, captured prices, expiry) | ✅ | Module + Catalog variant pricing/price-query; captured prices, currency guard, sliding expiry, one-active-cart index; **8 unit tests**; migrations validate; API boots (5 modules), /cart→401. ADR-012 |
 | 8 | Orders (state machine, totals, history) | ✅ | Checkout orchestration (cart→reserve→order→events), guarded state machine, totals+sim.tax, cancel/refund paths, IOrderWorkflow for Payments; **13 unit tests**; migration validates (unique cart idempotency); API boots (6 modules), 10 endpoints. ADR-013 |
 | 9 | Payments (provider abstraction, idempotency) | ✅ | FakePaymentProvider, payment state machine, idempotency key, HMAC+dedup webhooks, refunds→order; drives IOrderWorkflow; **10 unit tests**; migration validates; API boots (7 modules), unauth→401, bad-sig webhook→401. ADR-014 |
-| 10 | Shipping (methods, shipments, tracking) | ⬜ | |
+| 10 | Shipping (methods, shipments, tracking) | ✅ | Methods + shipments (one/order), tracking, shipment state machine; drives orders via IOrderFulfillment (Processing→Shipped→Delivered); **10 unit tests**; migration validates; API boots (8 modules), admin→401. ADR-015 |
 | 11 | Promotions (coupons, rules, usage limits) | ⬜ | |
 | 12 | Notifications (email/in-app, preferences) | ⬜ | |
 | 13 | Angular customer experience | ⬜ | |

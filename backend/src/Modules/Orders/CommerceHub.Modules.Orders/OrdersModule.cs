@@ -35,8 +35,9 @@ public sealed class OrdersModule : IModule
         services.AddScoped<OrderManagementService>();
         services.AddScoped<OrderQueryService>();
 
-        // Public contract consumed by Payments (Phase 9).
-        services.AddScoped<IOrderWorkflow, OrderWorkflowService>();
+        // Public contracts consumed by other modules.
+        services.AddScoped<IOrderWorkflow, OrderWorkflowService>();       // Payments (Phase 9)
+        services.AddScoped<IOrderFulfillment>(sp => sp.GetRequiredService<OrderManagementService>()); // Shipping (Phase 10)
 
         services.TryAddSingleton(TimeProvider.System);
         services.AddValidatorsFromAssemblyContaining<OrdersModule>(ServiceLifetime.Scoped);

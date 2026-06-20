@@ -22,6 +22,22 @@ public interface IOrderWorkflow
 
 public sealed record PayableOrder(Guid OrderId, Guid CustomerId, string Currency, decimal Amount, bool IsAwaitingPayment, bool IsPaid);
 
+/// <summary>
+/// Public, in-process contract the Shipping module calls to read an order's destination and drive its
+/// fulfillment transitions (Processing → Shipped → Delivered), each validated by the order state machine.
+/// </summary>
+public interface IOrderFulfillment
+{
+    Task<FulfillableOrder?> GetFulfillmentAsync(Guid orderId, CancellationToken ct = default);
+    Task<Result> StartProcessingAsync(Guid orderId, CancellationToken ct = default);
+    Task<Result> MarkShippedAsync(Guid orderId, CancellationToken ct = default);
+    Task<Result> MarkDeliveredAsync(Guid orderId, CancellationToken ct = default);
+}
+
+public sealed record FulfillableOrder(
+    Guid OrderId, Guid CustomerId, string Status,
+    string RecipientName, string Line1, string? Line2, string City, string? Region, string PostalCode, string Country);
+
 // --- Integration events (published via the outbox) ----------------------------------------------
 
 public sealed record OrderCreatedIntegrationEvent(

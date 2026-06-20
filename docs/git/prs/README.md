@@ -17,3 +17,4 @@ Index:
 | [PR-007](PR-007-cart.md) | Cart module + Catalog variant pricing | `feature/cart` | `develop` |
 | [PR-008](PR-008-orders.md) | Orders module (checkout + state machine) | `feature/orders` | `develop` |
 | [PR-009](PR-009-payments.md) | Payments module (provider, idempotency, webhooks) | `feature/payments` | `develop` |
+| [PR-010](PR-010-shipping.md) | Shipping module (methods, shipments, tracking) | `feature/shipping` | `develop` |
