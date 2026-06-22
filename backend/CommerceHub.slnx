@@ -29,6 +29,9 @@
   <Folder Name="/src/Modules/Payments/">
     <Project Path="src/Modules/Payments/CommerceHub.Modules.Payments/CommerceHub.Modules.Payments.csproj" />
   </Folder>
+  <Folder Name="/src/Modules/Promotions/">
+    <Project Path="src/Modules/Promotions/CommerceHub.Modules.Promotions/CommerceHub.Modules.Promotions.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Shipping/">
     <Project Path="src/Modules/Shipping/CommerceHub.Modules.Shipping/CommerceHub.Modules.Shipping.csproj" />
   </Folder>
@@ -38,6 +41,7 @@
     <Project Path="tests/CommerceHub.Modules.Inventory.Tests/CommerceHub.Modules.Inventory.Tests.csproj" />
     <Project Path="tests/CommerceHub.Modules.Orders.Tests/CommerceHub.Modules.Orders.Tests.csproj" />
     <Project Path="tests/CommerceHub.Modules.Payments.Tests/CommerceHub.Modules.Payments.Tests.csproj" />
+    <Project Path="tests/CommerceHub.Modules.Promotions.Tests/CommerceHub.Modules.Promotions.Tests.csproj" />
     <Project Path="tests/CommerceHub.Modules.Shipping.Tests/CommerceHub.Modules.Shipping.Tests.csproj" />
   </Folder>
 </Solution>
