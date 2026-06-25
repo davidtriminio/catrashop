@@ -5,7 +5,7 @@ namespace CommerceHub.Modules.Orders.Application.Contracts;
 public sealed record ShippingAddressRequest(
     string RecipientName, string Line1, string? Line2, string City, string? Region, string PostalCode, string Country);
 
-public sealed record CheckoutRequest(ShippingAddressRequest ShippingAddress);
+public sealed record CheckoutRequest(ShippingAddressRequest ShippingAddress, string? CouponCode = null);
 
 public sealed record CancelOrderRequest(string? Reason);
 
