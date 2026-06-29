@@ -9,6 +9,7 @@ using CommerceHub.Modules.Identity;
 using CommerceHub.Modules.Inventory;
 using CommerceHub.Modules.Orders;
 using CommerceHub.Modules.Payments;
+using CommerceHub.Modules.Promotions;
 using CommerceHub.Modules.Shipping;
 using CommerceHub.Modules.Identity.Application.Configuration;
 using CommerceHub.Modules.Identity.Infrastructure.Security;
@@ -26,6 +27,7 @@ var modules = new ModuleRegistry()
     .Add(new InventoryModule())
     .Add(new CustomersModule())
     .Add(new CartModule())
+    .Add(new PromotionsModule())
     .Add(new OrdersModule())
     .Add(new PaymentsModule())
     .Add(new ShippingModule());

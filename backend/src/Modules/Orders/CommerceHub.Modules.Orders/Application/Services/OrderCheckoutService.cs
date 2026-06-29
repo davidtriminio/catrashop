@@ -6,6 +6,7 @@ using CommerceHub.Modules.Orders.Application.Configuration;
 using CommerceHub.Modules.Orders.Application.Contracts;
 using CommerceHub.Modules.Orders.Contracts;
 using CommerceHub.Modules.Orders.Domain;
+using CommerceHub.Modules.Promotions.Contracts;
 using Microsoft.Extensions.Options;
 
 namespace CommerceHub.Modules.Orders.Application.Services;
@@ -21,6 +22,7 @@ public sealed class OrderCheckoutService
 {
     private readonly ICartQuery _cart;
     private readonly IInventoryOperations _inventory;
+    private readonly IPromotionApplication _promotions;
     private readonly IOrderRepository _orders;
     private readonly IIntegrationEventPublisher _events;
     private readonly IOrderUnitOfWork _unitOfWork;
@@ -30,6 +32,7 @@ public sealed class OrderCheckoutService
     public OrderCheckoutService(
         ICartQuery cart,
         IInventoryOperations inventory,
+        IPromotionApplication promotions,
         IOrderRepository orders,
         IIntegrationEventPublisher events,
         IOrderUnitOfWork unitOfWork,
@@ -38,6 +41,7 @@ public sealed class OrderCheckoutService
     {
         _cart = cart;
         _inventory = inventory;
+        _promotions = promotions;
         _orders = orders;
         _events = events;
         _unitOfWork = unitOfWork;
@@ -60,8 +64,20 @@ public sealed class OrderCheckoutService
         }
 
         var now = _clock.GetUtcNow();
-        var discountTotal = 0m; // promotions applied in Phase 11
-        var taxTotal = Math.Round(cart.Subtotal * (_options.TaxRatePercent / 100m), 2, MidpointRounding.AwayFromZero);
+
+        // A coupon, if supplied, is priced (read-only) before the order is built so its discount reduces the
+        // taxable base. An invalid coupon fails checkout with the coupon's own error — the customer can retry.
+        var hasCoupon = !string.IsNullOrWhiteSpace(request.CouponCode);
+        var discountTotal = 0m;
+        if (hasCoupon)
+        {
+            var quote = await _promotions.QuoteAsync(request.CouponCode!, customerId, cart.Subtotal, cart.Currency, ct);
+            if (quote.IsFailure)
+                return quote.Error;
+            discountTotal = quote.Value.DiscountAmount;
+        }
+
+        var taxTotal = Math.Round((cart.Subtotal - discountTotal) * (_options.TaxRatePercent / 100m), 2, MidpointRounding.AwayFromZero);
 
         var shipping = ToShippingAddress(request.ShippingAddress);
         var lines = cart.Lines.Select(l => (l.ProductId, l.VariantId, l.Sku, l.ProductName, l.UnitPrice, l.Quantity));
@@ -72,11 +88,22 @@ public sealed class OrderCheckoutService
             return orderResult.Error;
         var order = orderResult.Value;
 
-        // Reserve stock before persisting the order; if any line is short, nothing is created.
+        // Reserve stock before persisting the order; if any line is short, nothing is created. Reserving first
+        // (before redeeming the coupon) means the common failure — a line gone out of stock — never consumes a
+        // coupon use.
         var stockLines = cart.Lines.Select(l => new StockRequest(l.Sku, l.Quantity)).ToArray();
         var reserve = await _inventory.ReserveAsync(cart.CartId, stockLines, TimeSpan.FromMinutes(_options.ReservationHoldMinutes), ct);
         if (reserve.IsFailure)
             return reserve.Error;
+
+        // Commit the coupon redemption (idempotent on the cart id). Re-validates under the current usage counts,
+        // so a coupon exhausted between the quote and here still fails closed; the reservation then self-expires.
+        if (hasCoupon)
+        {
+            var redeem = await _promotions.RedeemAsync(request.CouponCode!, customerId, cart.CartId, cart.Subtotal, cart.Currency, ct);
+            if (redeem.IsFailure)
+                return redeem.Error;
+        }
 
         var transition = order.MarkPaymentPending(now); // checkout initiates payment
         if (transition.IsFailure)

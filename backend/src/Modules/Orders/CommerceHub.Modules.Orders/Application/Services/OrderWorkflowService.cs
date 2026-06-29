@@ -3,6 +3,7 @@ using CommerceHub.Modules.Inventory.Contracts;
 using CommerceHub.Modules.Orders.Application.Abstractions;
 using CommerceHub.Modules.Orders.Contracts;
 using CommerceHub.Modules.Orders.Domain;
+using CommerceHub.Modules.Promotions.Contracts;
 
 namespace CommerceHub.Modules.Orders.Application.Services;
 
@@ -15,6 +16,7 @@ public sealed class OrderWorkflowService : IOrderWorkflow
 {
     private readonly IOrderRepository _orders;
     private readonly IInventoryOperations _inventory;
+    private readonly IPromotionApplication _promotions;
     private readonly IIntegrationEventPublisher _events;
     private readonly IOrderUnitOfWork _unitOfWork;
     private readonly TimeProvider _clock;
@@ -22,12 +24,14 @@ public sealed class OrderWorkflowService : IOrderWorkflow
     public OrderWorkflowService(
         IOrderRepository orders,
         IInventoryOperations inventory,
+        IPromotionApplication promotions,
         IIntegrationEventPublisher events,
         IOrderUnitOfWork unitOfWork,
         TimeProvider clock)
     {
         _orders = orders;
         _inventory = inventory;
+        _promotions = promotions;
         _events = events;
         _unitOfWork = unitOfWork;
         _clock = clock;
@@ -64,6 +68,9 @@ public sealed class OrderWorkflowService : IOrderWorkflow
         var completed = order.CompleteRefund(now);
         if (completed.IsFailure)
             return completed;
+
+        // A refunded order returns its coupon redemption (idempotent no-op when none was used).
+        await _promotions.ReleaseAsync(order.CartId, ct);
 
         await _unitOfWork.SaveChangesAsync(ct);
         return Result.Success();

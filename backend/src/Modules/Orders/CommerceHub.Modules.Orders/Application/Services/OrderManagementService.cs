@@ -3,6 +3,7 @@ using CommerceHub.Modules.Inventory.Contracts;
 using CommerceHub.Modules.Orders.Application.Abstractions;
 using CommerceHub.Modules.Orders.Contracts;
 using CommerceHub.Modules.Orders.Domain;
+using CommerceHub.Modules.Promotions.Contracts;
 
 namespace CommerceHub.Modules.Orders.Application.Services;
 
@@ -25,6 +26,7 @@ public sealed class OrderManagementService : IOrderFulfillment
 
     private readonly IOrderRepository _orders;
     private readonly IInventoryOperations _inventory;
+    private readonly IPromotionApplication _promotions;
     private readonly IIntegrationEventPublisher _events;
     private readonly IOrderUnitOfWork _unitOfWork;
     private readonly TimeProvider _clock;
@@ -32,12 +34,14 @@ public sealed class OrderManagementService : IOrderFulfillment
     public OrderManagementService(
         IOrderRepository orders,
         IInventoryOperations inventory,
+        IPromotionApplication promotions,
         IIntegrationEventPublisher events,
         IOrderUnitOfWork unitOfWork,
         TimeProvider clock)
     {
         _orders = orders;
         _inventory = inventory;
+        _promotions = promotions;
         _events = events;
         _unitOfWork = unitOfWork;
         _clock = clock;
@@ -59,6 +63,9 @@ public sealed class OrderManagementService : IOrderFulfillment
         // Release any stock still merely reserved (no-op if it was already committed or released).
         if (heldReservation)
             await _inventory.ReleaseAsync(order.CartId, ct);
+
+        // Give back any coupon redeemed for this order (idempotent no-op when none was used).
+        await _promotions.ReleaseAsync(order.CartId, ct);
 
         _events.Enqueue(new OrderCancelledIntegrationEvent(order.Id, order.OrderNumber, order.CustomerId, reason), order.Id);
         await _unitOfWork.SaveChangesAsync(ct);
