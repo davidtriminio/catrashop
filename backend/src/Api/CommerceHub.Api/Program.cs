@@ -7,6 +7,7 @@ using CommerceHub.Modules.Catalog;
 using CommerceHub.Modules.Customers;
 using CommerceHub.Modules.Identity;
 using CommerceHub.Modules.Inventory;
+using CommerceHub.Modules.Notifications;
 using CommerceHub.Modules.Orders;
 using CommerceHub.Modules.Payments;
 using CommerceHub.Modules.Promotions;
@@ -30,7 +31,8 @@ var modules = new ModuleRegistry()
     .Add(new PromotionsModule())
     .Add(new OrdersModule())
     .Add(new PaymentsModule())
-    .Add(new ShippingModule());
+    .Add(new ShippingModule())
+    .Add(new NotificationsModule());
 
 // --- Cross-cutting services ------------------------------------------------------------------
 builder.Services.AddProblemDetails();
