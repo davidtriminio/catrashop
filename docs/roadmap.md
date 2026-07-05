@@ -17,7 +17,7 @@ Legend: ✅ done · 🚧 in progress · ⬜ pending · 🔷 partially scaffolded
 | 9 | Payments (provider abstraction, idempotency) | ✅ | FakePaymentProvider, payment state machine, idempotency key, HMAC+dedup webhooks, refunds→order; drives IOrderWorkflow; **10 unit tests**; migration validates; API boots (7 modules), unauth→401, bad-sig webhook→401. ADR-014 |
 | 10 | Shipping (methods, shipments, tracking) | ✅ | Methods + shipments (one/order), tracking, shipment state machine; drives orders via IOrderFulfillment (Processing→Shipped→Delivered); **10 unit tests**; migration validates; API boots (8 modules), admin→401. ADR-015 |
 | 11 | Promotions (coupons, rules, usage limits) | ✅ | Coupon aggregate (%/fixed, min subtotal, window, global + per-customer limits, cap); rules in `Coupon.CalculateDiscount`; `IPromotionApplication` (quote/redeem/release) wired into checkout (discount now real, reduces taxable base) + release on cancel/refund; **17 unit tests**; migration validates (unique code + per-order redemption); API boots (9 modules), admin→401, quote→401. ADR-016 |
-| 12 | Notifications (email/in-app, preferences) | ⬜ | |
+| 12 | Notifications (email/in-app, preferences) | ✅ | In-app inbox + email (LoggingEmailSender behind IEmailSender), per-customer preferences (transactional always-on / marketing mutable per channel), idempotent `INotificationDispatcher` (unique dispatch key), code templates; me-scoped inbox/prefs + admin send under `notifications.manage`; **14 unit tests**; migration validates (5 tables); API boots (10 modules), all→401. ADR-017 |
 | 13 | Angular customer experience | ⬜ | |
 | 14 | Angular administration | ⬜ | |
 | 15 | Messaging (RabbitMQ, Outbox publisher/consumers) | ⬜ | |
