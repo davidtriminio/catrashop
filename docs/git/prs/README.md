@@ -20,3 +20,4 @@ Index:
 | [PR-010](PR-010-shipping.md) | Shipping module (methods, shipments, tracking) | `feature/shipping` | `develop` |
 | [PR-011](PR-011-promotions.md) | Promotions module (coupons, discounts, checkout wiring) | `feature/promotions` | `develop` |
 | [PR-012](PR-012-notifications.md) | Notifications module (in-app + email, preferences, dispatch) | `feature/notifications` | `develop` |
+| [PR-013](PR-013-frontend-customer.md) | Customer storefront (Angular 22) | `feature/frontend-customer` | `develop` |
