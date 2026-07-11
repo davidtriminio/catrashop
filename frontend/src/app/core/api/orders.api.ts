@@ -1,0 +1,25 @@
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable, inject } from '@angular/core';
+import { Observable } from 'rxjs';
+import { API_BASE_URL } from './api-base-url';
+import { CancelOrderRequest, CheckoutRequest, CheckoutResponse, OrderDetail, OrderSummary, Paged } from './models';
+
+@Injectable({ providedIn: 'root' })
+export class OrdersApi {
+  private readonly http = inject(HttpClient);
+  private readonly base = inject(API_BASE_URL) + '/api/v1/orders';
+
+  checkout(request: CheckoutRequest): Observable<CheckoutResponse> {
+    return this.http.post<CheckoutResponse>(`${this.base}/checkout`, request);
+  }
+  listMine(page = 1, pageSize = 20): Observable<Paged<OrderSummary>> {
+    const params = new HttpParams().set('page', page).set('pageSize', pageSize);
+    return this.http.get<Paged<OrderSummary>>(this.base, { params });
+  }
+  getMine(id: string): Observable<OrderDetail> {
+    return this.http.get<OrderDetail>(`${this.base}/${id}`);
+  }
+  cancel(id: string, request: CancelOrderRequest): Observable<void> {
+    return this.http.post<void>(`${this.base}/${id}/cancel`, request);
+  }
+}
