@@ -1,13 +1,13 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
-import { CatalogApi } from '../../core/api/catalog.api';
-import { CustomersApi } from '../../core/api/customers.api';
-import { ProductDetail as ProductDetailModel, ProductVariant } from '../../core/api/models';
-import { AuthStore } from '../../core/auth/auth.store';
+import { CatalogApi } from '@ch/api/catalog.api';
+import { CustomersApi } from '@ch/api/customers.api';
+import { ProductDetail as ProductDetailModel, ProductVariant } from '@ch/api/models';
+import { AuthStore } from '@ch/auth/auth.store';
 import { CartStore } from '../../core/cart/cart.store';
-import { MoneyPipe } from '../../shared/money.pipe';
-import { problemMessage } from '../../shared/problem';
+import { MoneyPipe } from '@ch/util/money.pipe';
+import { problemMessage } from '@ch/util/problem';
 
 @Component({
   selector: 'app-product-detail',

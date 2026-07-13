@@ -1,10 +1,10 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { AuthStore } from '../../core/auth/auth.store';
+import { AuthStore } from '@ch/auth/auth.store';
 import { CartStore } from '../../core/cart/cart.store';
-import { MoneyPipe } from '../../shared/money.pipe';
-import { problemMessage } from '../../shared/problem';
+import { MoneyPipe } from '@ch/util/money.pipe';
+import { problemMessage } from '@ch/util/problem';
 
 @Component({
   selector: 'app-cart-page',

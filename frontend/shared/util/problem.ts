@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ProblemDetails } from '../core/api/models';
+import { ProblemDetails } from '../api/models';
 
 /** Extracts a human-readable message from an API error (RFC 7807 problem details or validation errors). */
 export function problemMessage(error: unknown, fallback = 'Something went wrong. Please try again.'): string {

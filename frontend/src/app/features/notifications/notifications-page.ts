@@ -1,8 +1,8 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { NotificationsApi } from '../../core/api/notifications.api';
-import { Notification, NotificationPreferences } from '../../core/api/models';
-import { problemMessage } from '../../shared/problem';
+import { NotificationsApi } from '@ch/api/notifications.api';
+import { Notification, NotificationPreferences } from '@ch/api/models';
+import { problemMessage } from '@ch/util/problem';
 
 interface Topic { label: string; value: number; name: string; }
 

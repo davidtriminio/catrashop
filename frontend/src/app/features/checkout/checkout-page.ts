@@ -1,15 +1,15 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { CustomersApi } from '../../core/api/customers.api';
-import { Address, CheckoutResponse, CouponQuote, ShippingMethod } from '../../core/api/models';
-import { OrdersApi } from '../../core/api/orders.api';
-import { PaymentsApi } from '../../core/api/payments.api';
-import { PromotionsApi } from '../../core/api/promotions.api';
-import { ShippingApi } from '../../core/api/shipping.api';
+import { CustomersApi } from '@ch/api/customers.api';
+import { Address, CheckoutResponse, CouponQuote, ShippingMethod } from '@ch/api/models';
+import { OrdersApi } from '@ch/api/orders.api';
+import { PaymentsApi } from '@ch/api/payments.api';
+import { PromotionsApi } from '@ch/api/promotions.api';
+import { ShippingApi } from '@ch/api/shipping.api';
 import { CartStore } from '../../core/cart/cart.store';
-import { MoneyPipe } from '../../shared/money.pipe';
-import { problemMessage } from '../../shared/problem';
+import { MoneyPipe } from '@ch/util/money.pipe';
+import { problemMessage } from '@ch/util/problem';
 
 @Component({
   selector: 'app-checkout-page',

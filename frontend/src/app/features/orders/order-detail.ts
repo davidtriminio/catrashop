@@ -1,13 +1,13 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
-import { OrderDetail, Tracking } from '../../core/api/models';
-import { OrdersApi } from '../../core/api/orders.api';
-import { PaymentsApi } from '../../core/api/payments.api';
-import { ShippingApi } from '../../core/api/shipping.api';
-import { MoneyPipe } from '../../shared/money.pipe';
+import { OrderDetail, Tracking } from '@ch/api/models';
+import { OrdersApi } from '@ch/api/orders.api';
+import { PaymentsApi } from '@ch/api/payments.api';
+import { ShippingApi } from '@ch/api/shipping.api';
+import { MoneyPipe } from '@ch/util/money.pipe';
 import { OrderStatusBadge } from './order-status-badge';
-import { problemMessage } from '../../shared/problem';
+import { problemMessage } from '@ch/util/problem';
 
 @Component({
   selector: 'app-order-detail',
