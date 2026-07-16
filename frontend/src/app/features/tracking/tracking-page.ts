@@ -1,10 +1,10 @@
 import { Component, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
-import { ShippingApi } from '../../core/api/shipping.api';
-import { Tracking } from '../../core/api/models';
+import { ShippingApi } from '@ch/api/shipping.api';
+import { Tracking } from '@ch/api/models';
 import { OrderStatusBadge } from '../orders/order-status-badge';
-import { problemMessage } from '../../shared/problem';
+import { problemMessage } from '@ch/util/problem';
 
 @Component({
   selector: 'app-tracking-page',

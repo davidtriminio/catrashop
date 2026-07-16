@@ -1,8 +1,8 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { tap } from 'rxjs';
-import { CartApi } from '../api/cart.api';
-import { Cart } from '../api/models';
-import { AuthStore } from '../auth/auth.store';
+import { CartApi } from '@ch/api/cart.api';
+import { Cart } from '@ch/api/models';
+import { AuthStore } from '@ch/auth/auth.store';
 
 /** App-wide cart state so the header badge and cart page share one source of truth. */
 @Injectable({ providedIn: 'root' })

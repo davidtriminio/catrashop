@@ -1,9 +1,9 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
-import { AuthStore } from '../../core/auth/auth.store';
+import { AuthStore } from '@ch/auth/auth.store';
 import { CartStore } from '../../core/cart/cart.store';
-import { problemMessage } from '../../shared/problem';
+import { problemMessage } from '@ch/util/problem';
 
 @Component({
   selector: 'app-register',

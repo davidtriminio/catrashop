@@ -1,0 +1,8 @@
+/* Admin console — shared design system with an admin accent + wider layout. */
+@use 'theme';
+
+:root {
+  --primary: #0f766e;      /* teal to distinguish the admin console from the storefront */
+  --primary-600: #0d5f58;
+  --maxw: 1280px;
+}

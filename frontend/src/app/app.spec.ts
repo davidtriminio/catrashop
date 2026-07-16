@@ -1,4 +1,4 @@
-import { MoneyPipe } from './shared/money.pipe';
+import { MoneyPipe } from '@ch/util/money.pipe';
 
 describe('MoneyPipe', () => {
   const pipe = new MoneyPipe();

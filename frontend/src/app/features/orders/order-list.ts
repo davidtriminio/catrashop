@@ -1,11 +1,11 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
-import { OrdersApi } from '../../core/api/orders.api';
-import { OrderSummary, Paged } from '../../core/api/models';
-import { MoneyPipe } from '../../shared/money.pipe';
+import { OrdersApi } from '@ch/api/orders.api';
+import { OrderSummary, Paged } from '@ch/api/models';
+import { MoneyPipe } from '@ch/util/money.pipe';
 import { OrderStatusBadge } from './order-status-badge';
-import { problemMessage } from '../../shared/problem';
+import { problemMessage } from '@ch/util/problem';
 
 @Component({
   selector: 'app-order-list',

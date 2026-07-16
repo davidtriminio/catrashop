@@ -1,9 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { RouterLink } from '@angular/router';
-import { CatalogApi, ProductQuery } from '../../core/api/catalog.api';
-import { Brand, Category, Paged, ProductListItem } from '../../core/api/models';
-import { problemMessage } from '../../shared/problem';
+import { CatalogApi, ProductQuery } from '@ch/api/catalog.api';
+import { Brand, Category, Paged, ProductListItem } from '@ch/api/models';
+import { problemMessage } from '@ch/util/problem';
 
 @Component({
   selector: 'app-product-list',

@@ -141,3 +141,55 @@ export interface MutedChannel { type: string; channel: string; }
 export interface NotificationPreferences { muted: MutedChannel[]; }
 /** Backend NotificationType/NotificationChannel serialize as numbers on write (web defaults, no string converter). */
 export interface UpdateChannelPreferenceRequest { type: number; channel: number; muted: boolean; }
+
+// ================================================================================================
+// Admin DTOs (used by the administration app; management endpoints behind permissions)
+// ================================================================================================
+
+export interface CreatedResource { id: string; slug?: string; }
+
+// --- Catalog (admin) ----------------------------------------------------------------------------
+export interface CreateCategoryRequest { name: string; description?: string | null; parentId?: string | null; }
+export interface CreateBrandRequest { name: string; description?: string | null; }
+export interface ProductVariantInput { sku: string; name: string; unitPrice: number; currency: string; }
+export interface CreateProductRequest {
+  name: string; description: string; categoryId: string; brandId?: string | null;
+  variants: ProductVariantInput[];
+}
+export interface AddVariantRequest { sku: string; name: string; unitPrice: number; currency: string; }
+
+// --- Inventory (admin) --------------------------------------------------------------------------
+export interface InventoryItem {
+  id: string; sku: string; onHand: number; reserved: number; available: number;
+  lowStockThreshold: number; isLowStock: boolean;
+}
+export interface CreateInventoryItemRequest { sku: string; initialOnHand: number; lowStockThreshold: number; }
+export interface ReceiveStockRequest { quantity: number; reason?: string | null; }
+export interface AdjustStockRequest { delta: number; reason?: string | null; }
+export interface SetThresholdRequest { threshold: number; }
+export interface StockMovement { id: string; type: string; quantity: number; reason: string | null; reference: string | null; occurredAtUtc: string; }
+
+// --- Promotions (admin) -------------------------------------------------------------------------
+export interface Coupon {
+  id: string; code: string; name: string; description: string | null; discountType: string;
+  discountValue: number; currency: string | null; minimumSubtotal: number; maxDiscountAmount: number | null;
+  startsAtUtc: string | null; endsAtUtc: string | null; usageLimit: number | null; perCustomerLimit: number | null;
+  timesRedeemed: number; isActive: boolean; createdAtUtc: string;
+}
+/** discountType: 0 = Percentage, 1 = FixedAmount (backend enum serialized as a number on write). */
+export interface CreateCouponRequest {
+  code: string; name: string; description?: string | null; discountType: number; discountValue: number;
+  currency?: string | null; minimumSubtotal: number; maxDiscountAmount?: number | null;
+  startsAtUtc?: string | null; endsAtUtc?: string | null; usageLimit?: number | null; perCustomerLimit?: number | null;
+}
+
+// --- Shipping (admin) ---------------------------------------------------------------------------
+export interface CreateShippingMethodRequest { code: string; name: string; cost: number; currency: string; estimatedDays: number; }
+export interface UpdateShippingMethodRequest { name: string; cost: number; currency: string; estimatedDays: number; }
+
+// --- Notifications (admin) ----------------------------------------------------------------------
+/** type: NotificationType enum value (serialized as a number on write). */
+export interface SendNotificationRequest {
+  recipientId: string; type: number; data?: Record<string, string> | null;
+  recipientEmail?: string | null; recipientName?: string | null; idempotencyKey?: string | null;
+}

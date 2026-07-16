@@ -1,9 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
-import { CustomersApi } from '../../core/api/customers.api';
-import { Address, CustomerProfile, WishlistItem } from '../../core/api/models';
-import { problemMessage } from '../../shared/problem';
+import { CustomersApi } from '@ch/api/customers.api';
+import { Address, CustomerProfile, WishlistItem } from '@ch/api/models';
+import { problemMessage } from '@ch/util/problem';
 
 @Component({
   selector: 'app-account-page',
