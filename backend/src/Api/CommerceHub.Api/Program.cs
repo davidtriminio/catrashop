@@ -1,7 +1,9 @@
 using System.Text;
+using CommerceHub.Api.Integration;
 using CommerceHub.Api.Security;
 using CommerceHub.BuildingBlocks.Modularity;
 using CommerceHub.BuildingBlocks.Security;
+using CommerceHub.Infrastructure.Messaging;
 using CommerceHub.Modules.Cart;
 using CommerceHub.Modules.Catalog;
 using CommerceHub.Modules.Customers;
@@ -72,7 +74,13 @@ builder.Services.AddSingleton<IAuthorizationHandler, PermissionAuthorizationHand
 // --- Per-module services ---------------------------------------------------------------------
 modules.RegisterServices(builder.Services, builder.Configuration);
 
+// --- Messaging: Outbox → RabbitMQ → in-process handlers (Phase 15) ---------------------------
+builder.Services.AddCommerceHubMessaging(builder.Configuration);
+
 var app = builder.Build();
+
+// Make every integration-event type known to the consumer (routing keys + deserialization).
+IntegrationSetup.RegisterIntegrationEventTypes(app.Services.GetRequiredService<IntegrationEventTypeRegistry>());
 
 // --- Pipeline --------------------------------------------------------------------------------
 app.UseExceptionHandler();
