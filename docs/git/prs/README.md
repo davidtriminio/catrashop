@@ -23,3 +23,4 @@ Index:
 | [PR-013](PR-013-frontend-customer.md) | Customer storefront (Angular 22) | `feature/frontend-customer` | `develop` |
 | [PR-014](PR-014-frontend-admin.md) | Administration console + shared library | `feature/frontend-admin` | `develop` |
 | [PR-015](PR-015-messaging.md) | Messaging (Outbox → RabbitMQ → handlers) | `feature/messaging` | `develop` |
+| [PR-016](PR-016-n8n-automations.md) | n8n automations over the event exchange | `feature/n8n-automations` | `develop` |

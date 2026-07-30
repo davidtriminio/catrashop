@@ -1,0 +1,69 @@
+{
+  "name": "CommerceHub — Review request",
+  "nodes": [
+    {
+      "parameters": {
+        "queue": "n8n.reviews",
+        "options": {}
+      },
+      "id": "trigger-review",
+      "name": "On ShipmentDelivered",
+      "type": "n8n-nodes-base.rabbitmqTrigger",
+      "typeVersion": 1,
+      "position": [220, 300],
+      "credentials": {
+        "rabbitmq": { "id": "REPLACE_WITH_RABBITMQ_CREDENTIAL_ID", "name": "CommerceHub RabbitMQ" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.content ?? $json.data ?? $json;\nconst e = typeof raw === 'string' ? JSON.parse(raw) : raw;\nreturn [{ json: {\n  orderId: e.OrderId,\n  shipmentId: e.ShipmentId,\n  trackingNumber: e.TrackingNumber,\n  eventId: e.EventId\n} }];"
+      },
+      "id": "shape-review",
+      "name": "Build request",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [440, 300]
+    },
+    {
+      "parameters": {
+        "resume": "timeInterval",
+        "amount": 3,
+        "unit": "days"
+      },
+      "id": "wait-review",
+      "name": "Wait 3 days",
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1,
+      "position": [660, 300],
+      "webhookId": "commercehub-review-wait"
+    },
+    {
+      "parameters": {
+        "fromEmail": "reviews@commercehub.example",
+        "toEmail": "={{ $env.REVIEWS_NOTIFY_TO || 'reviews@commercehub.example' }}",
+        "subject": "How did we do? Review your recent order",
+        "emailFormat": "text",
+        "text": "Your order (tracking {{ $json.trackingNumber }}) was delivered a few days ago.\n\nWe'd love a quick review — it helps other shoppers and helps us improve.\n\n— CommerceHub",
+        "options": {}
+      },
+      "id": "send-review",
+      "name": "Send review request",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [880, 300],
+      "credentials": {
+        "smtp": { "id": "REPLACE_WITH_SMTP_CREDENTIAL_ID", "name": "CommerceHub SMTP" }
+      }
+    }
+  ],
+  "connections": {
+    "On ShipmentDelivered": { "main": [[{ "node": "Build request", "type": "main", "index": 0 }]] },
+    "Build request": { "main": [[{ "node": "Wait 3 days", "type": "main", "index": 0 }]] },
+    "Wait 3 days": { "main": [[{ "node": "Send review request", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "tags": [{ "name": "commercehub" }]
+}

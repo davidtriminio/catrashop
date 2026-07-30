@@ -1,0 +1,52 @@
+{
+  "name": "CommerceHub — Low-stock ops alert",
+  "nodes": [
+    {
+      "parameters": {
+        "queue": "n8n.ops",
+        "options": {}
+      },
+      "id": "trigger-lowstock",
+      "name": "On LowInventoryDetected",
+      "type": "n8n-nodes-base.rabbitmqTrigger",
+      "typeVersion": 1,
+      "position": [260, 300],
+      "credentials": {
+        "rabbitmq": { "id": "REPLACE_WITH_RABBITMQ_CREDENTIAL_ID", "name": "CommerceHub RabbitMQ" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.content ?? $json.data ?? $json;\nconst e = typeof raw === 'string' ? JSON.parse(raw) : raw;\nreturn [{ json: {\n  text: `:warning: Low stock — SKU *${e.Sku}* is at ${e.Available} (threshold ${e.Threshold}). Consider restocking.`,\n  sku: e.Sku,\n  available: e.Available,\n  threshold: e.Threshold\n} }];"
+      },
+      "id": "shape-lowstock",
+      "name": "Build alert",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "={{ $env.OPS_WEBHOOK_URL }}",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={{ { \"text\": $json.text } }}",
+        "options": {}
+      },
+      "id": "post-lowstock",
+      "name": "Post to ops channel",
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4,
+      "position": [740, 300]
+    }
+  ],
+  "connections": {
+    "On LowInventoryDetected": { "main": [[{ "node": "Build alert", "type": "main", "index": 0 }]] },
+    "Build alert": { "main": [[{ "node": "Post to ops channel", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "tags": [{ "name": "commercehub" }]
+}

@@ -1,0 +1,55 @@
+{
+  "name": "CommerceHub — Welcome email",
+  "nodes": [
+    {
+      "parameters": {
+        "queue": "n8n.welcome",
+        "options": {}
+      },
+      "id": "trigger-welcome",
+      "name": "On CustomerRegistered",
+      "type": "n8n-nodes-base.rabbitmqTrigger",
+      "typeVersion": 1,
+      "position": [260, 300],
+      "credentials": {
+        "rabbitmq": { "id": "REPLACE_WITH_RABBITMQ_CREDENTIAL_ID", "name": "CommerceHub RabbitMQ" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "// Normalize the integration-event payload (JSON, PascalCase from the backend).\nconst raw = $json.content ?? $json.data ?? $json;\nconst e = typeof raw === 'string' ? JSON.parse(raw) : raw;\nreturn [{ json: {\n  email: e.Email,\n  firstName: e.FirstName,\n  lastName: e.LastName,\n  userId: e.UserId,\n  eventId: e.EventId\n} }];"
+      },
+      "id": "shape-welcome",
+      "name": "Build message",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "hello@commercehub.example",
+        "toEmail": "={{ $json.email }}",
+        "subject": "Welcome to CommerceHub, {{ $json.firstName }}!",
+        "emailFormat": "text",
+        "text": "Hi {{ $json.firstName }},\n\nThanks for creating your CommerceHub account. Your storefront is ready — happy shopping!\n\n— The CommerceHub team",
+        "options": {}
+      },
+      "id": "send-welcome",
+      "name": "Send welcome email",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [740, 300],
+      "credentials": {
+        "smtp": { "id": "REPLACE_WITH_SMTP_CREDENTIAL_ID", "name": "CommerceHub SMTP" }
+      }
+    }
+  ],
+  "connections": {
+    "On CustomerRegistered": { "main": [[{ "node": "Build message", "type": "main", "index": 0 }]] },
+    "Build message": { "main": [[{ "node": "Send welcome email", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "tags": [{ "name": "commercehub" }]
+}
