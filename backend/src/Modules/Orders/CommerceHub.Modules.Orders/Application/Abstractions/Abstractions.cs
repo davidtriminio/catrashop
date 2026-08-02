@@ -33,4 +33,8 @@ public interface IOrderReadStore
 
     /// <summary>Order detail; when <paramref name="customerId"/> is provided, only that customer's order is returned.</summary>
     Task<OrderDetailResponse?> GetDetailAsync(Guid orderId, Guid? customerId, CancellationToken ct = default);
+
+    /// <summary>A customer's own order looked up by its number (ownership-scoped); null if not found or not theirs.</summary>
+    Task<CommerceHub.Modules.Orders.Contracts.CustomerOrderView?> GetForCustomerByNumberAsync(
+        Guid customerId, string orderNumber, CancellationToken ct = default);
 }

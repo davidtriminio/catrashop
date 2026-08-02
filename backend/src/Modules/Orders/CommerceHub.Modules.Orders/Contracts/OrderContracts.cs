@@ -38,6 +38,19 @@ public sealed record FulfillableOrder(
     Guid OrderId, Guid CustomerId, string Status,
     string RecipientName, string Line1, string? Line2, string City, string? Region, string PostalCode, string Country);
 
+/// <summary>A customer-facing summary of one order (public, read-only) — e.g. for the AI assistant's status tool.</summary>
+public sealed record CustomerOrderView(string OrderNumber, string Status, decimal GrandTotal, string Currency, DateTimeOffset CreatedAtUtc);
+
+/// <summary>
+/// Public, in-process read query for a single customer's order by number. Ownership is enforced by the
+/// <c>customerId</c> parameter: a caller can only ever see their own order, so a mismatched (or unknown) number
+/// returns null — no cross-customer leakage.
+/// </summary>
+public interface IOrderQueries
+{
+    Task<CustomerOrderView?> GetForCustomerByNumberAsync(Guid customerId, string orderNumber, CancellationToken ct = default);
+}
+
 // --- Integration events (published via the outbox) ----------------------------------------------
 
 public sealed record OrderCreatedIntegrationEvent(
