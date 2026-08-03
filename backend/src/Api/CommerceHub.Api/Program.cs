@@ -14,6 +14,7 @@ using CommerceHub.Modules.Orders;
 using CommerceHub.Modules.Payments;
 using CommerceHub.Modules.Promotions;
 using CommerceHub.Modules.Shipping;
+using CommerceHub.Modules.AI;
 using CommerceHub.Modules.Identity.Application.Configuration;
 using CommerceHub.Modules.Identity.Infrastructure.Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -34,7 +35,8 @@ var modules = new ModuleRegistry()
     .Add(new OrdersModule())
     .Add(new PaymentsModule())
     .Add(new ShippingModule())
-    .Add(new NotificationsModule());
+    .Add(new NotificationsModule())
+    .Add(new AiModule());
 
 // --- Cross-cutting services ------------------------------------------------------------------
 builder.Services.AddProblemDetails();

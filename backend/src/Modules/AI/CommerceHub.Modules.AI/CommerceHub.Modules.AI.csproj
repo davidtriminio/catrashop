@@ -1,0 +1,12 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Framework, nullability, implicit usings inherited from Directory.Build.props -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\CommerceHub.BuildingBlocks\CommerceHub.BuildingBlocks.csproj" />
+    <!-- The assistant's bounded tools call these modules' public read contracts only. -->
+    <ProjectReference Include="..\..\Catalog\CommerceHub.Modules.Catalog\CommerceHub.Modules.Catalog.csproj" />
+    <ProjectReference Include="..\..\Orders\CommerceHub.Modules.Orders\CommerceHub.Modules.Orders.csproj" />
+  </ItemGroup>
+</Project>

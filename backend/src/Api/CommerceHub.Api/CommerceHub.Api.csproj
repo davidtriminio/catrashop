@@ -17,5 +17,6 @@
     <ProjectReference Include="..\..\Modules\Payments\CommerceHub.Modules.Payments\CommerceHub.Modules.Payments.csproj" />
     <ProjectReference Include="..\..\Modules\Shipping\CommerceHub.Modules.Shipping\CommerceHub.Modules.Shipping.csproj" />
     <ProjectReference Include="..\..\Modules\Notifications\CommerceHub.Modules.Notifications\CommerceHub.Modules.Notifications.csproj" />
+    <ProjectReference Include="..\..\Modules\AI\CommerceHub.Modules.AI\CommerceHub.Modules.AI.csproj" />
   </ItemGroup>
 </Project>
