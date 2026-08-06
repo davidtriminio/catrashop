@@ -24,3 +24,4 @@ Index:
 | [PR-014](PR-014-frontend-admin.md) | Administration console + shared library | `feature/frontend-admin` | `develop` |
 | [PR-015](PR-015-messaging.md) | Messaging (Outbox → RabbitMQ → handlers) | `feature/messaging` | `develop` |
 | [PR-016](PR-016-n8n-automations.md) | n8n automations over the event exchange | `feature/n8n-automations` | `develop` |
+| [PR-017](PR-017-ai-assistant.md) | AI shopping assistant (bounded tools, RAG, guardrails) | `feature/ai-assistant` | `develop` |
