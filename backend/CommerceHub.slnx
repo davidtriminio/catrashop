@@ -8,6 +8,9 @@
     <Project Path="src/BuildingBlocks/CommerceHub.Infrastructure/CommerceHub.Infrastructure.csproj" />
   </Folder>
   <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/AI/">
+    <Project Path="src/Modules/AI/CommerceHub.Modules.AI/CommerceHub.Modules.AI.csproj" />
+  </Folder>
   <Folder Name="/src/Modules/Cart/">
     <Project Path="src/Modules/Cart/CommerceHub.Modules.Cart/CommerceHub.Modules.Cart.csproj" />
   </Folder>
@@ -40,6 +43,7 @@
   </Folder>
   <Folder Name="/tests/">
     <Project Path="tests/CommerceHub.Infrastructure.Tests/CommerceHub.Infrastructure.Tests.csproj" />
+    <Project Path="tests/CommerceHub.Modules.AI.Tests/CommerceHub.Modules.AI.Tests.csproj" />
     <Project Path="tests/CommerceHub.Modules.Cart.Tests/CommerceHub.Modules.Cart.Tests.csproj" />
     <Project Path="tests/CommerceHub.Modules.Customers.Tests/CommerceHub.Modules.Customers.Tests.csproj" />
     <Project Path="tests/CommerceHub.Modules.Inventory.Tests/CommerceHub.Modules.Inventory.Tests.csproj" />

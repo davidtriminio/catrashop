@@ -1,6 +1,7 @@
 using CommerceHub.BuildingBlocks.Pagination;
 using CommerceHub.Modules.Orders.Application.Abstractions;
 using CommerceHub.Modules.Orders.Application.Contracts;
+using CommerceHub.Modules.Orders.Contracts;
 using CommerceHub.Modules.Orders.Domain;
 using Microsoft.EntityFrameworkCore;
 
@@ -53,6 +54,28 @@ public sealed class OrderReadStore : IOrderReadStore
             .ToArray();
 
         return new PagedResult<OrderSummaryResponse>(items, request.Page, request.PageSize, total);
+    }
+
+    public async Task<CustomerOrderView?> GetForCustomerByNumberAsync(Guid customerId, string orderNumber, CancellationToken ct = default)
+    {
+        var normalized = orderNumber.Trim();
+        var row = await _context.Orders
+            .Where(o => o.CustomerId == customerId && o.OrderNumber == normalized)
+            .Select(o => new
+            {
+                o.OrderNumber,
+                o.Status,
+                o.Currency,
+                Subtotal = o.Items.Sum(i => i.UnitPrice * i.Quantity),
+                o.DiscountTotal,
+                o.TaxTotal,
+                o.CreatedAtUtc
+            })
+            .FirstOrDefaultAsync(ct);
+
+        return row is null
+            ? null
+            : new CustomerOrderView(row.OrderNumber, row.Status.ToString(), row.Subtotal - row.DiscountTotal + row.TaxTotal, row.Currency, row.CreatedAtUtc);
     }
 
     public async Task<OrderDetailResponse?> GetDetailAsync(Guid orderId, Guid? customerId, CancellationToken ct = default)
