@@ -42,6 +42,8 @@
     <Project Path="src/Modules/Shipping/CommerceHub.Modules.Shipping/CommerceHub.Modules.Shipping.csproj" />
   </Folder>
   <Folder Name="/tests/">
+    <Project Path="tests/CommerceHub.ArchitectureTests/CommerceHub.ArchitectureTests.csproj" />
+    <Project Path="tests/CommerceHub.IntegrationTests/CommerceHub.IntegrationTests.csproj" />
     <Project Path="tests/CommerceHub.Infrastructure.Tests/CommerceHub.Infrastructure.Tests.csproj" />
     <Project Path="tests/CommerceHub.Modules.AI.Tests/CommerceHub.Modules.AI.Tests.csproj" />
     <Project Path="tests/CommerceHub.Modules.Cart.Tests/CommerceHub.Modules.Cart.Tests.csproj" />
