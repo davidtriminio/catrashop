@@ -1,0 +1,15 @@
+# Prometheus scrape config for the CommerceHub API's in-process /metrics endpoint.
+# Used by the opt-in docker-compose "observability" profile. The API runs on the host during
+# development, so Prometheus reaches it through host.docker.internal.
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+
+scrape_configs:
+  - job_name: commercehub-api
+    metrics_path: /metrics
+    static_configs:
+      - targets: ["host.docker.internal:5227"]
+        labels:
+          service: commercehub-api
+          env: development

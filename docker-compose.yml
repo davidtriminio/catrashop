@@ -72,6 +72,32 @@ services:
         condition: service_healthy
     restart: unless-stopped
 
+  # --- Observability stack (opt-in) -----------------------------------------------------------
+  # Not started by default. Bring it up with:  docker compose --profile observability up -d
+  # The API runs on the host, so it exports OTLP to Jaeger at localhost:4317 (set
+  # Observability:OtlpEndpoint=http://localhost:4317), and Prometheus scrapes the host's /metrics.
+  jaeger:
+    image: jaegertracing/all-in-one:1.62
+    profiles: ["observability"]
+    environment:
+      COLLECTOR_OTLP_ENABLED: "true"
+    ports:
+      - "${JAEGER_UI_PORT:-16686}:16686"   # Jaeger UI
+      - "${OTLP_GRPC_PORT:-4317}:4317"     # OTLP gRPC (traces/metrics/logs in)
+      - "${OTLP_HTTP_PORT:-4318}:4318"     # OTLP HTTP
+    restart: unless-stopped
+
+  prometheus:
+    image: prom/prometheus:v3.1.0
+    profiles: ["observability"]
+    ports:
+      - "${PROMETHEUS_PORT:-9090}:9090"
+    volumes:
+      - ./observability/prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    restart: unless-stopped
+
 volumes:
   postgres-data:
   redis-data:
