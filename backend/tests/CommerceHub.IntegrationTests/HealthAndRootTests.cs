@@ -15,16 +15,33 @@ public sealed class HealthAndRootTests
 
     public HealthAndRootTests(CommerceHubApiFactory factory) => _factory = factory;
 
-    [Theory]
-    [InlineData("/health/live")]
-    [InlineData("/health/ready")]
-    public async Task Health_probes_report_healthy(string path)
+    [Fact]
+    public async Task Liveness_is_healthy_without_infrastructure()
     {
         var client = _factory.CreateClient();
 
-        var response = await client.GetAsync(path);
+        var response = await client.GetAsync("/health/live");
 
         Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+    }
+
+    [Fact]
+    public async Task Readiness_reports_its_infra_checks_and_is_unavailable_while_infra_is_down()
+    {
+        // No Docker: Postgres and RabbitMQ are unreachable, so readiness must be 503 (a load balancer would
+        // pull the instance) while liveness stays healthy. The body enumerates each dependency check.
+        var client = _factory.CreateClient();
+
+        var response = await client.GetAsync("/health/ready");
+        Assert.Equal(HttpStatusCode.ServiceUnavailable, response.StatusCode);
+
+        using var doc = JsonDocument.Parse(await response.Content.ReadAsStringAsync());
+        var names = doc.RootElement.GetProperty("checks").EnumerateArray()
+            .Select(c => c.GetProperty("name").GetString())
+            .ToArray();
+        Assert.Contains("postgres", names);
+        Assert.Contains("rabbitmq", names);
+        Assert.Equal("Unhealthy", doc.RootElement.GetProperty("status").GetString());
     }
 
     [Fact]

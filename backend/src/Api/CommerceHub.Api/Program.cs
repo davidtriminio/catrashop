@@ -1,5 +1,6 @@
 using System.Text;
 using CommerceHub.Api.Integration;
+using CommerceHub.Api.Observability;
 using CommerceHub.Api.Security;
 using CommerceHub.BuildingBlocks.Modularity;
 using CommerceHub.BuildingBlocks.Security;
@@ -38,10 +39,12 @@ var modules = new ModuleRegistry()
     .Add(new NotificationsModule())
     .Add(new AiModule());
 
+// --- Observability: structured logs, traces, metrics, health probes (Phase 19) --------------
+builder.AddCommerceHubObservability();
+
 // --- Cross-cutting services ------------------------------------------------------------------
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
-builder.Services.AddHealthChecks();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, CurrentUser>();
 
@@ -85,6 +88,7 @@ var app = builder.Build();
 IntegrationSetup.RegisterIntegrationEventTypes(app.Services.GetRequiredService<IntegrationEventTypeRegistry>());
 
 // --- Pipeline --------------------------------------------------------------------------------
+app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
 
@@ -96,8 +100,7 @@ if (app.Environment.IsDevelopment())
 app.UseAuthentication();
 app.UseAuthorization();
 
-app.MapHealthChecks("/health/live");
-app.MapHealthChecks("/health/ready");
+app.MapCommerceHubObservability();
 
 app.MapGet("/", () => Results.Ok(new
 {

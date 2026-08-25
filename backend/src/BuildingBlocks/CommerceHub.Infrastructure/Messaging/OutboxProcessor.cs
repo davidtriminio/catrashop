@@ -1,3 +1,6 @@
+using System.Diagnostics;
+using CommerceHub.BuildingBlocks.Observability;
+using CommerceHub.Infrastructure.Observability;
 using CommerceHub.Infrastructure.Persistence;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
@@ -43,6 +46,11 @@ public sealed class OutboxProcessor<TContext> : IOutboxProcessor where TContext 
 
         if (pending.Count == 0) return 0;
 
+        using var activity = CommerceHubTelemetry.ActivitySource.StartActivity("outbox.drain", ActivityKind.Producer);
+        activity?.SetTag("messaging.system", "rabbitmq");
+        activity?.SetTag("commercehub.module", typeof(TContext).Name);
+        activity?.SetTag("commercehub.outbox.pending", pending.Count);
+
         var published = 0;
         foreach (var message in pending)
         {
@@ -51,14 +59,19 @@ public sealed class OutboxProcessor<TContext> : IOutboxProcessor where TContext 
                 await _bus.PublishAsync(message.Type, message.Content, message.Id, message.CorrelationId, ct);
                 message.MarkProcessed(_clock.GetUtcNow());
                 published++;
+                MessagingMetrics.OutboxPublished.Add(1, new KeyValuePair<string, object?>("event.type", message.Type));
             }
             catch (Exception ex)
             {
                 message.MarkFailed(ex.Message);
+                MessagingMetrics.OutboxFailed.Add(1, new KeyValuePair<string, object?>("event.type", message.Type));
+                activity?.SetStatus(ActivityStatusCode.Error, ex.Message);
                 _logger.LogWarning(ex, "Failed to publish outbox message {MessageId} ({Type}); will retry.", message.Id, message.Type);
                 break; // broker likely unavailable — stop and retry the batch next cycle
             }
         }
+
+        activity?.SetTag("commercehub.outbox.published", published);
 
         await _context.SaveChangesAsync(ct);
         return published;
