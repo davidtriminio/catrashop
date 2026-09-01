@@ -42,6 +42,9 @@ var modules = new ModuleRegistry()
 // --- Observability: structured logs, traces, metrics, health probes (Phase 19) --------------
 builder.AddCommerceHubObservability();
 
+// --- Security hardening: headers, CORS, rate limiting, secret guard (Phase 20) ---------------
+builder.AddCommerceHubSecurity();
+
 // --- Cross-cutting services ------------------------------------------------------------------
 builder.Services.AddProblemDetails();
 builder.Services.AddOpenApi();
@@ -91,6 +94,9 @@ IntegrationSetup.RegisterIntegrationEventTypes(app.Services.GetRequiredService<I
 app.UseMiddleware<CorrelationIdMiddleware>();
 app.UseExceptionHandler();
 app.UseStatusCodePages();
+
+// Security hardening pipeline (headers, optional HTTPS/HSTS, CORS, rate limiting) — Phase 20.
+app.UseCommerceHubSecurity();
 
 if (app.Environment.IsDevelopment())
 {
