@@ -1,0 +1,33 @@
+# Gitleaks configuration for CommerceHub.
+#
+# Extends the built-in ruleset and allowlists the repository's *intentional* development-only
+# placeholders. None of these are real credentials: they are the sample values the app uses to run
+# offline, and Phase 20's SecretGuard already refuses to boot with any of them outside Development.
+# The allowlist keeps the secret scan focused on genuine leaks instead of failing on documented dummies.
+
+title = "CommerceHub Gitleaks config"
+
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Development-only placeholders and sample config (never real secrets)"
+
+# Files that exist to demonstrate configuration and deliberately carry dummy values.
+paths = [
+  '''\.env\.example$''',
+  '''backend/src/Api/CommerceHub\.Api/appsettings\.Development\.json$''',
+  '''backend/tests/.*''',
+  '''automations/rabbitmq/definitions\.json$''',
+  '''docker-compose\.yml$''',
+]
+
+# The exact placeholder strings, wherever they appear (docs quote them too).
+regexes = [
+  '''dev-only-signing-key-change-me[a-z0-9+\-]*''',
+  '''dev-only-webhook-secret-change-me''',
+  '''integration-tests-signing-key-0123456789''',
+  '''replace_with_a_long_random_dev_only_key_min_32_chars''',
+  '''change_me_locally''',
+  '''(POSTGRES_PASSWORD|RABBITMQ_DEFAULT_PASS|RABBITMQ_PASSWORD|Password)[:=]\s*\$?\{?[A-Za-z_]*:?-?commercehub\}?''',
+]
