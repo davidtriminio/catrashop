@@ -1,0 +1,128 @@
+name: Security
+
+# The security pipeline: static analysis (CodeQL), dependency vulnerability scanning for both
+# ecosystems, and secret detection. Runs on the long-lived branches, on PRs, and weekly so a newly
+# disclosed advisory against an unchanged dependency is still caught.
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+  schedule:
+    - cron: "27 4 * * 1" # Mondays 04:27 UTC
+
+concurrency:
+  group: security-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  codeql:
+    name: CodeQL (${{ matrix.language }})
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write # upload results to the Security tab
+    strategy:
+      fail-fast: false
+      matrix:
+        language: [csharp, javascript-typescript]
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Initialize CodeQL
+        uses: github/codeql-action/init@v3
+        with:
+          languages: ${{ matrix.language }}
+          # Analyse without orchestrating a build — no infrastructure or SDK setup needed here.
+          build-mode: none
+          queries: security-extended
+
+      - name: Analyze
+        uses: github/codeql-action/analyze@v3
+        with:
+          category: "/language:${{ matrix.language }}"
+
+  dependency-review:
+    name: Dependency review
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v4
+      - name: Review dependency changes
+        uses: actions/dependency-review-action@v4
+        with:
+          fail-on-severity: high
+
+  dotnet-vulnerabilities:
+    name: NuGet vulnerability scan
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: backend/global.json
+
+      - name: Restore
+        run: dotnet restore CommerceHub.slnx
+
+      - name: Fail on vulnerable packages (including transitive)
+        run: |
+          echo "Scanning for known-vulnerable packages…"
+          report=$(dotnet list CommerceHub.slnx package --vulnerable --include-transitive 2>&1)
+          echo "$report"
+          if echo "$report" | grep -qiE '\b(Critical|High|Moderate|Low)\b'; then
+            echo "::error::Vulnerable NuGet packages detected."
+            exit 1
+          fi
+          echo "No vulnerable packages found."
+
+      - name: Report deprecated packages (non-blocking)
+        run: dotnet list CommerceHub.slnx package --deprecated --include-transitive || true
+
+  npm-audit:
+    name: pnpm audit
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.24.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install dependencies (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Audit (fail on high or critical)
+        run: pnpm audit --prod --audit-level high
+
+  secret-scan:
+    name: Secret scan (Gitleaks)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 # full history so the scan covers every commit on the ref
+      - name: Run Gitleaks
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
