@@ -1,3 +1,4 @@
+using CommerceHub.BuildingBlocks.Caching;
 using CommerceHub.BuildingBlocks.Results;
 using CommerceHub.BuildingBlocks.Security;
 using CommerceHub.Modules.Catalog.Application.Contracts;
@@ -27,18 +28,22 @@ internal static class CatalogEndpoints
                 page ?? 1, pageSize ?? 20);
             return Results.Ok(await queries.SearchProductsAsync(criteria, ct));
         })
+        .CacheCatalogReads()
         .WithSummary("Search active products (full-text, filterable, sorted, paged).");
 
         group.MapGet("/products/{slug}", async (string slug, CatalogQueryService queries, CancellationToken ct) =>
             (await queries.GetProductBySlugAsync(slug, ct)).ToHttpResult())
+        .CacheCatalogReads()
         .WithSummary("Get an active product by slug.");
 
         group.MapGet("/categories", async (CatalogQueryService queries, CancellationToken ct) =>
             Results.Ok(await queries.ListCategoriesAsync(ct)))
+        .CacheCatalogReads()
         .WithSummary("List active categories.");
 
         group.MapGet("/brands", async (CatalogQueryService queries, CancellationToken ct) =>
             Results.Ok(await queries.ListBrandsAsync(ct)))
+        .CacheCatalogReads()
         .WithSummary("List active brands.");
 
         // --- Admin (require catalog management permission) --------------------------------------

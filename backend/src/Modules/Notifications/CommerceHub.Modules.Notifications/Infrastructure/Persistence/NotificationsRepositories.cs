@@ -24,7 +24,10 @@ public sealed class NotificationRepository : INotificationRepository
             query = query.Where(n => !n.IsRead);
 
         var total = await query.LongCountAsync(ct);
+        // The inbox listing is display-only — the caller maps these to responses and never mutates them
+        // (mark-read goes through GetAsync / MarkAllReadAsync, which load their own tracked entities).
         var items = await query
+            .AsNoTracking()
             .OrderByDescending(n => n.CreatedAtUtc)
             .Skip(request.Skip)
             .Take(request.PageSize)

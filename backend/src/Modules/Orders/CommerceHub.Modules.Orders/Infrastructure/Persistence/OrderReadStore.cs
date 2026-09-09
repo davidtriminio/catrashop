@@ -80,7 +80,10 @@ public sealed class OrderReadStore : IOrderReadStore
 
     public async Task<OrderDetailResponse?> GetDetailAsync(Guid orderId, Guid? customerId, CancellationToken ct = default)
     {
+        // Read-only detail projection (owned Items/StatusHistory/ShippingAddress load with the aggregate);
+        // no tracking needed on this display path.
         var order = await _context.Orders
+            .AsNoTracking()
             .FirstOrDefaultAsync(o => o.Id == orderId && (customerId == null || o.CustomerId == customerId), ct);
         if (order is null)
             return null;

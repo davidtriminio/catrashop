@@ -20,8 +20,10 @@ public sealed class ShippingMethodRepository : IShippingMethodRepository
     public Task<bool> CodeExistsAsync(string code, CancellationToken ct = default) =>
         _context.ShippingMethods.AnyAsync(m => m.Code == code, ct);
 
+    // Display-only listing (checkout options / admin list); mutations load through GetByIdAsync, so this
+    // read skips change tracking.
     public async Task<IReadOnlyList<ShippingMethod>> ListAsync(bool activeOnly, CancellationToken ct = default) =>
-        await _context.ShippingMethods.Where(m => !activeOnly || m.IsActive).OrderBy(m => m.Cost).ToListAsync(ct);
+        await _context.ShippingMethods.AsNoTracking().Where(m => !activeOnly || m.IsActive).OrderBy(m => m.Cost).ToListAsync(ct);
 }
 
 public sealed class ShipmentRepository : IShipmentRepository

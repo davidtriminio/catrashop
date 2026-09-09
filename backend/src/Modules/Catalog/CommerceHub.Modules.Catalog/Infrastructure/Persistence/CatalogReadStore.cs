@@ -86,7 +86,11 @@ public sealed class CatalogReadStore : ICatalogReadStore
 
     public async Task<ProductDetail?> GetProductBySlugAsync(string slug, CancellationToken ct = default)
     {
+        // Read-only projection to a DTO: no change tracking needed (owned Variants/Attributes/Images still
+        // load with the aggregate). Skipping the change tracker saves the identity-map snapshot on this
+        // hot customer-facing detail read.
         var product = await _context.Products
+            .AsNoTracking()
             .FirstOrDefaultAsync(p => p.Slug == slug && p.Status == ProductStatus.Active, ct);
         if (product is null)
             return null;
