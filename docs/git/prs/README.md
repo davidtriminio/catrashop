@@ -25,3 +25,8 @@ Index:
 | [PR-015](PR-015-messaging.md) | Messaging (Outbox → RabbitMQ → handlers) | `feature/messaging` | `develop` |
 | [PR-016](PR-016-n8n-automations.md) | n8n automations over the event exchange | `feature/n8n-automations` | `develop` |
 | [PR-017](PR-017-ai-assistant.md) | AI shopping assistant (bounded tools, RAG, guardrails) | `feature/ai-assistant` | `develop` |
+| [PR-018](PR-018-testing.md) | Testing (architecture, integration, E2E; frontend unit + Playwright) | `feature/testing` | `develop` |
+| [PR-019](PR-019-observability.md) | Observability (OpenTelemetry, structured logs, correlation, health) | `feature/observability` | `develop` |
+| [PR-020](PR-020-security-hardening.md) | Security hardening (headers, CORS, rate limiting, secret guard) | `feature/phase-20-security` | `develop` |
+| [PR-021](PR-021-cicd-pipeline.md) | CI/CD (GitHub Actions build/test + security pipeline) | `feature/phase-21-cicd` | `develop` |
+| [PR-022](PR-022-performance-review.md) | Performance review (DbContext pooling, no-tracking reads, compression, output cache) | `feature/phase-22-performance` | `develop` |
