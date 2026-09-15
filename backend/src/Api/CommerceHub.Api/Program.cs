@@ -1,6 +1,7 @@
 using System.Text;
 using CommerceHub.Api.Integration;
 using CommerceHub.Api.Observability;
+using CommerceHub.Api.Performance;
 using CommerceHub.Api.Security;
 using CommerceHub.BuildingBlocks.Modularity;
 using CommerceHub.BuildingBlocks.Security;
@@ -44,6 +45,9 @@ builder.AddCommerceHubObservability();
 
 // --- Security hardening: headers, CORS, rate limiting, secret guard (Phase 20) ---------------
 builder.AddCommerceHubSecurity();
+
+// --- Performance: response compression + output caching for anonymous reads (Phase 22) -------
+builder.AddCommerceHubPerformance();
 
 // --- Cross-cutting services ------------------------------------------------------------------
 builder.Services.AddProblemDetails();
@@ -97,6 +101,10 @@ app.UseStatusCodePages();
 
 // Security hardening pipeline (headers, optional HTTPS/HSTS, CORS, rate limiting) — Phase 20.
 app.UseCommerceHubSecurity();
+
+// Performance pipeline (response compression outside output caching) — Phase 22. Placed before auth so an
+// anonymous catalog cache hit short-circuits before the auth/authz work runs.
+app.UseCommerceHubPerformance();
 
 if (app.Environment.IsDevelopment())
 {
