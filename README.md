@@ -24,11 +24,12 @@
 
 ## Overview
 
-CommerceHub is a full commerce platform covering the real lifecycle of an online store: catalog and inventory,
-cart and checkout, orders, (simulated) payments, shipping, promotions, reviews, notifications, an AI shopping
-assistant with **strictly bounded** tools, and back-office administration with auditing. It is built as a
-**modular monolith** — independent modules with enforced boundaries that can be extracted into services later
-*if and when* a real reason appears, not before.
+CommerceHub is a full commerce platform covering the real lifecycle of an online store: identity, catalog and
+inventory, cart and checkout, orders, (simulated) payments, shipping, promotions, notifications, and an AI
+shopping assistant with **strictly bounded** tools. Back-office administration is a separate Angular app calling
+permission-gated endpoints, and security-sensitive actions (login, password changes) are recorded in the
+Identity module's audit log. It is built as a **modular monolith** — eleven independent modules with enforced
+boundaries that can be extracted into services later *if and when* a real reason appears, not before.
 
 ## The business problem
 
@@ -42,42 +43,42 @@ customers **without ever being able to leak or mutate data it shouldn't touch**.
 ```mermaid
 flowchart TB
     subgraph Client
-      A[Angular 22 SPA<br/>customer + admin]
+      WEB[commercehub-web<br/>customer SPA]
+      ADM[commercehub-admin<br/>admin SPA]
     end
-    subgraph API[ASP.NET Core API]
-      GW[Composition root<br/>auth, versioning, ProblemDetails]
+    subgraph API[ASP.NET Core API · one deployable]
+      GW[Composition root<br/>JWT auth · permission policies · ProblemDetails<br/>security headers · CORS · rate limit · compression · cache]
     end
-    subgraph Modules[Modular Monolith]
+    subgraph Modules[Modular Monolith · 11 modules]
       ID[Identity]:::m
       CAT[Catalog]:::m
       INV[Inventory]:::m
       CUS[Customers]:::m
       CART[Cart]:::m
+      PROMO[Promotions]:::m
       ORD[Orders]:::m
       PAY[Payments]:::m
       SHIP[Shipping]:::m
-      PROMO[Promotions]:::m
-      REV[Reviews]:::m
       NOTIF[Notifications]:::m
-      AI[AI Agent]:::m
-      ADMIN[Administration]:::m
-      AUD[Audit]:::m
+      AI[AI Assistant]:::m
     end
-    subgraph Infra[Infrastructure]
-      PG[(PostgreSQL)]
-      REDIS[(Redis)]
+    subgraph Infra[Infrastructure · docker-compose]
+      PG[(PostgreSQL<br/>schema-per-module)]
       MQ[(RabbitMQ)]
       N8N[n8n automations]
+      OBS[(Jaeger + Prometheus)]
+      REDIS[(Redis · provisioned,<br/>not yet wired)]:::future
     end
-    A -->|HTTPS/JSON| GW --> Modules
+    WEB & ADM -->|HTTPS/JSON + JWT| GW --> Modules
     Modules -->|Outbox| MQ --> N8N
     Modules --> PG
-    Modules -. cache .-> REDIS
+    GW -. traces/metrics .-> OBS
     classDef m fill:#eef,stroke:#88a;
+    classDef future fill:#f6f6f6,stroke:#bbb,stroke-dasharray:4 3,color:#777;
 ```
 
-See [`docs/architecture`](docs/architecture) for module boundaries, the checkout sequence, the order lifecycle
-state machine, and the AI agent boundary diagram.
+See [`docs/architecture`](docs/architecture/README.md) for the module map, module-boundary enforcement, the
+checkout sequence, the order lifecycle state machine, the Outbox flow, and the AI assistant boundary diagram.
 
 ## Why a modular monolith?
 
@@ -104,48 +105,53 @@ Full reasoning: [ADR-001 — Modular Monolith](docs/adr/001-modular-monolith.md)
 
 | Layer | Technology |
 |---|---|
-| Frontend | Angular 22 (standalone, signals, reactive forms), TypeScript |
-| Backend | .NET 10, ASP.NET Core, EF Core, FluentValidation, OpenAPI |
-| Database | PostgreSQL (+ full-text search) |
-| Cache / rate-limit | Redis |
+| Frontend | Angular 22 (standalone, **zoneless**, signals, reactive forms, `withFetch`), TypeScript |
+| Backend | .NET 10, ASP.NET Core (minimal APIs), EF Core + Npgsql, FluentValidation, OpenAPI |
+| Auth | JWT bearer + refresh tokens; BCrypt password hashing; on-demand permission policies |
+| Database | PostgreSQL (schema-per-module, snake_case, full-text search) |
+| Rate-limit / cache | In-process (framework rate limiter + output cache). *Redis is provisioned in compose but not yet wired.* |
 | Messaging | RabbitMQ (Outbox → publisher → consumers) |
 | Automation | n8n |
-| AI | Provider-abstracted LLM + bounded tool-calling + RAG for policies |
-| Observability | Serilog structured logs, OpenTelemetry traces/metrics, health checks |
-| Testing | xUnit, Testcontainers, Playwright, architecture tests |
-| Delivery | Docker Compose, GitHub Actions |
+| AI | Provider-abstracted `IChatModel` + bounded tool-calling + RAG over a seeded KB |
+| Observability | Structured JSON logging (`Microsoft.Extensions.Logging`), OpenTelemetry traces/metrics (Prometheus/OTLP/Jaeger), health probes |
+| Testing | xUnit, NetArchTest (architecture), WebApplicationFactory (integration) + Postgres-gated E2E; Vitest + Playwright (frontend) |
+| Delivery | Docker Compose, GitHub Actions (build/test + security scanning) |
 
 ## Prerequisites
 
-- .NET SDK **10.0+**
-- Node **20+** and **pnpm** (Angular 22)
-- Docker Desktop (for Postgres, Redis, RabbitMQ, n8n)
+- .NET SDK **10.0.400+** (pinned in [`backend/global.json`](backend/global.json))
+- Node **24+** and **pnpm 11+** (Angular 22)
+- Docker Desktop (for Postgres, RabbitMQ, n8n, and the opt-in Jaeger/Prometheus profile)
 - Git
 
 ## Quick start
 
-> Full instructions are added as each service comes online. The intended developer experience is:
-
 ```bash
-# 1. Bring up infrastructure (Postgres, Redis, RabbitMQ, n8n)
+# 1. Bring up infrastructure (Postgres, RabbitMQ, n8n; add --profile observability for Jaeger + Prometheus)
 docker compose up -d
 
-# 2. Run the backend (applies migrations on startup in Development)
-dotnet run --project backend/src/Api
+# 2. Apply EF Core migrations (each module owns its own; the app does NOT auto-migrate on startup)
+#    e.g. per context:  dotnet ef database update --project backend/src/Modules/Identity/CommerceHub.Modules.Identity
 
-# 3. Run the frontend
+# 3. Run the backend
+dotnet run --project backend/src/Api/CommerceHub.Api
+
+# 4. Run the customer SPA (http://localhost:4200)
 cd frontend && pnpm install && pnpm start
+#    …and the admin SPA (http://localhost:4300)
+pnpm ng serve commercehub-admin
 ```
 
-Demo credentials and seed data are documented in [`docs/demo-data.md`](docs/demo-data.md) once seeding lands. No
-real secrets are ever committed — see [`.env.example`](.env.example).
+There is no automated seed script yet; [`docs/demo-data.md`](docs/demo-data.md) walks the full journey through
+the API in the meantime. No real secrets are ever committed — see [`.env.example`](.env.example).
 
 ## Project status
 
 This repository is built **incrementally, phase by phase** (see the 24-phase plan in
-[`docs/roadmap.md`](docs/roadmap.md)). Every increment is expected to compile; runtime verification of
-infrastructure-dependent parts requires Docker to be running. The
-[CHANGELOG](CHANGELOG.md) and git tags (`v0.1.0`, …) track the evolution.
+[`docs/roadmap.md`](docs/roadmap.md)): **23 of 24 phases complete**, with only the final architectural review
+remaining. Every increment compiles and passes its suite (backend **200 pass / 2 skip**, frontend Vitest **23**
++ Playwright); runtime verification of infrastructure-dependent parts requires Docker to be running. The
+[CHANGELOG](CHANGELOG.md) tracks the evolution phase by phase.
 
 ## Git workflow
 
@@ -155,9 +161,13 @@ labeled as such; no human actually reviewed the code.
 
 ## Documentation map
 
+Start at the [documentation hub](docs/README.md), or jump straight in:
+
 | Path | Contents |
 |---|---|
-| [`docs/adr`](docs/adr) | Architecture Decision Records |
-| [`docs/architecture`](docs/architecture) | System & sequence diagrams |
-| [`docs/git/prs`](docs/git/prs) | Simulated PR history |
+| [`docs/architecture`](docs/architecture/README.md) | Module map, boundaries, checkout sequence, order state machine, Outbox & AI diagrams |
+| [`docs/adr`](docs/adr/README.md) | Architecture Decision Records (indexed) |
+| [`docs/git/prs`](docs/git/prs/README.md) | Simulated PR history |
 | [`docs/roadmap.md`](docs/roadmap.md) | The 24-phase build plan |
+| [`docs/demo-data.md`](docs/demo-data.md) | Driving the system end to end |
+| [`CHANGELOG.md`](CHANGELOG.md) | Phase-by-phase history |

@@ -30,3 +30,4 @@ Index:
 | [PR-020](PR-020-security-hardening.md) | Security hardening (headers, CORS, rate limiting, secret guard) | `feature/phase-20-security` | `develop` |
 | [PR-021](PR-021-cicd-pipeline.md) | CI/CD (GitHub Actions build/test + security pipeline) | `feature/phase-21-cicd` | `develop` |
 | [PR-022](PR-022-performance-review.md) | Performance review (DbContext pooling, no-tracking reads, compression, output cache) | `feature/phase-22-performance` | `develop` |
+| [PR-023](PR-023-documentation-polish.md) | Documentation polish (README accuracy, architecture docs, ADR & docs indexes, changelog) | `feature/phase-23-docs` | `develop` |
