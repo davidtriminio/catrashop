@@ -9,8 +9,19 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
 **local workflow simulations** — no human reviewed the code.
 
 ## [Unreleased]
-- Phase 23 — Documentation polish (this changelog, architecture docs, ADR & docs indexes, README accuracy pass).
-- Phase 24 — Final architectural review (pending).
+Nothing yet. The 24-phase build plan is complete; the next changes belong to a post-1.0 backlog (see the
+residuals in [ADR-028](docs/adr/028-final-architectural-review.md)).
+
+## Phase 24 — Final architectural review
+Capstone review; no production code. Every guard re-run as evidence — Release build 0/0, backend 200 pass / 2
+skip / 0 fail, architecture 66/66, no vulnerable packages, frontend both apps build + Vitest 23 + Playwright 3.
+Verdict: architecture matches ADR-001, **accepted as release-ready (v1.0.0)**; residual follow-ups recorded.
+→ [ADR-028](docs/adr/028-final-architectural-review.md) · [PR-024](docs/git/prs/PR-024-final-architectural-review.md)
+
+## Phase 23 — Documentation polish
+Accuracy + completeness pass over all docs: corrected README (real 11-module diagram, stack, quick start), new
+architecture overview + ADR index + docs hub + this changelog + demo walkthrough, real frontend README.
+→ [PR-023](docs/git/prs/PR-023-documentation-polish.md)
 
 ## Phase 22 — Performance review
 DbContext pooling (all 11 modules), opt-in `AsNoTracking()` on display-only reads, response compression
