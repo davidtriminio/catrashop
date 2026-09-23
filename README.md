@@ -2,7 +2,7 @@
 
 > A modular-monolith, event-driven **enterprise e-commerce platform** built with .NET 10 + Angular 22, designed as a realistic reference of how production commerce software is structured, secured, tested, and operated.
 
-[![status](https://img.shields.io/badge/status-in%20development-yellow)](#project-status)
+[![status](https://img.shields.io/badge/status-v1.0.0%20release--ready-brightgreen)](#project-status)
 [![backend](https://img.shields.io/badge/backend-.NET%2010-512BD4)](#stack)
 [![frontend](https://img.shields.io/badge/frontend-Angular%2022-DD0031)](#stack)
 
@@ -147,11 +147,12 @@ the API in the meantime. No real secrets are ever committed — see [`.env.examp
 
 ## Project status
 
-This repository is built **incrementally, phase by phase** (see the 24-phase plan in
-[`docs/roadmap.md`](docs/roadmap.md)): **23 of 24 phases complete**, with only the final architectural review
-remaining. Every increment compiles and passes its suite (backend **200 pass / 2 skip**, frontend Vitest **23**
-+ Playwright); runtime verification of infrastructure-dependent parts requires Docker to be running. The
-[CHANGELOG](CHANGELOG.md) tracks the evolution phase by phase.
+Built **incrementally, phase by phase** (see the 24-phase plan in [`docs/roadmap.md`](docs/roadmap.md)): **all
+24 phases complete**, accepted as **release-ready (v1.0.0)** in the [final architectural
+review](docs/adr/028-final-architectural-review.md). Every guard is green — backend Release build 0/0, tests
+**200 pass / 2 skip**, architecture **66/66**, no vulnerable packages; frontend both apps build, Vitest **23** +
+Playwright **3**. Runtime verification of infrastructure-dependent parts requires Docker; the recorded residual
+follow-ups live in ADR-028. The [CHANGELOG](CHANGELOG.md) tracks the evolution phase by phase.
 
 ## Git workflow
 

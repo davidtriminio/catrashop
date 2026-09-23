@@ -31,3 +31,4 @@ Index:
 | [PR-021](PR-021-cicd-pipeline.md) | CI/CD (GitHub Actions build/test + security pipeline) | `feature/phase-21-cicd` | `develop` |
 | [PR-022](PR-022-performance-review.md) | Performance review (DbContext pooling, no-tracking reads, compression, output cache) | `feature/phase-22-performance` | `develop` |
 | [PR-023](PR-023-documentation-polish.md) | Documentation polish (README accuracy, architecture docs, ADR & docs indexes, changelog) | `feature/phase-23-docs` | `develop` |
+| [PR-024](PR-024-final-architectural-review.md) | Final architectural review (evidence-based verdict; release-ready v1.0.0) | `feature/phase-24-final-review` | `develop` |
