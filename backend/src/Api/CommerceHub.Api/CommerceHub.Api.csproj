@@ -1,7 +1,14 @@
 <Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <UserSecretsId>29246385-58e5-4790-a6b2-fa703cdbf8ad</UserSecretsId>
+  </PropertyGroup>
   <!-- Framework, nullability, implicit usings inherited from Directory.Build.props -->
   <ItemGroup>
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
     <PackageReference Include="Microsoft.OpenApi" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" />
     <PackageReference Include="OpenTelemetry.Exporter.Console" />

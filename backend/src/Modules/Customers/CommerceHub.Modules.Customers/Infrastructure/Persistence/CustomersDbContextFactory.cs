@@ -9,7 +9,7 @@ public sealed class CustomersDbContextFactory : IDesignTimeDbContextFactory<Cust
     public CustomersDbContext CreateDbContext(string[] args)
     {
         var options = new DbContextOptionsBuilder<CustomersDbContext>()
-            .UseNpgsql("Host=localhost;Database=commercehub;Username=commercehub;Password=placeholder",
+            .UseNpgsql(Environment.GetEnvironmentVariable("COMMERCEHUB_CONNECTION") ?? "Host=localhost;Database=commercehub;Username=commercehub;Password=placeholder",
                 npgsql => npgsql.MigrationsHistoryTable("__ef_migrations_history", "customers"))
             .UseSnakeCaseNamingConvention()
             .Options;
