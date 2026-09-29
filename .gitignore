@@ -73,6 +73,7 @@ logs/
 .env
 .env.*
 !.env.example
+!.env.prod.example
 *.pfx
 *.p12
 appsettings.*.Local.json
@@ -89,3 +90,6 @@ volumes/
 *.db
 
 .aider*
+
+# Release bundles
+deploy/oracle/dist/

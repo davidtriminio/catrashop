@@ -9,7 +9,7 @@ services:
     image: postgres:17-alpine
     environment:
       POSTGRES_USER: ${POSTGRES_USER:-commercehub}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-commercehub}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?set POSTGRES_PASSWORD in .env}
       POSTGRES_DB: ${POSTGRES_DB:-commercehub}
     ports:
       - "${POSTGRES_PORT:-5432}:5432"
@@ -40,7 +40,7 @@ services:
     image: rabbitmq:4-management-alpine
     environment:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:-commercehub}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:-commercehub}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?set RABBITMQ_PASSWORD in .env}
     ports:
       - "${RABBITMQ_PORT:-5672}:5672"        # AMQP
       - "${RABBITMQ_MGMT_PORT:-15672}:15672"  # Management UI
@@ -58,7 +58,7 @@ services:
     environment:
       N8N_BASIC_AUTH_ACTIVE: "true"
       N8N_BASIC_AUTH_USER: ${N8N_BASIC_AUTH_USER:-admin}
-      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD:-change_me_locally}
+      N8N_BASIC_AUTH_PASSWORD: ${N8N_BASIC_AUTH_PASSWORD:?set N8N_BASIC_AUTH_PASSWORD in .env}
       N8N_PORT: 5678
       GENERIC_TIMEZONE: UTC
       N8N_DIAGNOSTICS_ENABLED: "false"
