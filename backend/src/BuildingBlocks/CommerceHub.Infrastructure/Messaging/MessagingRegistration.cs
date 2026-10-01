@@ -20,14 +20,26 @@ public static class MessagingRegistration
         services.TryAddSingleton(TimeProvider.System);
 
         services.AddSingleton<IntegrationEventTypeRegistry>();
-        services.AddSingleton<IEventBus, RabbitMqEventBus>();
         services.AddSingleton<IntegrationEventDispatcher>();
-
         services.AddHostedService<OutboxPublisherService>();
-        services.AddHostedService<IntegrationEventConsumerService>();
+
+        if (UsesInProcessTransport(configuration))
+        {
+            // Small single-node deployments: no broker, the outbox publisher dispatches straight to the handlers.
+            services.AddSingleton<IEventBus, InProcessEventBus>();
+        }
+        else
+        {
+            services.AddSingleton<IEventBus, RabbitMqEventBus>();
+            services.AddHostedService<IntegrationEventConsumerService>();
+        }
 
         return services;
     }
+
+    /// <summary>True when <c>Messaging:Transport</c> is "InProcess" (default is "RabbitMq").</summary>
+    public static bool UsesInProcessTransport(IConfiguration configuration) =>
+        string.Equals(configuration["Messaging:Transport"], "InProcess", StringComparison.OrdinalIgnoreCase);
 
     /// <summary>Registers the outbox drain for one module's DbContext (call once per publishing module).</summary>
     public static IServiceCollection AddOutboxProcessor<TContext>(this IServiceCollection services)

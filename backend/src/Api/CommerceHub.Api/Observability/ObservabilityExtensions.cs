@@ -1,5 +1,6 @@
 using System.Text.Json;
 using CommerceHub.BuildingBlocks.Observability;
+using CommerceHub.Infrastructure.Messaging;
 using Microsoft.AspNetCore.Diagnostics.HealthChecks;
 using Microsoft.Extensions.Diagnostics.HealthChecks;
 using OpenTelemetry.Logs;
@@ -30,7 +31,7 @@ public static class ObservabilityExtensions
 
         ConfigureLogging(builder, options, resource);
         ConfigureTracingAndMetrics(builder, options, resource);
-        ConfigureHealthChecks(builder.Services);
+        ConfigureHealthChecks(builder.Services, builder.Configuration);
 
         return builder;
     }
@@ -86,11 +87,14 @@ public static class ObservabilityExtensions
             });
     }
 
-    private static void ConfigureHealthChecks(IServiceCollection services)
+    private static void ConfigureHealthChecks(IServiceCollection services, IConfiguration configuration)
     {
-        services.AddHealthChecks()
-            .AddCheck<NpgsqlHealthCheck>("postgres", failureStatus: HealthStatus.Unhealthy, tags: [ReadyTag])
-            .AddCheck<RabbitMqHealthCheck>("rabbitmq", failureStatus: HealthStatus.Unhealthy, tags: [ReadyTag]);
+        var checks = services.AddHealthChecks()
+            .AddCheck<NpgsqlHealthCheck>("postgres", failureStatus: HealthStatus.Unhealthy, tags: [ReadyTag]);
+
+        // No broker to probe when events are dispatched in-process.
+        if (!MessagingRegistration.UsesInProcessTransport(configuration))
+            checks.AddCheck<RabbitMqHealthCheck>("rabbitmq", failureStatus: HealthStatus.Unhealthy, tags: [ReadyTag]);
     }
 
     /// <summary>Maps the liveness/readiness probes and (optionally) the Prometheus scrape endpoint.</summary>
