@@ -1,5 +1,6 @@
 using System.Text.Json;
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 
@@ -37,6 +38,11 @@ public static class SecurityHardeningExtensions
 
         // Never advertise the server implementation.
         builder.WebHost.ConfigureKestrel(o => o.AddServerHeader = false);
+
+        // Behind Apache/Cloudflare: trust X-Forwarded-* from the local reverse proxy (loopback) so rate limiting
+        // and HTTPS detection see the real client.
+        builder.Services.Configure<ForwardedHeadersOptions>(o =>
+            o.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto);
 
         ConfigureCors(builder.Services, options.Cors);
         ConfigureRateLimiting(builder.Services, options.RateLimiting);
@@ -127,6 +133,7 @@ public static class SecurityHardeningExtensions
     {
         var options = app.Services.GetRequiredService<IOptions<SecurityOptions>>().Value;
 
+        app.UseForwardedHeaders();
         app.UseMiddleware<SecurityHeadersMiddleware>();
 
         if (options.EnableHttpsRedirection)
