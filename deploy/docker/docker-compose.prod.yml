@@ -1,0 +1,101 @@
+# CommerceHub production stack. Run on the server:
+#   docker compose -f deploy/docker/docker-compose.prod.yml --env-file deploy/docker/.env.prod up -d --build
+# Secrets come ONLY from .env.prod (chmod 600, never committed). Only Caddy publishes ports.
+
+name: commercehub-prod
+
+x-restart: &restart
+  restart: unless-stopped
+
+services:
+  postgres:
+    <<: *restart
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:?}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?}
+      POSTGRES_DB: ${POSTGRES_DB:?}
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER} -d ${POSTGRES_DB}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  rabbitmq:
+    <<: *restart
+    image: rabbitmq:4-alpine
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USER:?}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD:?}
+    volumes:
+      - rabbitmq-data:/var/lib/rabbitmq
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  migrator:
+    build:
+      context: ../..
+      dockerfile: backend/Dockerfile
+      target: migrator
+    environment:
+      COMMERCEHUB_CONNECTION: "Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    restart: "no"
+
+  api:
+    <<: *restart
+    build:
+      context: ../..
+      dockerfile: backend/Dockerfile
+      target: api
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__Postgres: "Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      Identity__Jwt__Issuer: ${JWT_ISSUER:?}
+      Identity__Jwt__Audience: ${JWT_AUDIENCE:?}
+      Identity__Jwt__SigningKey: ${JWT_SIGNING_KEY:?}
+      Payments__WebhookSecret: ${PAYMENTS_WEBHOOK_SECRET:?}
+      RabbitMq__HostName: rabbitmq
+      RabbitMq__UserName: ${RABBITMQ_USER:?}
+      RabbitMq__Password: ${RABBITMQ_PASSWORD:?}
+      Security__Cors__AllowedOrigins__0: https://${DOMAIN:?}
+      Security__Cors__AllowedOrigins__1: https://admin.${DOMAIN}
+      AllowedHosts: ${DOMAIN};admin.${DOMAIN}
+    depends_on:
+      postgres: { condition: service_healthy }
+      rabbitmq: { condition: service_healthy }
+      migrator: { condition: service_completed_successfully }
+
+  web:
+    <<: *restart
+    build:
+      context: ../../frontend
+      dockerfile: Dockerfile
+    depends_on: [api]
+
+  caddy:
+    <<: *restart
+    image: caddy:2-alpine
+    environment:
+      DOMAIN: ${DOMAIN:?}
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy-data:/data
+      - caddy-config:/config
+    depends_on: [web]
+
+volumes:
+  postgres-data:
+  rabbitmq-data:
+  caddy-data:
+  caddy-config:

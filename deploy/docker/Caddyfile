@@ -1,0 +1,7 @@
+# Automatic HTTPS (Let's Encrypt). DOMAIN comes from the server's .env.prod.
+{$DOMAIN} {
+  reverse_proxy web:80
+}
+admin.{$DOMAIN} {
+  reverse_proxy web:80
+}
