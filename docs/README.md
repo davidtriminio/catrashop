@@ -9,6 +9,7 @@ The map of everything under `docs/`.
 | [git/prs/](git/prs/README.md) | Simulated pull-request history (local workflow simulations — no human reviewed the code) |
 | [roadmap.md](roadmap.md) | The 24-phase build plan and per-phase status |
 | [demo-data.md](demo-data.md) | How to exercise the running system end to end |
+| [deployment.md](deployment.md) | Oracle VM (systemd + Apache + Cloudflare), Vercel, secrets |
 
 See also the root [README](../README.md) for the overview and quick start, and the
 [CHANGELOG](../CHANGELOG.md) for the phase-by-phase history.
