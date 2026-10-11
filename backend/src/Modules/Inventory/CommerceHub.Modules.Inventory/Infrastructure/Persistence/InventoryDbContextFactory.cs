@@ -9,7 +9,7 @@ public sealed class InventoryDbContextFactory : IDesignTimeDbContextFactory<Inve
     public InventoryDbContext CreateDbContext(string[] args)
     {
         var options = new DbContextOptionsBuilder<InventoryDbContext>()
-            .UseNpgsql("Host=localhost;Database=commercehub;Username=commercehub;Password=placeholder",
+            .UseNpgsql(Environment.GetEnvironmentVariable("COMMERCEHUB_CONNECTION") ?? "Host=localhost;Database=commercehub;Username=commercehub;Password=placeholder",
                 npgsql => npgsql.MigrationsHistoryTable("__ef_migrations_history", "inventory"))
             .UseSnakeCaseNamingConvention()
             .Options;

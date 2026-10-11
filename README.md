@@ -16,6 +16,8 @@
 - [Stack](#stack)
 - [Prerequisites](#prerequisites)
 - [Quick start](#quick-start)
+- [Mobile app](#mobile-app)
+- [Deployment](#deployment)
 - [Project status](#project-status)
 - [Git workflow](#git-workflow)
 - [Documentation map](#documentation-map)
@@ -145,6 +147,16 @@ pnpm ng serve commercehub-admin
 There is no automated seed script yet; [`docs/demo-data.md`](docs/demo-data.md) walks the full journey through
 the API in the meantime. No real secrets are ever committed — see [`.env.example`](.env.example).
 
+## Mobile app
+
+`mobile/` is a Flutter app (Android + iOS) for operators: sign in as an admin, list/filter orders and advance them
+(process → ship → deliver) or cancel. Biometric unlock, no Firebase. See [`mobile/README.md`](mobile/README.md).
+
+## Deployment
+
+API on an Oracle VM (systemd + Apache + Cloudflare, no Docker, no RabbitMQ), frontends on Vercel, mobile as
+APK/IPA. Step by step in [`docs/deployment.md`](docs/deployment.md).
+
 ## Project status
 
 Built **incrementally, phase by phase** (see the 24-phase plan in [`docs/roadmap.md`](docs/roadmap.md)): **all
@@ -171,4 +183,7 @@ Start at the [documentation hub](docs/README.md), or jump straight in:
 | [`docs/git/prs`](docs/git/prs/README.md) | Simulated PR history |
 | [`docs/roadmap.md`](docs/roadmap.md) | The 24-phase build plan |
 | [`docs/demo-data.md`](docs/demo-data.md) | Driving the system end to end |
+| [`docs/local-development.md`](docs/local-development.md) | Local setup: secrets, DB, seed script, web and mobile |
+| [`docs/deployment.md`](docs/deployment.md) | Oracle VM + Vercel + mobile release guide |
+| [`mobile/`](mobile/README.md) | Flutter admin app |
 | [`CHANGELOG.md`](CHANGELOG.md) | Phase-by-phase history |

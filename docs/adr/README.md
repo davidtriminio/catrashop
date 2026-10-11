@@ -32,5 +32,8 @@ supersedes the old one rather than editing history.
 | [025](025-security-hardening.md) | Security hardening | Accepted |
 | [026](026-cicd-pipeline.md) | CI/CD pipeline | Accepted |
 | [027](027-performance-review.md) | Performance review | Accepted |
+| [028](028-final-architectural-review.md) | Final architectural review | Accepted |
+| [029](029-in-process-event-transport.md) | In-process event transport for small hosts | Accepted |
+| [030](030-mobile-admin-app.md) | Flutter admin app for order management | Accepted |
 
 For how these decisions fit together, see the [architecture overview](../architecture/README.md).

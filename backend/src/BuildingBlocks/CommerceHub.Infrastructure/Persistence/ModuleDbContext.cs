@@ -1,6 +1,7 @@
 using CommerceHub.BuildingBlocks.Persistence;
 using CommerceHub.Infrastructure.Outbox;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace CommerceHub.Infrastructure.Persistence;
 
@@ -28,6 +29,16 @@ public abstract class ModuleDbContext : DbContext, IUnitOfWork
 
         // Then the module's own entity configurations (from the derived context's assembly).
         modelBuilder.ApplyConfigurationsFromAssembly(GetType().Assembly);
+
+        // Ids are assigned by the domain (Guid.NewGuid()), never by the database. Without this EF treats a Guid key
+        // as "generated on add": a child (owned item, token, history row...) added to an already-loaded aggregate
+        // is then tracked as Modified instead of Added, and SaveChanges fails with a concurrency exception.
+        foreach (var entityType in modelBuilder.Model.GetEntityTypes())
+        {
+            var key = entityType.FindPrimaryKey();
+            if (key is { Properties.Count: 1 } && key.Properties[0].ClrType == typeof(Guid))
+                key.Properties[0].ValueGenerated = ValueGenerated.Never;
+        }
 
         base.OnModelCreating(modelBuilder);
     }
