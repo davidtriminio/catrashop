@@ -50,7 +50,12 @@ android {
     }
 
     buildTypes {
+        debug {
+            // Debug builds may talk to a local HTTP API (http://10.0.2.2:5227 or the PC's LAN IP).
+            manifestPlaceholders["usesCleartext"] = "true"
+        }
         release {
+            manifestPlaceholders["usesCleartext"] = "false"
             // Falls back to debug signing so `flutter run --release` works before a keystore exists.
             signingConfig = signingConfigs.findByName("release") ?: signingConfigs.getByName("debug")
         }

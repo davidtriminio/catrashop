@@ -17,7 +17,7 @@ flutter run                      # talks to https://api.davidtriminio.dev
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5227   # Android emulator -> local API
 flutter test && flutter analyze
 ```
-Plain-HTTP local APIs also need `android:usesCleartextTraffic="true"` temporarily in the Android manifest.
+Debug builds allow plain HTTP (for a local API); release builds are HTTPS-only.
 
 ## Release builds
 **Android** — create a keystore once and keep it out of git:
