@@ -5,7 +5,7 @@
     <application
         android:label="CommerceHub Admin"
         android:allowBackup="false"
-        android:usesCleartextTraffic="false"
+        android:usesCleartextTraffic="${usesCleartext}"
         android:name="${applicationName}"
         android:icon="@mipmap/ic_launcher">
         <activity

@@ -183,6 +183,7 @@ Start at the [documentation hub](docs/README.md), or jump straight in:
 | [`docs/git/prs`](docs/git/prs/README.md) | Simulated PR history |
 | [`docs/roadmap.md`](docs/roadmap.md) | The 24-phase build plan |
 | [`docs/demo-data.md`](docs/demo-data.md) | Driving the system end to end |
+| [`docs/local-development.md`](docs/local-development.md) | Local setup: secrets, DB, seed script, web and mobile |
 | [`docs/deployment.md`](docs/deployment.md) | Oracle VM + Vercel + mobile release guide |
 | [`mobile/`](mobile/README.md) | Flutter admin app |
 | [`CHANGELOG.md`](CHANGELOG.md) | Phase-by-phase history |

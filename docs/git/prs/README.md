@@ -32,3 +32,8 @@ Index:
 | [PR-022](PR-022-performance-review.md) | Performance review (DbContext pooling, no-tracking reads, compression, output cache) | `feature/phase-22-performance` | `develop` |
 | [PR-023](PR-023-documentation-polish.md) | Documentation polish (README accuracy, architecture docs, ADR & docs indexes, changelog) | `feature/phase-23-docs` | `develop` |
 | [PR-024](PR-024-final-architectural-review.md) | Final architectural review (evidence-based verdict; release-ready v1.0.0) | `feature/phase-24-final-review` | `develop` |
+| [PR-025](PR-025-repo-hygiene-and-dev-secrets-configurati.md) | Repo hygiene and dev-secrets configuration | `feature/dev-config` | `develop` |
+| [PR-026](PR-026-in-process-event-transport-and-forwarded.md) | In-process event transport and forwarded headers | `feature/in-process-transport` | `develop` |
+| [PR-027](PR-027-oracle-vm-release-systemd-apache-cloudfl.md) | Oracle VM release (systemd + Apache + Cloudflare) and Vercel config | `feature/oracle-deploy` | `develop` |
+| [PR-028](PR-028-flutter-admin-app-for-order-management.md) | Flutter admin app for order management | `feature/mobile-admin` | `develop` |
+| [PR-029](PR-029-local-setup-and-seed-scripts-guid-key-pe.md) | Local setup and seed scripts, Guid key persistence fix | `feature/local-dev` | `develop` |
