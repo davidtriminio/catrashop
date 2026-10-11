@@ -9,6 +9,9 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
 **local workflow simulations** — no human reviewed the code.
 
 ## [Unreleased]
+Nothing yet.
+
+## v1.1.0 — Oracle deployment & mobile admin app
 - **Flutter admin app** (`mobile/`): order list/detail, state actions, biometric lock, local new-order alerts
   → [ADR-030](docs/adr/030-mobile-admin-app.md)
 - **In-process event transport** (`Messaging:Transport=InProcess`) so the API runs without RabbitMQ on a 1 GB host
@@ -18,6 +21,7 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
 - API honours `X-Forwarded-*` from the local reverse proxy (real client IP for rate limiting)
 - Repository hygiene: tooling attributions removed from history and docs
 - Further changes belong to the post-1.0 backlog (residuals in [ADR-028](docs/adr/028-final-architectural-review.md)).
+→ [PR-025](docs/git/prs/PR-025-repo-hygiene-and-dev-secrets-configurati.md) · [PR-026](docs/git/prs/PR-026-in-process-event-transport-and-forwarded.md) · [PR-027](docs/git/prs/PR-027-oracle-vm-release-systemd-apache-cloudfl.md) · [PR-028](docs/git/prs/PR-028-flutter-admin-app-for-order-management.md) · [PR-029](docs/git/prs/PR-029-local-setup-and-seed-scripts-guid-key-pe.md)
 
 ## Phase 24 — Final architectural review
 Capstone review; no production code. Every guard re-run as evidence — Release build 0/0, backend 200 pass / 2
