@@ -67,15 +67,15 @@ $brandId = (Call POST '/api/v1/catalog/brands' @{ name = 'Galactic'; description
 if (-not $brandId) { $brandId = (Call GET '/api/v1/catalog/brands' | Where-Object name -eq 'Galactic' | Select-Object -First 1).id }
 
 $products = @(
-  @{ name = 'Taza Galactica';  sku = 'TAZA-001';  price = 12.50 },
-  @{ name = 'Lampara Nebula';  sku = 'LAMP-001';  price = 39.90 },
-  @{ name = 'Cojin Cometa';    sku = 'COJIN-001'; price = 18.00 }
+  @{ name = 'Taza Galactica';  sku = 'TAZA-001';  price = 320 },
+  @{ name = 'Lampara Nebula';  sku = 'LAMP-001';  price = 1050 },
+  @{ name = 'Cojin Cometa';    sku = 'COJIN-001'; price = 460 }
 )
 $variantIds = @()
 foreach ($p in $products) {
   $created = Call POST '/api/v1/catalog/products' @{
     name = $p.name; description = "$($p.name) - producto de demostracion"; categoryId = $catId; brandId = $brandId
-    variants = @(@{ sku = $p.sku; name = 'Unico'; unitPrice = $p.price; currency = 'USD' })
+    variants = @(@{ sku = $p.sku; name = 'Unico'; unitPrice = $p.price; currency = 'HNL' })
   } $admin -Soft
   if ($created) { Call POST "/api/v1/catalog/products/$($created.id)/publish" $null $admin | Out-Null }
   Call POST '/api/v1/inventory/items' @{ sku = $p.sku; initialOnHand = 200; lowStockThreshold = 5 } $admin -Soft | Out-Null
