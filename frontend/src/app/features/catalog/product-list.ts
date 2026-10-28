@@ -3,6 +3,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CatalogApi, ProductQuery } from '@ch/api/catalog.api';
 import { Brand, Category, Paged, PriceRange, ProductListItem } from '@ch/api/models';
+import { MoneyPipe } from '@ch/util/money.pipe';
 import { problemMessage } from '@ch/util/problem';
 import { buildPages } from '@ch/util/pagination';
 
