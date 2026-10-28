@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/providers.dart';
+import '../../core/theme.dart';
+import 'brand.dart';
 
 /// Shown on cold start and after the app spent time in the background. Prompts biometrics (PIN as fallback).
 class LockScreen extends ConsumerStatefulWidget {
@@ -38,38 +40,43 @@ class _LockScreenState extends ConsumerState<LockScreen> {
 
   @override
   Widget build(BuildContext context) {
-    final scheme = Theme.of(context).colorScheme;
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
     final unsupported = _result == BiometricResult.unsupported;
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: Padding(
-            padding: const EdgeInsets.all(32),
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(Icons.lock, size: 64, color: scheme.primary),
-                const SizedBox(height: 16),
-                Text('CommerceHub Admin', style: Theme.of(context).textTheme.headlineSmall),
-                const SizedBox(height: 8),
-                Text(
-                  unsupported
-                      ? 'Este dispositivo no tiene bloqueo de pantalla ni biometría. Configúralo en Ajustes para usar la app.'
-                      : 'Verifica tu identidad para continuar.',
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 24),
-                FilledButton.icon(
-                  onPressed: _busy ? null : _unlock,
-                  icon: const Icon(Icons.fingerprint),
-                  label: const Text('Desbloquear'),
-                ),
-                TextButton(
-                  onPressed: () => ref.read(sessionProvider.notifier).logout(),
-                  child: const Text('Cerrar sesión'),
-                ),
-              ],
-            ),
+            padding: const EdgeInsets.all(Gap.s6),
+            child: Column(mainAxisSize: MainAxisSize.min, children: [
+              Container(
+                width: 88,
+                height: 88,
+                decoration: const BoxDecoration(color: AppColors.lime, shape: BoxShape.circle),
+                child: const Icon(Icons.lock_outline, size: 40, color: AppColors.limeInk),
+              ),
+              const SizedBox(height: Gap.s5),
+              const BrandMark(size: 28),
+              const SizedBox(height: Gap.s3),
+              Text(
+                unsupported
+                    ? 'Este dispositivo no tiene bloqueo de pantalla ni biometría. Configúralo en Ajustes para usar la app.'
+                    : 'Verifica tu identidad para continuar.',
+                textAlign: TextAlign.center,
+                style: theme.textTheme.bodyLarge?.copyWith(color: scheme.onSurfaceVariant),
+              ),
+              const SizedBox(height: Gap.s5),
+              FilledButton.icon(
+                onPressed: _busy ? null : _unlock,
+                icon: const Icon(Icons.fingerprint),
+                label: const Text('Desbloquear'),
+              ),
+              const SizedBox(height: Gap.s2),
+              TextButton(
+                onPressed: () => ref.read(sessionProvider.notifier).logout(),
+                child: const Text('Cerrar sesión'),
+              ),
+            ]),
           ),
         ),
       ),

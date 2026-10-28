@@ -3,9 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import 'core/config.dart';
 import 'core/providers.dart';
+import 'core/theme.dart';
 import 'features/auth/lock_screen.dart';
 import 'features/auth/login_page.dart';
-import 'features/orders/orders_page.dart';
+import 'shell/home_shell.dart';
 
 class CommerceHubAdminApp extends StatelessWidget {
   const CommerceHubAdminApp({super.key});
@@ -15,18 +16,15 @@ class CommerceHubAdminApp extends StatelessWidget {
     return MaterialApp(
       title: 'CommerceHub Admin',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(colorSchemeSeed: const Color(0xFF3F51B5), useMaterial3: true),
-      darkTheme: ThemeData(
-        colorSchemeSeed: const Color(0xFF3F51B5),
-        brightness: Brightness.dark,
-        useMaterial3: true,
-      ),
+      theme: AppTheme.light(),
+      darkTheme: AppTheme.dark(),
+      themeMode: ThemeMode.system,
       home: const _Root(),
     );
   }
 }
 
-/// session loading → login → (biometric lock) → orders.
+/// session loading → login → (biometric lock) → home shell.
 class _Root extends ConsumerStatefulWidget {
   const _Root();
 
@@ -70,7 +68,7 @@ class _RootState extends ConsumerState<_Root> with WidgetsBindingObserver {
     return switch (session) {
       SessionStatus.loading => const Scaffold(body: Center(child: CircularProgressIndicator())),
       SessionStatus.signedOut => const LoginPage(),
-      SessionStatus.signedIn => locked ? const LockScreen() : const OrdersPage(),
+      SessionStatus.signedIn => locked ? const LockScreen() : const HomeShell(),
     };
   }
 }
