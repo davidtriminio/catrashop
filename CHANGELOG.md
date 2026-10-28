@@ -21,6 +21,8 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
   pager, redesigned product page and cart → [PR-033](docs/git/prs/PR-033-storefront-redesign.md)
 - **Mobile redesign:** shared design language, bottom navigation, new Summary and Settings tabs, order cards, detail
   with timeline and sticky action bar, confirmation sheets, light/dark → [PR-034](docs/git/prs/PR-034-mobile-redesign.md)
+- **Orders and shared UI:** one status badge and one timeline component for both web apps; redesigned orders list,
+  order detail, tracking page and footer → [PR-035](docs/git/prs/PR-035-orders-and-shared-ui.md)
 
 ## v1.1.0 — Oracle deployment & mobile admin app
 - **Flutter admin app** (`mobile/`): order list/detail, state actions, biometric lock, local new-order alerts
