@@ -39,7 +39,10 @@ public sealed record ProductListItem(
     string? BrandName,
     string? PrimaryImageUrl,
     int VariantCount,
-    string Status);
+    string Status,
+    decimal? MinPrice = null,
+    decimal? MaxPrice = null,
+    string? Currency = null);
 
 public sealed record ProductVariantResponse(Guid Id, string Sku, string Name, decimal UnitPrice, string Currency, bool IsActive);
 public sealed record ProductAttributeResponse(string Name, string Value);
@@ -66,7 +69,9 @@ public enum ProductSort
     Relevance = 0,
     NameAsc = 1,
     NameDesc = 2,
-    Newest = 3
+    Newest = 3,
+    PriceAsc = 4,
+    PriceDesc = 5
 }
 
 /// <summary>Customer-facing product search. Only Active products are ever returned.</summary>
@@ -76,4 +81,9 @@ public sealed record ProductSearchCriteria(
     string? BrandSlug,
     ProductSort Sort,
     int Page,
-    int PageSize);
+    int PageSize,
+    decimal? MinPrice = null,
+    decimal? MaxPrice = null);
+
+/// <summary>Lowest and highest active variant price across active products (drives the price filter bounds).</summary>
+public sealed record PriceRangeResponse(decimal? Min, decimal? Max, string? Currency);

@@ -39,3 +39,4 @@ Index:
 | [PR-029](PR-029-local-setup-and-seed-scripts-guid-key-pe.md) | Local setup and seed scripts, Guid key persistence fix | `feature/local-dev` | `develop` |
 | [PR-030](PR-030-profile-race-and-dev-fixes.md) | Profile provisioning race and local-dev fixes | `feature/fix-profile-race` | `develop` |
 | [PR-031](PR-031-design-foundation.md) | Design foundation (tokens and primitives) | `feature/design-foundation` | `develop` |
+| [PR-032](PR-032-catalog-price-filters.md) | Catalog prices, price filter and price sorting | `feature/catalog-filters` | `develop` |
