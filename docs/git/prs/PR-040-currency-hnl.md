@@ -40,6 +40,9 @@ script; a deployment with only test data just needs re-seeding.
 
 ## Verification
 - Backend: Catalog (24), Promotions (27) and architecture (66) tests pass; the API builds.
-- Web Vitest 33/33 and admin 6/6; both builds succeed; Flutter 24/24 and `flutter analyze` clean.
+- Web Vitest 33/33 and admin 6/6; Flutter 24/24 and `flutter analyze` clean.
+- **Correction:** the first merge of this PR broke the storefront build (`MoneyPipe` was not imported in
+  `product-list.ts`, NG1010/TS2304). My build check only looked for lowercase "error" and missed it. Fixed in a
+  follow-up commit; both `ng build commercehub-web` and `commercehub-admin` now complete.
 - **Not verified:** nothing was run against PostgreSQL for this PR (the temporary role was removed), so the seed in
   HNL and the validators over HTTP are untested end to end; no visual check in the browser or on a device.
