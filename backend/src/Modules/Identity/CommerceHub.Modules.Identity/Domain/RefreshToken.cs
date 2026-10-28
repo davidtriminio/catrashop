@@ -29,6 +29,17 @@ public sealed class RefreshToken
 
     public bool IsActive(DateTimeOffset nowUtc) => RevokedAtUtc is null && nowUtc < ExpiresAtUtc;
 
+    /// <summary>
+    /// True when this token was rotated (not logged out or compromised) at most <paramref name="grace"/> ago and is
+    /// otherwise still valid. A second client presenting it in that window is a legitimate concurrent refresh
+    /// (two tabs, or foreground and background tasks), not a replay.
+    /// </summary>
+    public bool WasJustRotated(DateTimeOffset nowUtc, TimeSpan grace) =>
+        RevokedAtUtc is { } revoked
+        && ReplacedByTokenHash is not null
+        && nowUtc < ExpiresAtUtc
+        && nowUtc - revoked <= grace;
+
     internal void Revoke(DateTimeOffset nowUtc, string? replacedByTokenHash = null)
     {
         RevokedAtUtc = nowUtc;

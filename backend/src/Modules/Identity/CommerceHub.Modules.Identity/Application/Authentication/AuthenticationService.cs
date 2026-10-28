@@ -124,6 +124,19 @@ public sealed class AuthenticationService
 
         // Reuse detection: a token that exists but is no longer active means a revoked/rotated token was
         // replayed — treat as compromise and revoke every session for the user.
+        if (current is not null && current.WasJustRotated(now, TimeSpan.FromSeconds(Math.Max(0, _security.RefreshReuseGraceSeconds))))
+        {
+            // Concurrent refresh with a token another request just rotated: hand out a sibling session token
+            // instead of revoking the chain. The token already issued to the other request stays valid.
+            var siblingRaw = _secureTokens.Generate();
+            var siblingExpiry = now.AddDays(_security.RefreshTokenDays);
+            user.IssueRefreshToken(_tokenHasher.Hash(siblingRaw), siblingExpiry, now);
+            var siblingAccess = _jwt.Generate(user);
+            _audit.Record("token_refreshed_concurrent", user.Id);
+            await _unitOfWork.SaveChangesAsync(ct);
+            return new AuthTokensResponse(siblingAccess.Value, "Bearer", siblingAccess.ExpiresAtUtc, siblingRaw, siblingExpiry);
+        }
+
         if (current is null || !current.IsActive(now))
         {
             user.RevokeAllRefreshTokens(now);

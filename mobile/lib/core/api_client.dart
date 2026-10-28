@@ -13,17 +13,22 @@ class ApiException implements Exception {
   String toString() => message;
 }
 
+/// Outcome of a refresh attempt: only [rejected] means the session is really over.
+enum RefreshResult { ok, rejected, transient }
+
 /// Dio wrapper that attaches the bearer token and transparently performs one rotating-refresh on 401.
 /// Has no Flutter/Riverpod dependency so the background isolate (WorkManager) can use it too.
+/// The background isolate passes [canRefresh] = false: the refresh token is single-use and rotating, so only the
+/// foreground client may spend it; a background 401 just waits for the app to renew the session.
 class ApiClient {
-  ApiClient(this._store, {this.onSessionExpired, String? baseUrl})
-      : _dio = Dio(BaseOptions(
+  ApiClient(this._store, {this.onSessionExpired, String? baseUrl, this.canRefresh = true, Dio? dio, Dio? bare})
+      : _dio = dio ?? Dio(BaseOptions(
           baseUrl: baseUrl ?? apiBaseUrl,
           connectTimeout: const Duration(seconds: 15),
           receiveTimeout: const Duration(seconds: 20),
           headers: {'Accept': 'application/json'},
         )),
-        _bare = Dio(BaseOptions(
+        _bare = bare ?? Dio(BaseOptions(
           baseUrl: baseUrl ?? apiBaseUrl,
           connectTimeout: const Duration(seconds: 15),
           receiveTimeout: const Duration(seconds: 20),
@@ -36,8 +41,13 @@ class ApiClient {
       },
       onError: (e, h) async {
         final req = e.requestOptions;
-        if (e.response?.statusCode == 401 && req.extra['retried'] != true) {
-          if (await _refresh()) {
+        if (e.response?.statusCode == 401 && canRefresh && req.extra['retried'] != true) {
+          final sent = req.headers['Authorization'];
+          final current = await _store.read();
+          // Another client already renewed the session while this request was in flight: just retry.
+          final renewed = current != null && sent != 'Bearer ${current.access}';
+          final result = renewed ? RefreshResult.ok : await _refresh();
+          if (result == RefreshResult.ok) {
             req.extra['retried'] = true;
             final t = await _store.read();
             req.headers['Authorization'] = 'Bearer ${t!.access}';
@@ -47,8 +57,11 @@ class ApiClient {
               return h.next(e2);
             }
           }
-          await _store.clear();
-          onSessionExpired?.call();
+          if (result == RefreshResult.rejected) {
+            await _store.clear();
+            onSessionExpired?.call();
+          }
+          // transient: keep the session and surface the original error so the caller can retry later.
         }
         h.next(e);
       },
@@ -57,23 +70,26 @@ class ApiClient {
 
   final TokenStore _store;
   final void Function()? onSessionExpired;
+  final bool canRefresh;
   final Dio _dio;
   final Dio _bare; // no interceptors: used for login/refresh
-  Future<bool>? _refreshing;
+  Future<RefreshResult>? _refreshing;
 
   /// Single-flight refresh so parallel 401s don't burn the single-use refresh token twice.
-  Future<bool> _refresh() => _refreshing ??= _doRefresh().whenComplete(() => _refreshing = null);
+  Future<RefreshResult> _refresh() => _refreshing ??= _doRefresh().whenComplete(() => _refreshing = null);
 
-  Future<bool> _doRefresh() async {
+  Future<RefreshResult> _doRefresh() async {
     final t = await _store.read();
-    if (t == null) return false;
+    if (t == null) return RefreshResult.rejected;
     try {
       final r = await _bare.post('/api/v1/identity/refresh', data: {'refreshToken': t.refresh});
       final d = r.data as Map<String, dynamic>;
       await _store.save(Tokens(access: d['accessToken'] as String, refresh: d['refreshToken'] as String));
-      return true;
-    } on DioException {
-      return false;
+      return RefreshResult.ok;
+    } on DioException catch (e) {
+      final code = e.response?.statusCode;
+      // The server refused the token itself. Network failures, timeouts, 429 and 5xx are transient.
+      return (code == 400 || code == 401 || code == 403) ? RefreshResult.rejected : RefreshResult.transient;
     }
   }
 

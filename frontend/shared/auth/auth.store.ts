@@ -1,6 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { Observable, switchMap, tap } from 'rxjs';
 import { AuthApi } from '../api/auth.api';
+import { isSessionRejected } from './session-errors';
 import { AuthTokens, LoginRequest, RegisterRequest, UserProfile } from '../api/models';
 
 const STORAGE_KEY = 'ch_auth_tokens';
@@ -17,7 +18,10 @@ export class AuthStore {
   readonly permissions = computed(() => this.user()?.permissions ?? []);
 
   constructor() {
-    if (this.tokens()) this.loadProfile().subscribe({ error: () => this.clear() });
+    if (this.tokens()) {
+      // A transient failure (offline, 5xx) keeps the session; only an auth rejection ends it.
+      this.loadProfile().subscribe({ error: (e: unknown) => { if (isSessionRejected(e)) this.clear(); } });
+    }
   }
 
   accessToken(): string | null { return this.tokens()?.accessToken ?? null; }
