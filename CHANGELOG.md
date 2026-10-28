@@ -9,7 +9,9 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
 **local workflow simulations** — no human reviewed the code.
 
 ## [Unreleased]
-Nothing yet.
+- **Fix:** the account page no longer fails when the customer profile is created by concurrent requests
+  (idempotent provisioning); `setup-db.ps1` no longer clashes with a running API; `pnpm start` works on pnpm 11
+  → [PR-030](docs/git/prs/PR-030-profile-race-and-dev-fixes.md)
 
 ## v1.1.0 — Oracle deployment & mobile admin app
 - **Flutter admin app** (`mobile/`): order list/detail, state actions, biometric lock, local new-order alerts

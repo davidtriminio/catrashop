@@ -25,8 +25,9 @@ public sealed class CustomerService : ICustomerProvisioning
         if (await _customers.ExistsAsync(userId, ct))
             return; // idempotent
 
-        _customers.Add(Customer.Create(userId, email, firstName, lastName, _clock.GetUtcNow()));
-        await _unitOfWork.SaveChangesAsync(ct);
+        // Several requests (profile + wishlist on the account page, plus the CustomerRegistered handler) can race to
+        // provision the same profile: whoever loses simply finds it already there.
+        await _customers.TryAddAsync(Customer.Create(userId, email, firstName, lastName, _clock.GetUtcNow()), ct);
     }
 
     public async Task<Result<CustomerProfileResponse>> GetProfileAsync(Guid userId, CancellationToken ct = default)

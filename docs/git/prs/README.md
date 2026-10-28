@@ -37,3 +37,4 @@ Index:
 | [PR-027](PR-027-oracle-vm-release-systemd-apache-cloudfl.md) | Oracle VM release (systemd + Apache + Cloudflare) and Vercel config | `feature/oracle-deploy` | `develop` |
 | [PR-028](PR-028-flutter-admin-app-for-order-management.md) | Flutter admin app for order management | `feature/mobile-admin` | `develop` |
 | [PR-029](PR-029-local-setup-and-seed-scripts-guid-key-pe.md) | Local setup and seed scripts, Guid key persistence fix | `feature/local-dev` | `develop` |
+| [PR-030](PR-030-profile-race-and-dev-fixes.md) | Profile provisioning race and local-dev fixes | `feature/fix-profile-race` | `develop` |
