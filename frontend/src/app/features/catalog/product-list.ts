@@ -1,108 +1,339 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
-import { RouterLink } from '@angular/router';
+import { CurrencyPipe } from '@angular/common';
+import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CatalogApi, ProductQuery } from '@ch/api/catalog.api';
-import { Brand, Category, Paged, ProductListItem } from '@ch/api/models';
+import { Brand, Category, Paged, PriceRange, ProductListItem } from '@ch/api/models';
 import { problemMessage } from '@ch/util/problem';
+import { buildPages } from './pagination';
+
+const PAGE_SIZE = 12;
+/** Soft placeholder tints (used when a product has no photo); picked deterministically from the name. */
+const TINTS = ['#e8efe9', '#ece9f4', '#f3ece6', '#e6eef3', '#f1e9ee', '#eef0e2'];
+
+interface ActiveFilter { key: string; label: string; params: Record<string, null>; }
 
 @Component({
   selector: 'app-product-list',
-  imports: [FormsModule, RouterLink],
+  imports: [RouterLink, CurrencyPipe],
   template: `
-    <h1>Shop</h1>
+    <nav class="crumbs" aria-label="Breadcrumb"><a routerLink="/">Home</a><span>/</span><span aria-current="page">Shop</span></nav>
 
-    <div class="filters card">
-      <input class="input" style="flex:2" placeholder="Search products…" [(ngModel)]="q" (keyup.enter)="applyFilters()" />
-      <select [(ngModel)]="category" (change)="applyFilters()">
-        <option value="">All categories</option>
-        @for (c of categories(); track c.id) { <option [value]="c.slug">{{ c.name }}</option> }
-      </select>
-      <select [(ngModel)]="brand" (change)="applyFilters()">
-        <option value="">All brands</option>
-        @for (b of brands(); track b.id) { <option [value]="b.slug">{{ b.name }}</option> }
-      </select>
-      <select [(ngModel)]="sort" (change)="applyFilters()">
-        <option value="">Sort</option>
-        <option value="name">Name A–Z</option>
-        <option value="name_desc">Name Z–A</option>
-        <option value="newest">Newest</option>
-      </select>
-      <button class="btn" (click)="applyFilters()">Search</button>
+    <div class="page-head">
+      <div>
+        <h1>Shop</h1>
+        <p class="muted count">
+          @if (result(); as r) { {{ r.totalCount }} {{ r.totalCount === 1 ? 'product' : 'products' }} } @else { &nbsp; }
+        </p>
+      </div>
+      <div class="toolbar">
+        <button class="btn secondary sm filters-toggle" type="button" (click)="filtersOpen.set(!filtersOpen())" [attr.aria-expanded]="filtersOpen()">
+          Filters@if (activeFilters().length) { <span class="badge accent">{{ activeFilters().length }}</span> }
+        </button>
+        <label class="sort">
+          <span class="muted">Sort by</span>
+          <select [value]="sort()" (change)="update({ sort: value($event) || null })" aria-label="Sort products">
+            <option value="">Name A–Z</option>
+            <option value="name_desc">Name Z–A</option>
+            <option value="price_asc">Price: low to high</option>
+            <option value="price_desc">Price: high to low</option>
+            <option value="newest">Newest</option>
+          </select>
+        </label>
+      </div>
     </div>
 
-    @if (error()) { <div class="alert error">{{ error() }}</div> }
-    @if (loading()) { <p class="muted">Loading…</p> }
+    <div class="layout">
+      <aside class="filters card" [class.open]="filtersOpen()" aria-label="Filters">
+        <div class="f-head">
+          <h2>Filters</h2>
+          @if (activeFilters().length) { <button class="link" type="button" (click)="clearAll()">Clear all</button> }
+        </div>
 
-    @if (result(); as r) {
-      @if (r.items.length === 0) {
-        <p class="muted">No products match your search.</p>
-      } @else {
-        <div class="products">
-          @for (p of r.items; track p.id) {
-            <a class="product card" [routerLink]="['/products', p.slug]">
-              <div class="thumb">
-                @if (p.primaryImageUrl) { <img [src]="p.primaryImageUrl" [alt]="p.name" /> }
-                @else { <div class="ph">No image</div> }
-              </div>
-              <div class="meta">
-                <strong>{{ p.name }}</strong>
-                <span class="muted">{{ p.categoryName }}@if (p.brandName) { · {{ p.brandName }} }</span>
-              </div>
-            </a>
+        <section>
+          <h3>Search</h3>
+          <input class="input" type="search" placeholder="Search products…" [value]="q()" (input)="onSearch($event)" aria-label="Search products" />
+        </section>
+
+        <section>
+          <h3>Category</h3>
+          <div class="options">
+            <label class="opt"><input type="radio" name="category" [checked]="!category()" (change)="update({ category: null })" /> All categories</label>
+            @for (c of categories(); track c.id) {
+              <label class="opt"><input type="radio" name="category" [checked]="category() === c.slug" (change)="update({ category: c.slug })" /> {{ c.name }}</label>
+            }
+          </div>
+        </section>
+
+        @if (brands().length) {
+          <section>
+            <h3>Brand</h3>
+            <div class="options">
+              <label class="opt"><input type="radio" name="brand" [checked]="!brand()" (change)="update({ brand: null })" /> All brands</label>
+              @for (b of brands(); track b.id) {
+                <label class="opt"><input type="radio" name="brand" [checked]="brand() === b.slug" (change)="update({ brand: b.slug })" /> {{ b.name }}</label>
+              }
+            </div>
+          </section>
+        }
+
+        <section>
+          <h3>Price</h3>
+          <div class="price">
+            <input class="input" type="number" min="0" inputmode="decimal" placeholder="Min" [value]="minPrice() ?? ''" (change)="setPrice('minPrice', $event)" aria-label="Minimum price" />
+            <span class="muted">–</span>
+            <input class="input" type="number" min="0" inputmode="decimal" placeholder="Max" [value]="maxPrice() ?? ''" (change)="setPrice('maxPrice', $event)" aria-label="Maximum price" />
+          </div>
+          @if (range(); as pr) {
+            @if (pr.min !== null && pr.max !== null) {
+              <p class="muted hint">Prices range from {{ pr.min | currency: pr.currency || 'USD' }} to {{ pr.max | currency: pr.currency || 'USD' }}</p>
+            }
           }
-        </div>
-        <div class="pager">
-          <button class="btn secondary sm" [disabled]="!r.hasPrevious" (click)="go(r.page - 1)">Previous</button>
-          <span class="muted">Page {{ r.page }} of {{ r.totalPages || 1 }}</span>
-          <button class="btn secondary sm" [disabled]="!r.hasNext" (click)="go(r.page + 1)">Next</button>
-        </div>
-      }
-    }
+        </section>
+      </aside>
+
+      <section class="results" aria-live="polite">
+        @if (activeFilters().length) {
+          <div class="chips active">
+            @for (f of activeFilters(); track f.key) {
+              <button class="chip active" type="button" (click)="update(f.params)">{{ f.label }} <span aria-hidden="true">×</span><span class="sr">remove filter</span></button>
+            }
+            <button class="link" type="button" (click)="clearAll()">Clear all</button>
+          </div>
+        }
+
+        @if (error()) { <div class="alert error">{{ error() }}</div> }
+
+        @if (loading() && !result()) {
+          <div class="products">
+            @for (n of skeletons; track n) { <div class="product card flush"><div class="skeleton thumb"></div><div class="meta"><div class="skeleton line"></div><div class="skeleton line short"></div></div></div> }
+          </div>
+        } @else if (result(); as r) {
+          @if (r.items.length === 0) {
+            <div class="empty card">
+              <h2>No products match</h2>
+              <p>Try removing a filter or searching for something else.</p>
+              @if (activeFilters().length) { <button class="btn" type="button" (click)="clearAll()">Clear all filters</button> }
+            </div>
+          } @else {
+            <div class="products" [class.dim]="loading()">
+              @for (p of r.items; track p.id) {
+                <a class="product card flush" [routerLink]="['/products', p.slug]">
+                  <div class="thumb" [style.background]="p.primaryImageUrl ? null : tint(p.name)">
+                    @if (p.primaryImageUrl) { <img [src]="p.primaryImageUrl" [alt]="p.name" loading="lazy" /> }
+                    @else { <span class="mono" aria-hidden="true">{{ p.name.charAt(0) }}</span> }
+                    @if (p.variantCount > 1) { <span class="badge accent variants">{{ p.variantCount }} options</span> }
+                  </div>
+                  <div class="meta">
+                    <span class="eyebrow">{{ p.brandName || p.categoryName }}</span>
+                    <strong class="name">{{ p.name }}</strong>
+                    <span class="price-line">
+                      @if (p.minPrice !== null) {
+                        @if (p.maxPrice !== null && p.maxPrice !== p.minPrice) { <span class="muted from">From</span> }
+                        {{ p.minPrice | currency: p.currency || 'USD' }}
+                      } @else { <span class="muted">Price on request</span> }
+                    </span>
+                  </div>
+                </a>
+              }
+            </div>
+
+            @if (r.totalPages > 1) {
+              <nav class="pager" aria-label="Pagination">
+                <button class="btn secondary sm" type="button" [disabled]="!r.hasPrevious" (click)="goTo(r.page - 1)">Previous</button>
+                @for (item of pages(); track $index) {
+                  @if (item === '…') { <span class="gap muted">…</span> }
+                  @else { <button class="page" type="button" [class.current]="item === r.page" [attr.aria-current]="item === r.page ? 'page' : null" (click)="goTo(item)">{{ item }}</button> }
+                }
+                <button class="btn secondary sm" type="button" [disabled]="!r.hasNext" (click)="goTo(r.page + 1)">Next</button>
+              </nav>
+            }
+          }
+        }
+      </section>
+    </div>
   `,
   styles: [`
-    .filters { display: flex; gap: 0.6rem; flex-wrap: wrap; align-items: center; margin-bottom: 1rem; }
-    .filters select, .filters .input { width: auto; }
-    .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 1rem; }
-    .product { padding: 0; overflow: hidden; color: var(--text); }
-    .product:hover { text-decoration: none; border-color: var(--primary); }
-    .thumb { aspect-ratio: 4/3; background: #f1f1f4; display: flex; align-items: center; justify-content: center; }
+    .crumbs { display: flex; gap: var(--space-2); font-size: 0.82rem; color: var(--muted); margin-bottom: var(--space-3); }
+    .crumbs a:hover { color: var(--text); }
+    .count { margin: var(--space-1) 0 0; min-height: 1.5em; }
+    .toolbar { display: flex; align-items: center; gap: var(--space-3); }
+    .sort { display: flex; align-items: center; gap: var(--space-2); font-size: 0.85rem; }
+    .sort select { width: auto; padding: 0.45rem 0.75rem; border-radius: var(--radius-pill); }
+    .filters-toggle { display: none; gap: var(--space-2); }
+
+    .layout { display: grid; grid-template-columns: 260px 1fr; gap: var(--space-6); align-items: start; }
+    .filters { position: sticky; top: 80px; display: flex; flex-direction: column; gap: var(--space-5); padding: var(--space-5); }
+    .f-head { display: flex; align-items: center; justify-content: space-between; }
+    .f-head h2 { margin: 0; }
+    .filters section h3 { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin-bottom: var(--space-3); }
+    .options { display: flex; flex-direction: column; gap: var(--space-2); max-height: 220px; overflow: auto; }
+    .opt { display: flex; align-items: center; gap: var(--space-3); font-size: 0.9rem; cursor: pointer; }
+    .opt input { accent-color: var(--primary); width: 1rem; height: 1rem; margin: 0; }
+    .price { display: flex; align-items: center; gap: var(--space-2); }
+    .price .input { padding: 0.5rem 0.65rem; }
+    .hint { font-size: 0.78rem; margin: var(--space-2) 0 0; }
+    .link { background: none; border: none; padding: 0; font: inherit; font-size: 0.82rem; color: var(--muted); text-decoration: underline; text-underline-offset: 3px; cursor: pointer; }
+    .link:hover { color: var(--text); }
+
+    .active { margin-bottom: var(--space-4); align-items: center; }
+    .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
+
+    .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: var(--space-4); transition: opacity 0.15s; }
+    .products.dim { opacity: 0.55; }
+    .products > .card + .card { margin-top: 0; }
+    .product { color: var(--text); display: flex; flex-direction: column; transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s; }
+    .product:hover { text-decoration: none; border-color: var(--border-strong); box-shadow: var(--shadow-raised); transform: translateY(-2px); }
+    .thumb { position: relative; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; }
     .thumb img { width: 100%; height: 100%; object-fit: cover; }
-    .ph { color: var(--muted); font-size: 0.85rem; }
-    .meta { padding: 0.8rem; display: flex; flex-direction: column; gap: 0.2rem; }
-    .pager { display: flex; align-items: center; justify-content: center; gap: 1rem; margin: 1.5rem 0; }
+    .mono { font-size: 3.5rem; font-weight: 700; color: rgba(11, 11, 12, 0.18); letter-spacing: -0.04em; }
+    .variants { position: absolute; left: var(--space-3); top: var(--space-3); }
+    .meta { padding: var(--space-4); display: flex; flex-direction: column; gap: var(--space-1); }
+    .eyebrow { font-size: 0.7rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
+    .name { font-size: 0.98rem; line-height: 1.3; }
+    .price-line { margin-top: var(--space-2); font-weight: 650; }
+    .from { font-weight: 400; margin-right: var(--space-1); }
+
+    .skeleton.thumb { aspect-ratio: 1 / 1; border-radius: 0; }
+    .skeleton.line { height: 0.9rem; margin-bottom: var(--space-2); }
+    .skeleton.line.short { width: 55%; }
+
+    .empty h2 { color: var(--text); }
+    .empty .btn { margin-top: var(--space-3); }
+
+    .pager { display: flex; align-items: center; justify-content: center; gap: var(--space-2); margin: var(--space-6) 0 var(--space-2); flex-wrap: wrap; }
+    .page { min-width: 2.2rem; height: 2.2rem; border-radius: var(--radius-pill); border: 1px solid transparent; background: none; font: inherit; font-weight: 600; cursor: pointer; }
+    .page:hover { border-color: var(--border-strong); }
+    .page.current { background: var(--primary); color: var(--primary-contrast); }
+    .gap { padding: 0 var(--space-1); }
+
+    @media (max-width: 860px) {
+      .layout { grid-template-columns: 1fr; gap: var(--space-4); }
+      .filters { display: none; position: static; }
+      .filters.open { display: flex; }
+      .filters-toggle { display: inline-flex; }
+      .sort span { display: none; }
+      .page-head { align-items: flex-start; flex-direction: column; }
+      .toolbar { width: 100%; justify-content: space-between; }
+      .products { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--space-3); }
+      .meta { padding: var(--space-3); }
+    }
   `],
 })
 export class ProductList implements OnInit {
   private readonly api = inject(CatalogApi);
+  private readonly route = inject(ActivatedRoute);
+  private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
+  private searchTimer: ReturnType<typeof setTimeout> | undefined;
 
-  q = '';
-  category = '';
-  brand = '';
-  sort = '';
-  private page = 1;
-
+  readonly skeletons = [1, 2, 3, 4, 5, 6];
   readonly categories = signal<Category[]>([]);
   readonly brands = signal<Brand[]>([]);
+  readonly range = signal<PriceRange | null>(null);
   readonly result = signal<Paged<ProductListItem> | null>(null);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+  readonly filtersOpen = signal(false);
+
+  // The filter state lives in the URL (shareable, back button works); these signals mirror it.
+  readonly q = signal('');
+  readonly category = signal('');
+  readonly brand = signal('');
+  readonly sort = signal('');
+  readonly minPrice = signal<number | null>(null);
+  readonly maxPrice = signal<number | null>(null);
+  readonly page = signal(1);
+
+  readonly pages = computed(() => buildPages(this.result()?.page ?? 1, this.result()?.totalPages ?? 0));
+
+  readonly activeFilters = computed<ActiveFilter[]>(() => {
+    const filters: ActiveFilter[] = [];
+    if (this.q()) filters.push({ key: 'q', label: `“${this.q()}”`, params: { q: null } });
+    const category = this.categories().find((c) => c.slug === this.category());
+    if (this.category()) filters.push({ key: 'category', label: category?.name ?? this.category(), params: { category: null } });
+    const brand = this.brands().find((b) => b.slug === this.brand());
+    if (this.brand()) filters.push({ key: 'brand', label: brand?.name ?? this.brand(), params: { brand: null } });
+    if (this.minPrice() !== null || this.maxPrice() !== null) {
+      const lo = this.minPrice() ?? 0;
+      const hi = this.maxPrice();
+      filters.push({ key: 'price', label: hi === null ? `From ${lo}` : `${lo} – ${hi}`, params: { minPrice: null, maxPrice: null } });
+    }
+    return filters;
+  });
 
   ngOnInit(): void {
     this.api.listCategories().subscribe({ next: (c) => this.categories.set(c), error: () => {} });
     this.api.listBrands().subscribe({ next: (b) => this.brands.set(b), error: () => {} });
-    this.load();
+    this.api.priceRange().subscribe({ next: (r) => this.range.set(r), error: () => {} });
+
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe((params) => {
+      this.q.set(params.get('q') ?? '');
+      this.category.set(params.get('category') ?? '');
+      this.brand.set(params.get('brand') ?? '');
+      this.sort.set(params.get('sort') ?? '');
+      this.minPrice.set(toNumber(params.get('minPrice')));
+      this.maxPrice.set(toNumber(params.get('maxPrice')));
+      this.page.set(Math.max(1, Number(params.get('page')) || 1));
+      this.load();
+    });
   }
 
-  applyFilters(): void { this.page = 1; this.load(); }
-  go(page: number): void { this.page = page; this.load(); }
+  value(event: Event): string { return (event.target as HTMLSelectElement).value; }
+
+  tint(name: string): string {
+    let hash = 0;
+    for (const ch of name) hash = (hash * 31 + ch.charCodeAt(0)) >>> 0;
+    return TINTS[hash % TINTS.length];
+  }
+
+  /** Changes filters in the URL; any change but pagination returns to page 1. */
+  update(changes: Record<string, string | number | null>): void {
+    this.router.navigate([], {
+      relativeTo: this.route,
+      queryParams: { page: null, ...changes },
+      queryParamsHandling: 'merge',
+    });
+  }
+
+  goTo(page: number | '…'): void {
+    if (page === '…') return;
+    this.update({ page: page === 1 ? null : page });
+    if (typeof window !== 'undefined') window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  clearAll(): void {
+    this.update({ q: null, category: null, brand: null, minPrice: null, maxPrice: null });
+  }
+
+  onSearch(event: Event): void {
+    const text = (event.target as HTMLInputElement).value.trim();
+    clearTimeout(this.searchTimer);
+    this.searchTimer = setTimeout(() => this.update({ q: text || null }), 350);
+  }
+
+  setPrice(key: 'minPrice' | 'maxPrice', event: Event): void {
+    const parsed = toNumber((event.target as HTMLInputElement).value);
+    this.update({ [key]: parsed });
+  }
 
   private load(): void {
     this.loading.set(true);
     this.error.set(null);
-    const query: ProductQuery = { q: this.q, category: this.category, brand: this.brand, sort: this.sort, page: this.page, pageSize: 12 };
+    const query: ProductQuery = {
+      q: this.q(), category: this.category(), brand: this.brand(), sort: this.sort(),
+      minPrice: this.minPrice() ?? undefined, maxPrice: this.maxPrice() ?? undefined,
+      page: this.page(), pageSize: PAGE_SIZE,
+    };
     this.api.searchProducts(query).subscribe({
       next: (r) => { this.result.set(r); this.loading.set(false); },
       error: (err) => { this.error.set(problemMessage(err)); this.loading.set(false); },
     });
   }
+}
+
+function toNumber(value: string | null): number | null {
+  if (value === null || value.trim() === '') return null;
+  const n = Number(value);
+  return Number.isFinite(n) && n >= 0 ? n : null;
 }

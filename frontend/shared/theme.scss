@@ -93,6 +93,9 @@ img { max-width: 100%; display: block; }
   padding: var(--space-5);
 }
 .card + .card, .card + .alert, .alert + .card, .alert + .alert { margin-top: var(--space-5); }
+/* ...but not inside containers that lay cards out in columns; those space their children with `gap`.
+   Use `.cols` for any new multi-column card layout. */
+:is(.grid, .row, .cols, .layout, .checkout, .grids) > .card + :is(.card, .alert) { margin-top: 0; }
 .card > h2:first-child, .card > h3:first-child { margin-bottom: var(--space-4); }
 .card.flush { padding: 0; overflow: hidden; }
 
