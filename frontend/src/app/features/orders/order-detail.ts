@@ -5,50 +5,55 @@ import { OrderDetail, Tracking } from '@ch/api/models';
 import { OrdersApi } from '@ch/api/orders.api';
 import { PaymentsApi } from '@ch/api/payments.api';
 import { ShippingApi } from '@ch/api/shipping.api';
+import { StatusBadge } from '@ch/ui/status-badge';
+import { Timeline } from '@ch/ui/timeline';
 import { MoneyPipe } from '@ch/util/money.pipe';
-import { OrderStatusBadge } from './order-status-badge';
 import { problemMessage } from '@ch/util/problem';
 
 @Component({
   selector: 'app-order-detail',
-  imports: [DatePipe, RouterLink, MoneyPipe, OrderStatusBadge],
+  imports: [DatePipe, RouterLink, MoneyPipe, StatusBadge, Timeline],
   template: `
-    @if (loading()) { <p class="muted">Loading…</p> }
+    @if (loading()) { <div class="card"><div class="skeleton" style="height:1.4rem;width:40%"></div></div> }
     @if (error()) { <div class="alert error">{{ error() }}</div> }
 
     @if (order(); as o) {
-      <a routerLink="/orders" class="muted">← All orders</a>
-      <div class="head">
-        <h1>Order {{ o.orderNumber }}</h1>
-        <app-order-status-badge [status]="o.status" />
+      <nav class="crumbs" aria-label="Breadcrumb">
+        <a routerLink="/orders">Orders</a><span>/</span><span aria-current="page">{{ o.orderNumber }}</span>
+      </nav>
+
+      <div class="page-head">
+        <div class="title">
+          <h1>{{ o.orderNumber }}</h1>
+          <ch-status-badge [status]="o.status" />
+        </div>
+        <div class="actions">
+          @if (canPay()) { <button class="btn" [disabled]="busy()" (click)="pay(o)">Pay now</button> }
+          @if (canCancel()) { <button class="btn secondary danger-text" [disabled]="busy()" (click)="cancel(o)">Cancel order</button> }
+        </div>
       </div>
-      <p class="muted">Placed {{ o.createdAtUtc | date: 'medium' }}</p>
+      <p class="muted placed">Placed {{ o.createdAtUtc | date: 'MMMM d, y, h:mm a' }}</p>
 
       @if (actionError()) { <div class="alert error">{{ actionError() }}</div> }
       @if (actionMessage()) { <div class="alert success">{{ actionMessage() }}</div> }
 
-      <div class="row actions">
-        @if (canPay()) { <button class="btn" [disabled]="busy()" (click)="pay(o)">Pay now</button> }
-        @if (canCancel()) { <button class="btn danger" [disabled]="busy()" (click)="cancel(o)">Cancel order</button> }
-      </div>
-
-      <div class="grids">
+      <div class="cols grids">
         <div class="card">
           <h2>Items</h2>
-          <table>
-            <tbody>
-              @for (item of o.items; track item.id) {
-                <tr>
-                  <td>{{ item.productName }}<br /><span class="muted">{{ item.sku }} × {{ item.quantity }}</span></td>
-                  <td class="right">{{ item.lineTotal | money: o.currency }}</td>
-                </tr>
-              }
-            </tbody>
-          </table>
+          @for (item of o.items; track item.id) {
+            <div class="item">
+              <div class="thumb" aria-hidden="true">{{ item.productName.charAt(0) }}</div>
+              <div class="what">
+                <strong>{{ item.productName }}</strong>
+                <span class="muted">{{ item.sku }} · {{ item.quantity }} × {{ item.unitPrice | money: o.currency }}</span>
+              </div>
+              <strong>{{ item.lineTotal | money: o.currency }}</strong>
+            </div>
+          }
           <div class="totals">
-            <div class="line"><span>Subtotal</span><span>{{ o.subtotal | money: o.currency }}</span></div>
-            @if (o.discountTotal > 0) { <div class="line"><span>Discount</span><span>−{{ o.discountTotal | money: o.currency }}</span></div> }
-            <div class="line"><span>Tax</span><span>{{ o.taxTotal | money: o.currency }}</span></div>
+            <div class="line"><span class="muted">Subtotal</span><span>{{ o.subtotal | money: o.currency }}</span></div>
+            @if (o.discountTotal > 0) { <div class="line"><span class="muted">Discount</span><span>−{{ o.discountTotal | money: o.currency }}</span></div> }
+            <div class="line"><span class="muted">Tax</span><span>{{ o.taxTotal | money: o.currency }}</span></div>
             <div class="line total"><span>Total</span><strong>{{ o.grandTotal | money: o.currency }}</strong></div>
           </div>
         </div>
@@ -56,8 +61,8 @@ import { problemMessage } from '@ch/util/problem';
         <div class="side">
           <div class="card">
             <h2>Ship to</h2>
-            <p>
-              {{ o.shippingAddress.recipientName }}<br />
+            <p class="addr">
+              <strong>{{ o.shippingAddress.recipientName }}</strong><br />
               {{ o.shippingAddress.line1 }}@if (o.shippingAddress.line2) { , {{ o.shippingAddress.line2 }} }<br />
               {{ o.shippingAddress.city }}, {{ o.shippingAddress.postalCode }}<br />
               {{ o.shippingAddress.country }}
@@ -67,36 +72,38 @@ import { problemMessage } from '@ch/util/problem';
           @if (tracking(); as t) {
             <div class="card">
               <h2>Shipment</h2>
-              <p><span class="muted">Tracking</span> <strong>{{ t.trackingNumber }}</strong> · <app-order-status-badge [status]="t.status" /></p>
-              <ul class="timeline">
-                @for (e of t.events; track e.occurredAtUtc) {
-                  <li><strong>{{ e.status }}</strong> <span class="muted">{{ e.occurredAtUtc | date: 'short' }}</span>@if (e.note) { — {{ e.note }} }</li>
-                }
-              </ul>
+              <p class="track"><span class="muted">Tracking</span> <strong>{{ t.trackingNumber }}</strong> <ch-status-badge [status]="t.status" /></p>
+              <ch-timeline [items]="t.events" />
             </div>
           }
 
           <div class="card">
             <h2>History</h2>
-            <ul class="timeline">
-              @for (h of o.history; track h.occurredAtUtc) {
-                <li><strong>{{ h.status }}</strong> <span class="muted">{{ h.occurredAtUtc | date: 'short' }}</span>@if (h.note) { — {{ h.note }} }</li>
-              }
-            </ul>
+            <ch-timeline [items]="o.history" />
           </div>
         </div>
       </div>
     }
   `,
   styles: [`
-    .head { display: flex; align-items: center; gap: 0.8rem; }
-    .actions { margin: 1rem 0; }
-    .grids { display: grid; grid-template-columns: 1.5fr 1fr; gap: 1.5rem; align-items: start; }
-    .side { display: flex; flex-direction: column; gap: 1rem; }
-    .totals { margin-top: 1rem; }
-    .line { display: flex; justify-content: space-between; padding: 0.3rem 0; }
-    .line.total { border-top: 1px solid var(--border); margin-top: 0.4rem; padding-top: 0.6rem; }
-    .timeline { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+    .crumbs { display: flex; flex-wrap: wrap; gap: var(--space-2); font-size: 0.82rem; color: var(--muted); margin-bottom: var(--space-3); }
+    .crumbs a:hover { color: var(--text); }
+    .title { display: flex; align-items: center; gap: var(--space-3); flex-wrap: wrap; }
+    .actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .danger-text { color: var(--danger); }
+    .placed { margin-top: calc(var(--space-3) * -1); margin-bottom: var(--space-5); }
+    .grids { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: var(--space-5); align-items: start; }
+    .side { display: flex; flex-direction: column; gap: var(--space-5); }
+    .side > .card + .card { margin-top: 0; }
+    .item { display: grid; grid-template-columns: 48px minmax(0, 1fr) auto; align-items: center; gap: var(--space-3); padding: var(--space-3) 0; border-bottom: 1px solid var(--border); }
+    .thumb { width: 48px; height: 48px; border-radius: var(--radius-sm); background: #ece9f4; display: flex; align-items: center; justify-content: center; font-weight: 700; color: rgba(11, 11, 12, 0.25); }
+    .what { display: flex; flex-direction: column; min-width: 0; }
+    .what .muted { font-size: 0.82rem; }
+    .totals { margin-top: var(--space-4); }
+    .line { display: flex; justify-content: space-between; padding: var(--space-1) 0; }
+    .line.total { border-top: 1px solid var(--border); margin-top: var(--space-2); padding-top: var(--space-3); font-size: 1.05rem; }
+    .addr { margin: 0; line-height: 1.6; }
+    .track { display: flex; align-items: center; flex-wrap: wrap; gap: var(--space-2); margin-bottom: var(--space-4); }
     @media (max-width: 760px) { .grids { grid-template-columns: 1fr; } }
   `],
 })

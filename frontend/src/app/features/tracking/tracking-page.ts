@@ -1,19 +1,19 @@
 import { Component, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ShippingApi } from '@ch/api/shipping.api';
 import { Tracking } from '@ch/api/models';
-import { OrderStatusBadge } from '../orders/order-status-badge';
+import { StatusBadge } from '@ch/ui/status-badge';
+import { Timeline } from '@ch/ui/timeline';
 import { problemMessage } from '@ch/util/problem';
 
 @Component({
   selector: 'app-tracking-page',
-  imports: [FormsModule, DatePipe, OrderStatusBadge],
+  imports: [FormsModule, StatusBadge, Timeline],
   template: `
-    <h1>Track a shipment</h1>
+    <div class="page-head"><h1>Track a shipment</h1></div>
     <div class="card">
-      <div class="row">
-        <input class="input" placeholder="Tracking number (e.g. CH…)" [(ngModel)]="trackingNumber" (keyup.enter)="track()" />
+      <div class="row finder">
+        <input class="input" placeholder="Tracking number (e.g. CH…)" aria-label="Tracking number" [(ngModel)]="trackingNumber" (keyup.enter)="track()" />
         <button class="btn" (click)="track()" [disabled]="!trackingNumber || busy()">Track</button>
       </div>
       @if (error()) { <div class="alert error">{{ error() }}</div> }
@@ -21,18 +21,23 @@ import { problemMessage } from '@ch/util/problem';
 
     @if (result(); as t) {
       <div class="card">
-        <p><strong>{{ t.trackingNumber }}</strong> · {{ t.carrier }} · <app-order-status-badge [status]="t.status" /></p>
-        <p class="muted">Destination: {{ t.city }}, {{ t.country }}</p>
-        <ul class="timeline">
-          @for (e of t.events; track e.occurredAtUtc) {
-            <li><strong>{{ e.status }}</strong> <span class="muted">{{ e.occurredAtUtc | date: 'short' }}</span>@if (e.note) { — {{ e.note }} }</li>
-          }
-        </ul>
+        <div class="head">
+          <div>
+            <strong class="num">{{ t.trackingNumber }}</strong>
+            <p class="muted">{{ t.carrier }} · Destination: {{ t.city }}, {{ t.country }}</p>
+          </div>
+          <ch-status-badge [status]="t.status" />
+        </div>
+        <ch-timeline [items]="t.events" />
       </div>
     }
   `,
   styles: [`
-    .timeline { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 0.4rem; }
+    .finder .input { flex: 1; }
+    .head { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-4); margin-bottom: var(--space-5); }
+    .head p { margin: var(--space-1) 0 0; }
+    .num { font-size: 1.1rem; }
+    @media (max-width: 560px) { .finder { flex-direction: column; } }
   `],
 })
 export class TrackingPage {
