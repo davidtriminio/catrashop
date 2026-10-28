@@ -24,9 +24,7 @@ internal static class CatalogEndpoints
             CatalogQueryService queries, CancellationToken ct) =>
         {
             // Ignore nonsensical bounds instead of failing the request (a stale URL should still show products).
-            if (minPrice is < 0) minPrice = null;
-            if (maxPrice is < 0) maxPrice = null;
-            if (minPrice is { } lo && maxPrice is { } hi && lo > hi) (minPrice, maxPrice) = (hi, lo);
+            (minPrice, maxPrice) = PriceFilter.Normalize(minPrice, maxPrice);
 
             var criteria = new ProductSearchCriteria(
                 q, category, brand, ParseSort(sort, hasTerm: !string.IsNullOrWhiteSpace(q)),

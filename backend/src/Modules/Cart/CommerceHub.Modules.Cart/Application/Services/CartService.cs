@@ -4,6 +4,8 @@ using CommerceHub.Modules.Cart.Application.Contracts;
 using CommerceHub.Modules.Cart.Contracts;
 using CommerceHub.Modules.Cart.Domain;
 using CommerceHub.Modules.Catalog.Contracts;
+using CommerceHub.Modules.Inventory.Contracts;
+using Microsoft.Extensions.Options;
 
 namespace CommerceHub.Modules.Cart.Application.Services;
 
@@ -18,13 +20,18 @@ public sealed class CartService : ICartQuery
     private readonly IProductCatalogQuery _catalog;
     private readonly ICartUnitOfWork _unitOfWork;
     private readonly TimeProvider _clock;
+    private readonly IStockQuery _stock;
+    private readonly CartOptions _options;
 
-    public CartService(ICartRepository carts, IProductCatalogQuery catalog, ICartUnitOfWork unitOfWork, TimeProvider clock)
+    public CartService(ICartRepository carts, IProductCatalogQuery catalog, ICartUnitOfWork unitOfWork, TimeProvider clock,
+        IStockQuery stock, IOptions<CartOptions> options)
     {
         _carts = carts;
         _catalog = catalog;
         _unitOfWork = unitOfWork;
         _clock = clock;
+        _stock = stock;
+        _options = options.Value;
     }
 
     public async Task<CartResponse> GetAsync(Guid customerId, CancellationToken ct = default)
@@ -46,6 +53,12 @@ public sealed class CartService : ICartQuery
 
         var (cart, _) = await GetOrCreateAsync(customerId, ct);
 
+        var inCart = cart.Items.FirstOrDefault(i => i.VariantId == variant.VariantId)?.Quantity ?? 0;
+        var check = CartQuantityPolicy.Check(inCart + request.Quantity, _options.MaxQuantityPerLine,
+            await _stock.GetAvailableAsync(variant.Sku, ct));
+        if (check.IsFailure)
+            return check.Error;
+
         var result = cart.AddItem(variant.ProductId, variant.VariantId, variant.Sku, variant.ProductName,
             variant.UnitPrice, variant.Currency, request.Quantity, _clock.GetUtcNow());
         if (result.IsFailure)
@@ -55,8 +68,23 @@ public sealed class CartService : ICartQuery
         return CartMappers.ToResponse(cart);
     }
 
-    public Task<Result<CartResponse>> UpdateItemAsync(Guid customerId, Guid itemId, UpdateCartItemRequest request, CancellationToken ct = default) =>
-        MutateAsync(customerId, cart => cart.SetItemQuantity(itemId, request.Quantity, _clock.GetUtcNow()), ct);
+    public async Task<Result<CartResponse>> UpdateItemAsync(Guid customerId, Guid itemId, UpdateCartItemRequest request, CancellationToken ct = default)
+    {
+        if (request.Quantity > 0)
+        {
+            var cart = await _carts.GetActiveByCustomerAsync(customerId, ct);
+            var item = cart?.Items.FirstOrDefault(i => i.Id == itemId);
+            if (item is not null)
+            {
+                var check = CartQuantityPolicy.Check(request.Quantity, _options.MaxQuantityPerLine,
+                    await _stock.GetAvailableAsync(item.Sku, ct));
+                if (check.IsFailure)
+                    return check.Error;
+            }
+        }
+
+        return await MutateAsync(customerId, cart => cart.SetItemQuantity(itemId, request.Quantity, _clock.GetUtcNow()), ct);
+    }
 
     public Task<Result<CartResponse>> RemoveItemAsync(Guid customerId, Guid itemId, CancellationToken ct = default) =>
         MutateAsync(customerId, cart => cart.RemoveItem(itemId, _clock.GetUtcNow()), ct);

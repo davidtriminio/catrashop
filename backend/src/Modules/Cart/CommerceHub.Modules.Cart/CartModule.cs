@@ -26,6 +26,7 @@ public sealed class CartModule : IModule
         services.AddScoped<ICartUnitOfWork>(sp => sp.GetRequiredService<CartDbContext>());
         services.AddScoped<ICartRepository, CartRepository>();
 
+        services.Configure<CartOptions>(configuration.GetSection(CartOptions.SectionName));
         services.AddScoped<CartService>();
         // Public contract consumed by Orders during checkout.
         services.AddScoped<ICartQuery>(sp => sp.GetRequiredService<CartService>());

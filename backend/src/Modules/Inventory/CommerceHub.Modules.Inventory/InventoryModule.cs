@@ -33,6 +33,7 @@ public sealed class InventoryModule : IModule
 
         // Public in-process contract consumed by Orders during checkout.
         services.AddScoped<IInventoryOperations, InventoryOperationsService>();
+        services.AddScoped<IStockQuery, StockQueryService>();
 
         services.TryAddSingleton(TimeProvider.System);
         services.AddValidatorsFromAssemblyContaining<InventoryModule>(ServiceLifetime.Scoped);

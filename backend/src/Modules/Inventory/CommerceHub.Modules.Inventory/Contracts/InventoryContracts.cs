@@ -24,6 +24,13 @@ public interface IInventoryOperations
     Task<Result> CommitAsync(Guid reference, CancellationToken ct = default);
 }
 
+/// <summary>Read-only stock lookup for other modules (e.g. Cart validating a quantity against availability).</summary>
+public interface IStockQuery
+{
+    /// <summary>Units that can still be sold for the SKU, or null when Inventory does not track it.</summary>
+    Task<int?> GetAvailableAsync(string sku, CancellationToken ct = default);
+}
+
 // --- Integration events (published via the outbox) ----------------------------------------------
 
 public sealed record InventoryReservedIntegrationEvent(Guid Reference, string Sku, int Quantity) : IntegrationEvent;

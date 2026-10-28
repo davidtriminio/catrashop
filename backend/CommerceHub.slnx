@@ -47,6 +47,7 @@
     <Project Path="tests/CommerceHub.Infrastructure.Tests/CommerceHub.Infrastructure.Tests.csproj" />
     <Project Path="tests/CommerceHub.Modules.AI.Tests/CommerceHub.Modules.AI.Tests.csproj" />
     <Project Path="tests/CommerceHub.Modules.Cart.Tests/CommerceHub.Modules.Cart.Tests.csproj" />
+    <Project Path="tests/CommerceHub.Modules.Catalog.Tests/CommerceHub.Modules.Catalog.Tests.csproj" />
     <Project Path="tests/CommerceHub.Modules.Customers.Tests/CommerceHub.Modules.Customers.Tests.csproj" />
     <Project Path="tests/CommerceHub.Modules.Inventory.Tests/CommerceHub.Modules.Inventory.Tests.csproj" />
     <Project Path="tests/CommerceHub.Modules.Notifications.Tests/CommerceHub.Modules.Notifications.Tests.csproj" />
