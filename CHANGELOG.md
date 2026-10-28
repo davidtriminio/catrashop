@@ -17,6 +17,8 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
   → [PR-031](docs/git/prs/PR-031-design-foundation.md)
 - **Catalog:** product list items carry their price; price filter (`minPrice`/`maxPrice`), `price_asc`/`price_desc`
   sorting and a `price-range` endpoint → [PR-032](docs/git/prs/PR-032-catalog-price-filters.md)
+- **Storefront redesign:** responsive header, catalog with filter panel, active-filter chips, URL-driven state and
+  pager, redesigned product page and cart → [PR-033](docs/git/prs/PR-033-storefront-redesign.md)
 
 ## v1.1.0 — Oracle deployment & mobile admin app
 - **Flutter admin app** (`mobile/`): order list/detail, state actions, biometric lock, local new-order alerts
