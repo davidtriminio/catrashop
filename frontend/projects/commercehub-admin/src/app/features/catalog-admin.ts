@@ -58,7 +58,7 @@ import { problemMessage } from '@ch/util/problem';
         <div class="row">
           <div class="field" style="flex:1"><label>SKU</label><input class="input" formControlName="sku" /></div>
           <div class="field" style="flex:2"><label>Variant name</label><input class="input" formControlName="variantName" /></div>
-          <div class="field" style="flex:1"><label>Price</label><input class="input" type="number" step="0.01" formControlName="unitPrice" /></div>
+          <div class="field" style="flex:1"><label>Price</label><input class="input" type="number" min="0.01" max="1000000" step="0.01" formControlName="unitPrice" /></div>
           <div class="field" style="flex:1"><label>Currency</label><input class="input" maxlength="3" formControlName="currency" /></div>
         </div>
         <button class="btn" [disabled]="productForm.invalid || busy()">Create product (draft)</button>
@@ -112,7 +112,7 @@ export class CatalogAdmin implements OnInit {
     brandId: [''],
     sku: ['', Validators.required],
     variantName: ['', Validators.required],
-    unitPrice: [0, [Validators.required, Validators.min(0.01)]],
+    unitPrice: [0, [Validators.required, Validators.min(0.01), Validators.max(1_000_000)]],
     currency: ['USD', [Validators.required, Validators.maxLength(3)]],
   });
 

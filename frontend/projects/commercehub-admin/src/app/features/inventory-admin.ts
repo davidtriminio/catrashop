@@ -17,8 +17,8 @@ import { problemMessage } from '@ch/util/problem';
         <h2>Start tracking a SKU</h2>
         <div class="field"><label>SKU</label><input class="input" [(ngModel)]="newSku" /></div>
         <div class="row">
-          <div class="field" style="flex:1"><label>Initial on-hand</label><input class="input" type="number" [(ngModel)]="newOnHand" /></div>
-          <div class="field" style="flex:1"><label>Low-stock threshold</label><input class="input" type="number" [(ngModel)]="newThreshold" /></div>
+          <div class="field" style="flex:1"><label>Initial on-hand</label><input class="input" type="number" min="0" max="1000000" [(ngModel)]="newOnHand" /></div>
+          <div class="field" style="flex:1"><label>Low-stock threshold</label><input class="input" type="number" min="0" max="1000000" [(ngModel)]="newThreshold" /></div>
         </div>
         <button class="btn sm" [disabled]="!newSku || busy()" (click)="createItem()">Create item</button>
       </section>
@@ -26,7 +26,7 @@ import { problemMessage } from '@ch/util/problem';
       <section class="card">
         <h2>Adjust stock</h2>
         <div class="field"><label>SKU</label><input class="input" [(ngModel)]="opSku" /></div>
-        <div class="field"><label>Quantity / delta</label><input class="input" type="number" [(ngModel)]="opQty" /></div>
+        <div class="field"><label>Quantity / delta</label><input class="input" type="number" min="-1000000" max="1000000" [(ngModel)]="opQty" /></div>
         <div class="row">
           <button class="btn sm" [disabled]="!opSku || busy()" (click)="receive()">Receive (+)</button>
           <button class="btn secondary sm" [disabled]="!opSku || busy()" (click)="adjust()">Adjust (±)</button>

@@ -1,3 +1,4 @@
+import { MAX_LINE_QUANTITY, clampQuantity } from '@ch/util/quantity';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CatalogApi } from '@ch/api/catalog.api';
@@ -60,8 +61,9 @@ import { problemMessage } from '@ch/util/problem';
             <div class="stepper">
               <button type="button" aria-label="Decrease quantity" (click)="step(-1)" [disabled]="quantity() <= 1">−</button>
               <span aria-live="polite">{{ quantity() }}</span>
-              <button type="button" aria-label="Increase quantity" (click)="step(1)">+</button>
+              <button type="button" aria-label="Increase quantity" (click)="step(1)" [disabled]="quantity() >= maxQuantity">+</button>
             </div>
+            @if (quantity() >= maxQuantity) { <span class="muted">Maximum {{ maxQuantity }} per order.</span> }
           </div>
 
           @if (message()) { <div class="alert success">{{ message() }} <a routerLink="/cart">View cart</a></div> }
@@ -137,6 +139,7 @@ export class ProductDetail implements OnInit {
   readonly busy = signal(false);
 
   readonly selectedVariantId = signal('');
+  readonly maxQuantity = MAX_LINE_QUANTITY;
   readonly quantity = signal(1);
 
   readonly activeVariants = computed<ProductVariant[]>(() => (this.product()?.variants ?? []).filter((v) => v.isActive));
@@ -158,7 +161,7 @@ export class ProductDetail implements OnInit {
   }
 
   step(delta: number): void {
-    this.quantity.update((q) => Math.max(1, q + delta));
+    this.quantity.update((q) => clampQuantity(q + delta, this.maxQuantity));
   }
 
   addToCart(): void {

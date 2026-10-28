@@ -1,3 +1,4 @@
+import { MAX_LINE_QUANTITY } from '@ch/util/quantity';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { AuthStore } from '@ch/auth/auth.store';
@@ -39,7 +40,7 @@ import { problemMessage } from '@ch/util/problem';
                 <div class="stepper">
                   <button type="button" [attr.aria-label]="'Decrease ' + item.productName" (click)="setQty(item.id, item.quantity - 1)">−</button>
                   <span>{{ item.quantity }}</span>
-                  <button type="button" [attr.aria-label]="'Increase ' + item.productName" (click)="setQty(item.id, item.quantity + 1)">+</button>
+                  <button type="button" [attr.aria-label]="'Increase ' + item.productName" (click)="setQty(item.id, item.quantity + 1)" [disabled]="item.quantity >= maxQuantity">+</button>
                 </div>
                 <strong class="total">{{ item.lineTotal | money: c.currency }}</strong>
               </div>
@@ -95,12 +96,13 @@ import { problemMessage } from '@ch/util/problem';
 export class CartPage implements OnInit {
   readonly auth = inject(AuthStore);
   readonly cart = inject(CartStore);
+  readonly maxQuantity = MAX_LINE_QUANTITY;
   readonly error = signal<string | null>(null);
 
   ngOnInit(): void { this.cart.refresh(); }
 
   setQty(itemId: string, quantity: number): void {
-    if (quantity < 0) return;
+    if (quantity < 0 || quantity > this.maxQuantity) return;
     this.error.set(null);
     this.cart.updateQuantity(itemId, quantity).subscribe({
       error: (err) => { this.error.set(problemMessage(err)); this.cart.refresh(); },
