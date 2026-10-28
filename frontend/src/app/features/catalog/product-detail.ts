@@ -1,20 +1,23 @@
-import { MAX_LINE_QUANTITY, clampQuantity } from '@ch/util/quantity';
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, computed, inject, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CatalogApi } from '@ch/api/catalog.api';
 import { CustomersApi } from '@ch/api/customers.api';
-import { ProductDetail as ProductDetailModel, ProductVariant } from '@ch/api/models';
+import { ProductDetail as ProductDetailModel, ProductListItem, ProductVariant } from '@ch/api/models';
 import { AuthStore } from '@ch/auth/auth.store';
-import { CartStore } from '../../core/cart/cart.store';
 import { MoneyPipe } from '@ch/util/money.pipe';
 import { problemMessage } from '@ch/util/problem';
+import { MAX_LINE_QUANTITY, clampQuantity } from '@ch/util/quantity';
+import { CartStore } from '../../core/cart/cart.store';
+
+const RELATED_COUNT = 4;
 
 @Component({
   selector: 'app-product-detail',
   imports: [RouterLink, MoneyPipe],
   template: `
     @if (loading()) {
-      <div class="detail"><div class="skeleton media"></div><div class="info"><div class="skeleton line"></div><div class="skeleton line short"></div></div></div>
+      <div class="top"><div class="skeleton gallery-skeleton"></div><div class="skeleton buy-skeleton"></div></div>
     }
     @if (error()) { <div class="alert error">{{ error() }}</div> }
 
@@ -23,107 +26,204 @@ import { problemMessage } from '@ch/util/problem';
         <a routerLink="/">Home</a><span>/</span><a routerLink="/products">Shop</a><span>/</span><span aria-current="page">{{ p.name }}</span>
       </nav>
 
-      <div class="detail">
-        <div class="media card flush">
-          @if (p.images.length) {
-            <img [src]="p.images[0].url" [alt]="p.images[0].altText || p.name" />
-          } @else {
-            <div class="ph" aria-hidden="true"><span>{{ p.name.charAt(0) }}</span></div>
-          }
-        </div>
-
-        <div class="info">
-          <span class="eyebrow">{{ p.brandName || p.categoryName }}</span>
-          <h1>{{ p.name }}</h1>
-          <p class="muted">{{ p.categoryName }}</p>
-
-          @if (selectedVariant(); as v) {
-            <div class="price">{{ v.unitPrice | money: v.currency }}</div>
-          }
-
-          <p class="desc">{{ p.description }}</p>
-
-          @if (activeVariants().length > 1) {
-            <div class="group" role="radiogroup" aria-label="Option">
-              <span class="label">Option</span>
-              <div class="chips">
-                @for (v of activeVariants(); track v.id) {
-                  <button type="button" class="chip" role="radio" [class.active]="v.id === selectedVariantId()" [attr.aria-checked]="v.id === selectedVariantId()" (click)="selectedVariantId.set(v.id)">
-                    {{ v.name }}
-                  </button>
-                }
-              </div>
-            </div>
-          }
-
-          <div class="group">
-            <span class="label">Quantity</span>
-            <div class="stepper">
-              <button type="button" aria-label="Decrease quantity" (click)="step(-1)" [disabled]="quantity() <= 1">−</button>
-              <span aria-live="polite">{{ quantity() }}</span>
-              <button type="button" aria-label="Increase quantity" (click)="step(1)" [disabled]="quantity() >= maxQuantity">+</button>
-            </div>
-            @if (quantity() >= maxQuantity) { <span class="muted">Maximum {{ maxQuantity }} per order.</span> }
-          </div>
-
-          @if (message()) { <div class="alert success">{{ message() }} <a routerLink="/cart">View cart</a></div> }
-          @if (actionError()) { <div class="alert error">{{ actionError() }}</div> }
-
-          <div class="buy">
-            <button class="btn" [disabled]="!selectedVariantId() || busy()" (click)="addToCart()">Add to cart</button>
-            @if (auth.isAuthenticated()) {
-              <button class="btn secondary" [disabled]="busy()" (click)="addToWishlist(p.id)">♥ Wishlist</button>
+      <div class="top">
+        <div class="gallery">
+          <div class="stage card flush">
+            @if (currentImage(); as img) {
+              <img [src]="img.url" [alt]="img.altText || p.name" />
+            } @else {
+              <div class="ph" aria-hidden="true"><span>{{ p.name.charAt(0) }}</span></div>
             }
           </div>
-
-          @if (p.attributes.length) {
-            <div class="specs card">
-              <h2>Details</h2>
-              <dl>
-                @for (a of p.attributes; track a.name) { <dt>{{ a.name }}</dt><dd>{{ a.value }}</dd> }
-              </dl>
+          @if (p.images.length > 1) {
+            <div class="thumbs" role="tablist" aria-label="Product images">
+              @for (img of p.images; track img.url; let i = $index) {
+                <button type="button" class="thumb" role="tab" [class.active]="i === imageIndex()" [attr.aria-selected]="i === imageIndex()" [attr.aria-label]="'Image ' + (i + 1)" (click)="imageIndex.set(i)">
+                  <img [src]="img.url" [alt]="''" loading="lazy" />
+                </button>
+              }
             </div>
           }
         </div>
+
+        <aside class="buy-col">
+          <div class="buy-box card">
+            <span class="eyebrow">{{ p.brandName || p.categoryName }}</span>
+            <h1>{{ p.name }}</h1>
+            @if (p.brandName) { <p class="muted cat">{{ p.categoryName }}</p> }
+
+            @if (selectedVariant(); as v) {
+              <div class="price">{{ v.unitPrice | money: v.currency }}</div>
+            }
+
+            @if (activeVariants().length > 1) {
+              <div class="group" role="radiogroup" aria-label="Option">
+                <span class="label">Option</span>
+                <div class="chips">
+                  @for (v of activeVariants(); track v.id) {
+                    <button type="button" class="chip" role="radio" [class.active]="v.id === selectedVariantId()" [attr.aria-checked]="v.id === selectedVariantId()" (click)="selectedVariantId.set(v.id)">
+                      {{ v.name }}
+                    </button>
+                  }
+                </div>
+              </div>
+            }
+
+            <div class="group qty">
+              <span class="label">Quantity</span>
+              <div class="stepper">
+                <button type="button" aria-label="Decrease quantity" (click)="step(-1)" [disabled]="quantity() <= 1">−</button>
+                <span aria-live="polite">{{ quantity() }}</span>
+                <button type="button" aria-label="Increase quantity" (click)="step(1)" [disabled]="quantity() >= maxQuantity">+</button>
+              </div>
+              @if (quantity() >= maxQuantity) { <span class="muted limit">Maximum {{ maxQuantity }} per order.</span> }
+            </div>
+
+            @if (message()) { <div class="alert success">{{ message() }} <a routerLink="/cart">View cart</a></div> }
+            @if (actionError()) { <div class="alert error">{{ actionError() }}</div> }
+
+            <div class="buy">
+              <button class="btn" [disabled]="!selectedVariantId() || busy()" (click)="addToCart()">Add to cart</button>
+              @if (auth.isAuthenticated()) {
+                <button class="btn secondary" [disabled]="busy()" (click)="addToWishlist(p.id)">♥ Wishlist</button>
+              }
+            </div>
+
+            <ul class="perks">
+              <li>Delivery options and cost are calculated at checkout.</li>
+              <li>Track your order any time from My orders.</li>
+            </ul>
+          </div>
+        </aside>
       </div>
+
+      <div class="sections">
+        <section class="card about">
+          <h2>About this product</h2>
+          <p class="desc">{{ p.description }}</p>
+        </section>
+
+        <section class="card specs">
+          <h2>Details</h2>
+          <dl>
+            <dt>Category</dt><dd>{{ p.categoryName }}</dd>
+            @if (p.brandName) { <dt>Brand</dt><dd>{{ p.brandName }}</dd> }
+            @if (selectedVariant(); as v) { <dt>SKU</dt><dd>{{ v.sku }}</dd> }
+            @for (a of p.attributes; track a.name) { <dt>{{ a.name }}</dt><dd>{{ a.value }}</dd> }
+          </dl>
+        </section>
+
+        <section class="card policies">
+          <h2>Shipping &amp; returns</h2>
+          <h3>Shipping</h3>
+          <p>Available shipping methods, costs and estimated delivery times are shown at checkout once you choose your address.</p>
+          <h3>Returns</h3>
+          <p>Returns follow the store's return policy. If something is wrong with your order, contact the store before sending anything back.</p>
+        </section>
+      </div>
+
+      @if (related().length) {
+        <section class="related" aria-labelledby="related-title">
+          <h2 id="related-title">More in {{ p.categoryName }}</h2>
+          <div class="related-grid">
+            @for (r of related(); track r.id) {
+              <a class="rcard card flush" [routerLink]="['/products', r.slug]">
+                <div class="rthumb">
+                  @if (r.primaryImageUrl) { <img [src]="r.primaryImageUrl" [alt]="r.name" loading="lazy" /> }
+                  @else { <span aria-hidden="true">{{ r.name.charAt(0) }}</span> }
+                </div>
+                <div class="rmeta">
+                  <strong>{{ r.name }}</strong>
+                  @if (r.minPrice !== null) {
+                    <span class="rprice">
+                      @if (r.maxPrice !== null && r.maxPrice !== r.minPrice) { <span class="muted">From</span> }
+                      {{ r.minPrice | money: r.currency || 'USD' }}
+                    </span>
+                  }
+                </div>
+              </a>
+            }
+          </div>
+        </section>
+      }
     }
   `,
   styles: [`
     .crumbs { display: flex; flex-wrap: wrap; gap: var(--space-2); font-size: 0.82rem; color: var(--muted); margin-bottom: var(--space-4); }
     .crumbs a:hover { color: var(--text); }
-    .detail { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--space-6); align-items: start; }
-    .media { position: sticky; top: 90px; background: #ece9f4; }
-    .media img { width: 100%; aspect-ratio: 1 / 1; object-fit: cover; }
-    .ph { aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; }
-    .ph span { font-size: 8rem; font-weight: 700; color: rgba(11, 11, 12, 0.15); letter-spacing: -0.05em; }
+
+    .top { display: grid; grid-template-columns: minmax(0, 480px) minmax(0, 1fr); gap: var(--space-6); align-items: start; justify-content: center; max-width: 960px; margin: 0 auto; }
+    .gallery { min-width: 0; }
+    .stage { background: var(--surface-2); }
+    .stage img { display: block; width: 100%; aspect-ratio: 4 / 3; object-fit: contain; }
+    .ph { aspect-ratio: 4 / 3; display: flex; align-items: center; justify-content: center; }
+    .ph span { font-size: 5rem; font-weight: 700; color: var(--border-strong); letter-spacing: -0.05em; }
+    .thumbs { display: flex; gap: var(--space-2); margin-top: var(--space-3); flex-wrap: wrap; }
+    .thumb { width: 64px; height: 64px; padding: 0; border: 2px solid var(--border); border-radius: var(--radius-sm); background: var(--surface-2); cursor: pointer; overflow: hidden; }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .thumb:hover { border-color: var(--border-strong); }
+    .thumb.active { border-color: var(--primary); }
+
+    .buy-col { position: sticky; top: 90px; min-width: 0; }
+    .buy-box { margin: 0; }
     .eyebrow { font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); }
-    .info h1 { margin: var(--space-2) 0 var(--space-1); font-size: 2.1rem; }
-    .price { font-size: 1.8rem; font-weight: 750; letter-spacing: -0.02em; margin: var(--space-4) 0; }
-    .desc { color: #3f3f46; max-width: 52ch; margin-bottom: var(--space-5); }
-    .group { margin-bottom: var(--space-5); }
+    .buy-box h1 { margin: var(--space-2) 0 var(--space-1); font-size: 1.7rem; line-height: 1.2; }
+    .cat { margin: 0; font-size: 0.9rem; }
+    .price { font-size: 1.7rem; font-weight: 750; letter-spacing: -0.02em; margin: var(--space-4) 0; }
+    .group { margin-bottom: var(--space-4); }
     .label { display: block; font-size: 0.74rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); font-weight: 650; margin-bottom: var(--space-2); }
+    .limit { display: block; font-size: 0.82rem; margin-top: var(--space-2); }
     .stepper { display: inline-flex; align-items: center; border: 1px solid var(--border-strong); border-radius: var(--radius-pill); background: var(--surface); }
     .stepper button { width: 2.5rem; height: 2.5rem; border: none; background: none; font-size: 1.15rem; cursor: pointer; border-radius: var(--radius-pill); }
     .stepper button:hover:not(:disabled) { background: var(--bg); }
     .stepper button:disabled { opacity: 0.35; cursor: not-allowed; }
     .stepper span { min-width: 2.2rem; text-align: center; font-weight: 650; }
-    .buy { display: flex; gap: var(--space-3); flex-wrap: wrap; margin-bottom: var(--space-6); }
-    .buy .btn:first-child { flex: 1; min-width: 180px; padding: 0.8rem 1.5rem; }
-    .specs h2 { margin-bottom: var(--space-3); }
+    .buy { display: flex; gap: var(--space-3); flex-wrap: wrap; }
+    .buy .btn:first-child { flex: 1; min-width: 160px; padding: 0.8rem 1.5rem; }
+    .perks { list-style: none; margin: var(--space-4) 0 0; padding: var(--space-4) 0 0; border-top: 1px solid var(--border); display: grid; gap: var(--space-2); font-size: 0.86rem; color: var(--muted); }
+
+    .sections { display: grid; grid-template-columns: minmax(0, 3fr) minmax(0, 2fr); gap: var(--space-4); max-width: 960px; margin: var(--space-6) auto 0; align-items: start; }
+    .sections .card { margin: 0; }
+    .about { grid-column: 1; }
+    .specs { grid-column: 1; }
+    .policies { grid-column: 2; grid-row: 1 / span 2; }
+    .sections h2 { margin-bottom: var(--space-3); font-size: 1.1rem; }
+    .policies h3 { font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); margin: var(--space-4) 0 var(--space-1); }
+    .policies p { margin: 0; font-size: 0.92rem; }
+    .desc { color: var(--tint-neutral-fg); margin: 0; white-space: pre-line; }
     dl { display: grid; grid-template-columns: max-content 1fr; gap: var(--space-2) var(--space-5); margin: 0; }
     dt { color: var(--muted); }
-    dd { margin: 0; font-weight: 550; }
-    .skeleton.media { aspect-ratio: 1 / 1; }
-    .skeleton.line { height: 1.2rem; margin-bottom: var(--space-3); }
-    .skeleton.line.short { width: 40%; }
+    dd { margin: 0; font-weight: 550; overflow-wrap: anywhere; }
+
+    .related { max-width: 960px; margin: var(--space-7) auto 0; }
+    .related h2 { margin-bottom: var(--space-4); font-size: 1.2rem; }
+    .related-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: var(--space-4); }
+    .rcard { color: var(--text); display: flex; flex-direction: column; margin: 0; transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s; }
+    .rcard:hover { text-decoration: none; border-color: var(--border-strong); box-shadow: var(--shadow-raised); transform: translateY(-2px); }
+    .rthumb { aspect-ratio: 4 / 3; background: var(--surface-2); display: flex; align-items: center; justify-content: center; overflow: hidden; }
+    .rthumb img { width: 100%; height: 100%; object-fit: cover; }
+    .rthumb span { font-size: 2.4rem; font-weight: 700; color: var(--border-strong); }
+    .rmeta { padding: var(--space-3); display: flex; flex-direction: column; gap: var(--space-1); }
+    .rmeta strong { font-size: 0.92rem; line-height: 1.3; overflow-wrap: anywhere; }
+    .rprice { font-size: 0.9rem; font-weight: 650; }
+
+    .gallery-skeleton { aspect-ratio: 4 / 3; border-radius: var(--radius); }
+    .buy-skeleton { height: 22rem; border-radius: var(--radius); }
+
+    @media (max-width: 900px) {
+      .related-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    }
     @media (max-width: 760px) {
-      .detail { grid-template-columns: 1fr; gap: var(--space-5); }
-      .media { position: static; }
-      .info h1 { font-size: 1.7rem; }
+      .top { grid-template-columns: minmax(0, 1fr); gap: var(--space-5); }
+      .buy-col { position: static; }
+      .sections { grid-template-columns: minmax(0, 1fr); }
+      .about, .specs, .policies { grid-column: 1; grid-row: auto; }
+      .buy-box h1 { font-size: 1.45rem; }
+      .related-grid { gap: var(--space-3); }
     }
   `],
 })
-export class ProductDetail implements OnInit {
+export class ProductDetail {
   private readonly api = inject(CatalogApi);
   private readonly customers = inject(CustomersApi);
   private readonly route = inject(ActivatedRoute);
@@ -132,6 +232,7 @@ export class ProductDetail implements OnInit {
   private readonly cart = inject(CartStore);
 
   readonly product = signal<ProductDetailModel | null>(null);
+  readonly related = signal<ProductListItem[]>([]);
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly actionError = signal<string | null>(null);
@@ -141,22 +242,56 @@ export class ProductDetail implements OnInit {
   readonly selectedVariantId = signal('');
   readonly maxQuantity = MAX_LINE_QUANTITY;
   readonly quantity = signal(1);
+  readonly imageIndex = signal(0);
 
   readonly activeVariants = computed<ProductVariant[]>(() => (this.product()?.variants ?? []).filter((v) => v.isActive));
   readonly selectedVariant = computed<ProductVariant | undefined>(() =>
     this.activeVariants().find((v) => v.id === this.selectedVariantId()));
+  readonly currentImage = computed(() => {
+    const images = this.product()?.images ?? [];
+    return images[this.imageIndex()] ?? images[0] ?? null;
+  });
 
-  ngOnInit(): void {
-    const slug = this.route.snapshot.paramMap.get('slug')!;
+  constructor() {
+    // The route reuses this component when moving between related products, so follow the slug, not a snapshot.
+    this.route.paramMap.pipe(takeUntilDestroyed()).subscribe((params) => this.load(params.get('slug')!));
+  }
+
+  private load(slug: string): void {
     this.loading.set(true);
+    this.error.set(null);
+    this.product.set(null);
+    this.related.set([]);
+    this.quantity.set(1);
+    this.imageIndex.set(0);
+    this.message.set(null);
+    this.actionError.set(null);
     this.api.getProduct(slug).subscribe({
       next: (p) => {
         this.product.set(p);
         const first = p.variants.find((v) => v.isActive);
         if (first) this.selectedVariantId.set(first.id);
+        const primary = p.images.findIndex((i) => i.isPrimary);
+        if (primary > 0) this.imageIndex.set(primary);
         this.loading.set(false);
+        this.loadRelated(p);
       },
       error: (err) => { this.error.set(problemMessage(err, 'Product not found.')); this.loading.set(false); },
+    });
+  }
+
+  /** Other products of the same category; the category slug is resolved from the (small) category list. */
+  private loadRelated(p: ProductDetailModel): void {
+    this.api.listCategories().subscribe({
+      next: (categories) => {
+        const slug = categories.find((c) => c.id === p.categoryId)?.slug;
+        if (!slug) return;
+        this.api.searchProducts({ category: slug, pageSize: RELATED_COUNT + 1 }).subscribe({
+          next: (page) => this.related.set(page.items.filter((i) => i.id !== p.id).slice(0, RELATED_COUNT)),
+          error: () => this.related.set([]),
+        });
+      },
+      error: () => this.related.set([]),
     });
   }
 
