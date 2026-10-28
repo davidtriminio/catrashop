@@ -43,3 +43,4 @@ Index:
 | [PR-033](PR-033-storefront-redesign.md) | Storefront redesign: header, catalog, product page and cart | `feature/storefront-catalog` | `develop` |
 | [PR-034](PR-034-mobile-redesign.md) | Mobile app redesign | `feature/mobile-redesign` | `develop` |
 | [PR-035](PR-035-orders-and-shared-ui.md) | Storefront orders and shared UI components | `feature/storefront-account` | `develop` |
+| [PR-036](PR-036-admin-console-redesign.md) | Admin console redesign | `feature/admin-redesign` | `develop` |
