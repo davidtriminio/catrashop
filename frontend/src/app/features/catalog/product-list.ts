@@ -5,7 +5,7 @@ import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { CatalogApi, ProductQuery } from '@ch/api/catalog.api';
 import { Brand, Category, Paged, PriceRange, ProductListItem } from '@ch/api/models';
 import { problemMessage } from '@ch/util/problem';
-import { buildPages } from './pagination';
+import { buildPages } from '@ch/util/pagination';
 
 const PAGE_SIZE = 12;
 /** Soft placeholder tints (used when a product has no photo); picked deterministically from the name. */
