@@ -9,7 +9,9 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
 **local workflow simulations** — no human reviewed the code.
 
 ## [Unreleased]
-Nothing yet.
+- **Fix:** sessions no longer close on parallel refreshes or transient network/429/5xx errors (web and mobile); the
+  background task never spends the refresh token; the API tolerates concurrent refreshes within a short grace window
+  → [PR-037](docs/git/prs/PR-037-session-stability.md)
 
 ## v1.2.0 — Reliability fixes and the redesign
 - **Fix:** the account page no longer fails when the customer profile is created by concurrent requests
