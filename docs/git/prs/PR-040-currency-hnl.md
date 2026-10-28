@@ -29,6 +29,9 @@ arrive with the i18n work (PR-041).
 ## Existing data
 Rows already stored in another currency are not converted. A deployment with real USD prices needs a one-off data
 script; a deployment with only test data just needs re-seeding.
+`scripts/local/convert-currency.ps1` (added as a follow-up) converts a local database in place: one transaction,
+`-DryRun` first, optional `-Rate`, only rows still in `-From`, safe to re-run. It is documented in
+`docs/local-development.md`. **It has not been run against PostgreSQL yet** (see Verification).
 
 ## Tests (rule → test)
 | Rule | Test |
@@ -44,5 +47,6 @@ script; a deployment with only test data just needs re-seeding.
 - **Correction:** the first merge of this PR broke the storefront build (`MoneyPipe` was not imported in
   `product-list.ts`, NG1010/TS2304). My build check only looked for lowercase "error" and missed it. Fixed in a
   follow-up commit; both `ng build commercehub-web` and `commercehub-admin` now complete.
-- **Not verified:** nothing was run against PostgreSQL for this PR (the temporary role was removed), so the seed in
+- **Not verified:** `convert-currency.ps1` was only parse-checked and its argument guards exercised; its SQL has not
+  run against a database. Nothing else was run against PostgreSQL for this PR (the temporary role was removed), so the seed in
   HNL and the validators over HTTP are untested end to end; no visual check in the browser or on a device.

@@ -92,3 +92,13 @@ while your local infrastructure is up. That is expected on a dev machine with th
 # wipes all data (keeps no seed) — then repeat steps 2-3
 psql -h localhost -U postgres -c "DROP DATABASE commercehub WITH (FORCE)"
 ```
+
+## Keep your data but switch it to HNL
+Data created before the store moved to lempiras (PR-040) still shows its old currency. Instead of resetting you can
+convert it in place (back up first: `pg_dump -h localhost -U postgres -Fc commercehub > backup.dump`):
+```powershell
+./scripts/local/convert-currency.ps1 -DryRun            # shows what would change, saves nothing
+./scripts/local/convert-currency.ps1 -Rate 25.5         # USD -> HNL, amounts x 25.5 (default rate 1 only relabels)
+```
+It runs in one transaction, only touches rows still in `-From` (default `USD`), and is safe to re-run.
+
