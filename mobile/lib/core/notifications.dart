@@ -74,7 +74,7 @@ void backgroundDispatcher() {
     try {
       final store = TokenStore();
       if (await store.read() == null) return true; // signed out
-      final watcher = NewOrderWatcher(OrdersRepository(ApiClient(store)), store);
+      final watcher = NewOrderWatcher(OrdersRepository(ApiClient(store, canRefresh: false)), store);
       await showNewOrders(await watcher.check());
       return true;
     } catch (_) {
