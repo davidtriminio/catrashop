@@ -20,6 +20,9 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
 - **Currency:** the store sells in HNL (`Store:Currency`); the API rejects other currencies for products, shipping
   methods and fixed coupons; web and mobile format amounts as `L 1,234.50`
   → [PR-040](docs/git/prs/PR-040-currency-hnl.md)
+- **Fix:** administrators can manage coupons and send notifications (the Administrator role was missing the
+  `promotions.manage` and `notifications.manage` permissions); a test now keeps module permissions and the role in
+  step → [PR-041](docs/git/prs/PR-041-admin-permissions.md)
 
 ## v1.2.0 — Reliability fixes and the redesign
 - **Fix:** the account page no longer fails when the customer profile is created by concurrent requests

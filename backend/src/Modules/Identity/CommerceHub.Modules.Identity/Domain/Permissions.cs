@@ -22,6 +22,10 @@ public static class Permissions
     public const string OrdersReadAll = "orders.read_all";
     public const string OrdersManage = "orders.manage";
 
+    // Promotions and notifications administration
+    public const string PromotionsManage = "promotions.manage";
+    public const string NotificationsManage = "notifications.manage";
+
     /// <summary>Every known permission — used to grant the Administrator role the full set.</summary>
     public static readonly IReadOnlyList<string> All = new[]
     {
@@ -30,6 +34,8 @@ public static class Permissions
         CatalogManage,
         InventoryManage,
         OrdersReadAll,
-        OrdersManage
+        OrdersManage,
+        PromotionsManage,
+        NotificationsManage
     };
 }
