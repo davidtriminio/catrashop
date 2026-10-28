@@ -32,13 +32,13 @@ import { ADMIN_NAV } from './admin-permissions';
   `,
   styles: [`
     .shell { display: grid; grid-template-columns: 240px 1fr; min-height: 100vh; }
-    .sidebar { background: #0b132b; color: #cbd5e1; padding: 1.2rem 0.8rem; }
-    .brand { font-weight: 800; font-size: 1.1rem; color: #fff; padding: 0 0.6rem 1rem; }
-    .brand span { display: block; font-size: 0.7rem; letter-spacing: 0.2em; color: #64ffda; text-transform: uppercase; }
-    .sidebar nav { display: flex; flex-direction: column; gap: 0.15rem; }
-    .sidebar nav a { color: #cbd5e1; padding: 0.55rem 0.6rem; border-radius: 8px; font-weight: 600; }
-    .sidebar nav a:hover { background: rgba(255,255,255,0.06); text-decoration: none; }
-    .sidebar nav a.active { background: var(--primary); color: #fff; }
+    .sidebar { background: var(--primary); color: #d4d4d8; padding: var(--space-5) var(--space-3); }
+    .brand { font-weight: 800; font-size: 1.1rem; color: #fff; padding: 0 var(--space-3) var(--space-5); letter-spacing: -0.02em; }
+    .brand span { display: block; font-size: 0.7rem; letter-spacing: 0.2em; color: var(--accent); text-transform: uppercase; }
+    .sidebar nav { display: flex; flex-direction: column; gap: var(--space-1); }
+    .sidebar nav a { color: #d4d4d8; padding: 0.6rem var(--space-3); border-radius: var(--radius-sm); font-weight: 600; }
+    .sidebar nav a:hover { background: rgba(255,255,255,0.08); text-decoration: none; }
+    .sidebar nav a.active { background: var(--accent); color: var(--accent-ink); }
     .main { display: flex; flex-direction: column; }
     .topbar { display: flex; align-items: center; gap: 0.8rem; padding: 0.8rem 1.25rem; border-bottom: 1px solid var(--border); background: var(--surface); }
     .who { color: var(--muted); font-size: 0.9rem; }
