@@ -23,6 +23,9 @@ public sealed class CatalogQueryService
     public Task<PagedResult<ProductListItem>> SearchProductsAsync(ProductSearchCriteria criteria, CancellationToken ct = default) =>
         _readStore.SearchProductsAsync(criteria, ct);
 
+    public Task<PriceRangeResponse> GetPriceRangeAsync(CancellationToken ct = default) =>
+        _readStore.GetPriceRangeAsync(ct);
+
     public async Task<Result<ProductDetail>> GetProductBySlugAsync(string slug, CancellationToken ct = default)
     {
         var product = await _readStore.GetProductBySlugAsync(slug, ct);

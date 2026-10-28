@@ -37,6 +37,12 @@ public sealed class CatalogReadStore : ICatalogReadStore
             query = query.Where(p => p.BrandId != null && _context.Brands.Any(b => b.Id == p.BrandId && b.Slug == brandSlug));
         }
 
+        // Price filter: a product matches when at least one of its active variants is inside the range.
+        if (criteria.MinPrice is { } minPrice)
+            query = query.Where(p => p.Variants.Any(v => v.IsActive && v.Price >= minPrice));
+        if (criteria.MaxPrice is { } maxPrice)
+            query = query.Where(p => p.Variants.Any(v => v.IsActive && v.Price <= maxPrice));
+
         var term = criteria.SearchTerm?.Trim();
         var hasTerm = !string.IsNullOrWhiteSpace(term);
         if (hasTerm)
@@ -53,6 +59,12 @@ public sealed class CatalogReadStore : ICatalogReadStore
             (ProductSort.NameAsc, _) => query.OrderBy(p => p.Name),
             (ProductSort.NameDesc, _) => query.OrderByDescending(p => p.Name),
             (ProductSort.Newest, _) => query.OrderByDescending(p => p.CreatedAtUtc),
+            (ProductSort.PriceAsc, _) => query
+                .OrderBy(p => p.Variants.Where(v => v.IsActive).Min(v => (decimal?)v.Price))
+                .ThenBy(p => p.Name),
+            (ProductSort.PriceDesc, _) => query
+                .OrderByDescending(p => p.Variants.Where(v => v.IsActive).Min(v => (decimal?)v.Price))
+                .ThenBy(p => p.Name),
             (ProductSort.Relevance, true) => query.OrderByDescending(p =>
                 EF.Functions.ToTsVector(FtsConfig, p.Name + " " + p.Description)
                   .Rank(EF.Functions.WebSearchToTsQuery(FtsConfig, term!))),
@@ -71,17 +83,33 @@ public sealed class CatalogReadStore : ICatalogReadStore
                 CategoryName = _context.Categories.Where(c => c.Id == p.CategoryId).Select(c => c.Name).FirstOrDefault(),
                 BrandName = _context.Brands.Where(b => b.Id == p.BrandId).Select(b => b.Name).FirstOrDefault(),
                 PrimaryImageUrl = p.Images.Where(i => i.IsPrimary).Select(i => i.Url).FirstOrDefault(),
-                VariantCount = p.Variants.Count
+                VariantCount = p.Variants.Count,
+                MinPrice = p.Variants.Where(v => v.IsActive).Min(v => (decimal?)v.Price),
+                MaxPrice = p.Variants.Where(v => v.IsActive).Max(v => (decimal?)v.Price),
+                Currency = p.Variants.Where(v => v.IsActive).Select(v => v.Currency).FirstOrDefault()
             })
             .ToListAsync(ct);
 
         var items = rows
             .Select(r => new ProductListItem(
                 r.Id, r.Name, r.Slug, r.CategoryName ?? string.Empty, r.BrandName,
-                r.PrimaryImageUrl, r.VariantCount, r.Status.ToString()))
+                r.PrimaryImageUrl, r.VariantCount, r.Status.ToString(), r.MinPrice, r.MaxPrice, r.Currency))
             .ToArray();
 
         return new PagedResult<ProductListItem>(items, page.Page, page.PageSize, total);
+    }
+
+    public async Task<PriceRangeResponse> GetPriceRangeAsync(CancellationToken ct = default)
+    {
+        var prices = _context.Products
+            .Where(p => p.Status == ProductStatus.Active)
+            .SelectMany(p => p.Variants)
+            .Where(v => v.IsActive);
+
+        var min = await prices.MinAsync(v => (decimal?)v.Price, ct);
+        var max = await prices.MaxAsync(v => (decimal?)v.Price, ct);
+        var currency = await prices.Select(v => v.Currency).FirstOrDefaultAsync(ct);
+        return new PriceRangeResponse(min, max, currency);
     }
 
     public async Task<ProductDetail?> GetProductBySlugAsync(string slug, CancellationToken ct = default)

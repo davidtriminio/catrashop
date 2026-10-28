@@ -20,16 +20,26 @@ internal static class CatalogEndpoints
         // --- Public (customer-facing) reads -----------------------------------------------------
 
         group.MapGet("/products", async (
-            string? q, string? category, string? brand, string? sort, int? page, int? pageSize,
+            string? q, string? category, string? brand, string? sort, decimal? minPrice, decimal? maxPrice, int? page, int? pageSize,
             CatalogQueryService queries, CancellationToken ct) =>
         {
+            // Ignore nonsensical bounds instead of failing the request (a stale URL should still show products).
+            if (minPrice is < 0) minPrice = null;
+            if (maxPrice is < 0) maxPrice = null;
+            if (minPrice is { } lo && maxPrice is { } hi && lo > hi) (minPrice, maxPrice) = (hi, lo);
+
             var criteria = new ProductSearchCriteria(
                 q, category, brand, ParseSort(sort, hasTerm: !string.IsNullOrWhiteSpace(q)),
-                page ?? 1, pageSize ?? 20);
+                page ?? 1, pageSize ?? 20, minPrice, maxPrice);
             return Results.Ok(await queries.SearchProductsAsync(criteria, ct));
         })
         .CacheCatalogReads()
         .WithSummary("Search active products (full-text, filterable, sorted, paged).");
+
+        group.MapGet("/price-range", async (CatalogQueryService queries, CancellationToken ct) =>
+            Results.Ok(await queries.GetPriceRangeAsync(ct)))
+        .CacheCatalogReads()
+        .WithSummary("Lowest and highest price across active products.");
 
         group.MapGet("/products/{slug}", async (string slug, CatalogQueryService queries, CancellationToken ct) =>
             (await queries.GetProductBySlugAsync(slug, ct)).ToHttpResult())
@@ -114,6 +124,8 @@ internal static class CatalogEndpoints
         "name" => ProductSort.NameAsc,
         "name_desc" => ProductSort.NameDesc,
         "newest" => ProductSort.Newest,
+        "price_asc" => ProductSort.PriceAsc,
+        "price_desc" => ProductSort.PriceDesc,
         "relevance" => ProductSort.Relevance,
         _ => hasTerm ? ProductSort.Relevance : ProductSort.NameAsc
     };

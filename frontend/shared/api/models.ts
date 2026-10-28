@@ -53,7 +53,11 @@ export interface ProductListItem {
   primaryImageUrl: string | null;
   variantCount: number;
   status: string;
+  minPrice: number | null;
+  maxPrice: number | null;
+  currency: string | null;
 }
+export interface PriceRange { min: number | null; max: number | null; currency: string | null; }
 export interface ProductVariant {
   id: string; sku: string; name: string; unitPrice: number; currency: string; isActive: boolean;
 }
