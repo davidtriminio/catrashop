@@ -45,6 +45,7 @@ builder.AddCommerceHubObservability();
 
 // --- Security hardening: headers, CORS, rate limiting, secret guard (Phase 20) ---------------
 builder.AddCommerceHubSecurity();
+builder.Services.Configure<CommerceHub.BuildingBlocks.Money.StoreOptions>(builder.Configuration.GetSection(CommerceHub.BuildingBlocks.Money.StoreOptions.SectionName));
 
 // --- Performance: response compression + output caching for anonymous reads (Phase 22) -------
 builder.AddCommerceHubPerformance();

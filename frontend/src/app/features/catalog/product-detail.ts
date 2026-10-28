@@ -137,7 +137,7 @@ const RELATED_COUNT = 4;
                   @if (r.minPrice !== null) {
                     <span class="rprice">
                       @if (r.maxPrice !== null && r.maxPrice !== r.minPrice) { <span class="muted">From</span> }
-                      {{ r.minPrice | money: r.currency || 'USD' }}
+                      {{ r.minPrice | money: r.currency }}
                     </span>
                   }
                 </div>

@@ -38,7 +38,7 @@ OrderSummary order(String id, String number, String status, double total, int it
       id: id,
       orderNumber: number,
       status: status,
-      currency: 'USD',
+      currency: 'HNL',
       grandTotal: total,
       itemCount: items,
       createdAtUtc: DateTime.now().toUtc().subtract(ago),

@@ -1,3 +1,4 @@
+import { STORE_CURRENCY } from '@ch/util/store';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ShippingApi } from '@ch/api/shipping.api';
@@ -23,7 +24,7 @@ import { problemMessage } from '@ch/util/problem';
         </div>
         <div class="row">
           <div class="field" style="flex:1"><label>Cost</label><input class="input" type="number" step="0.01" formControlName="cost" /></div>
-          <div class="field" style="flex:1"><label>Currency</label><input class="input" maxlength="3" formControlName="currency" /></div>
+          <div class="field" style="flex:1"><label>Currency</label><input class="input" maxlength="3" formControlName="currency" readonly title="The store sells in one currency" /></div>
           <div class="field" style="flex:1"><label>Est. days</label><input class="input" type="number" formControlName="estimatedDays" /></div>
         </div>
         <button class="btn" [disabled]="form.invalid || busy()">Create method</button>
@@ -62,7 +63,7 @@ export class ShippingAdmin implements OnInit {
     code: ['', Validators.required],
     name: ['', Validators.required],
     cost: [0, [Validators.required, Validators.min(0)]],
-    currency: ['USD', [Validators.required, Validators.maxLength(3)]],
+    currency: [STORE_CURRENCY, [Validators.required, Validators.maxLength(3)]],
     estimatedDays: [3, [Validators.required, Validators.min(0)]],
   });
 
@@ -76,7 +77,7 @@ export class ShippingAdmin implements OnInit {
     this.busy.set(true);
     const v = this.form.getRawValue();
     this.api.createMethod({ code: v.code, name: v.name, cost: Number(v.cost), currency: v.currency.toUpperCase(), estimatedDays: Number(v.estimatedDays) })
-      .subscribe({ next: () => { this.ok('Method created.'); this.form.reset({ cost: 0, currency: 'USD', estimatedDays: 3 }); }, error: (e) => this.fail(e) });
+      .subscribe({ next: () => { this.ok('Method created.'); this.form.reset({ cost: 0, currency: STORE_CURRENCY, estimatedDays: 3 }); }, error: (e) => this.fail(e) });
   }
   deactivate(m: ShippingMethod): void {
     this.busy.set(true);

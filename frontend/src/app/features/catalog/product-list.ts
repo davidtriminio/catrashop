@@ -1,4 +1,3 @@
-import { CurrencyPipe } from '@angular/common';
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
@@ -15,7 +14,7 @@ interface ActiveFilter { key: string; label: string; params: Record<string, null
 
 @Component({
   selector: 'app-product-list',
-  imports: [RouterLink, CurrencyPipe],
+  imports: [RouterLink, MoneyPipe],
   template: `
     <nav class="crumbs" aria-label="Breadcrumb"><a routerLink="/">Home</a><span>/</span><span aria-current="page">Shop</span></nav>
 
@@ -86,7 +85,7 @@ interface ActiveFilter { key: string; label: string; params: Record<string, null
           </div>
           @if (range(); as pr) {
             @if (pr.min !== null && pr.max !== null) {
-              <p class="muted hint">Prices range from {{ pr.min | currency: pr.currency || 'USD' }} to {{ pr.max | currency: pr.currency || 'USD' }}</p>
+              <p class="muted hint">Prices range from {{ pr.min | money: pr.currency }} to {{ pr.max | money: pr.currency }}</p>
             }
           }
         </section>
@@ -130,7 +129,7 @@ interface ActiveFilter { key: string; label: string; params: Record<string, null
                     <span class="price-line">
                       @if (p.minPrice !== null) {
                         @if (p.maxPrice !== null && p.maxPrice !== p.minPrice) { <span class="muted from">From</span> }
-                        {{ p.minPrice | currency: p.currency || 'USD' }}
+                        {{ p.minPrice | money: p.currency }}
                       } @else { <span class="muted">Price on request</span> }
                     </span>
                   </div>

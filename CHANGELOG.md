@@ -17,6 +17,9 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
   now tested → [PR-038](docs/git/prs/PR-038-validation-limits.md)
 - **Storefront:** product page redesigned: bounded gallery with thumbnails, compact sticky buy box, details,
   shipping and returns, and related products → [PR-039](docs/git/prs/PR-039-product-detail-layout.md)
+- **Currency:** the store sells in HNL (`Store:Currency`); the API rejects other currencies for products, shipping
+  methods and fixed coupons; web and mobile format amounts as `L 1,234.50`
+  → [PR-040](docs/git/prs/PR-040-currency-hnl.md)
 
 ## v1.2.0 — Reliability fixes and the redesign
 - **Fix:** the account page no longer fails when the customer profile is created by concurrent requests
