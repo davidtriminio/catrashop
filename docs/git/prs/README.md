@@ -47,3 +47,4 @@ Index:
 | [PR-037](PR-037-session-stability.md) | Session stability: refresh race and transient failures | `feature/session-stability` | `develop` |
 | [PR-038](PR-038-validation-limits.md) | Minimum/maximum validations audit | `feature/validation-limits` | `develop` |
 | [PR-039](PR-039-product-detail-layout.md) | Product detail page layout | `feature/product-detail-layout` | `develop` |
+| [PR-040](PR-040-currency-hnl.md) | Store currency HNL and es-HN money formats | `feature/currency-hnl` | `develop` |
