@@ -2,7 +2,7 @@
 
 > A modular-monolith, event-driven **enterprise e-commerce platform** built with .NET 10 + Angular 22, designed as a realistic reference of how production commerce software is structured, secured, tested, and operated.
 
-[![status](https://img.shields.io/badge/status-v1.0.0%20release--ready-brightgreen)](#project-status)
+[![status](https://img.shields.io/badge/status-v1.2.0-brightgreen)](#project-status)
 [![backend](https://img.shields.io/badge/backend-.NET%2010-512BD4)](#stack)
 [![frontend](https://img.shields.io/badge/frontend-Angular%2022-DD0031)](#stack)
 
@@ -158,6 +158,8 @@ API on an Oracle VM (systemd + Apache + Cloudflare, no Docker, no RabbitMQ), fro
 APK/IPA. Step by step in [`docs/deployment.md`](docs/deployment.md).
 
 ## Project status
+
+**Current release: v1.2.0** — see the [CHANGELOG](CHANGELOG.md).
 
 Built **incrementally, phase by phase** (see the 24-phase plan in [`docs/roadmap.md`](docs/roadmap.md)): **all
 24 phases complete**, accepted as **release-ready (v1.0.0)** in the [final architectural

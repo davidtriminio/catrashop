@@ -9,6 +9,9 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
 **local workflow simulations** — no human reviewed the code.
 
 ## [Unreleased]
+Nothing yet.
+
+## v1.2.0 — Reliability fixes and the redesign
 - **Fix:** the account page no longer fails when the customer profile is created by concurrent requests
   (idempotent provisioning); `setup-db.ps1` no longer clashes with a running API; `pnpm start` works on pnpm 11
   → [PR-030](docs/git/prs/PR-030-profile-race-and-dev-fixes.md)
