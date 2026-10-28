@@ -21,4 +21,10 @@ public sealed class IdentitySecurityOptions
 
     public int RefreshTokenDays { get; set; } = 14;
     public int PasswordResetTokenHours { get; set; } = 2;
+
+    /// <summary>
+    /// Seconds during which a just-rotated refresh token may be presented again without being treated as theft.
+    /// Covers concurrent refreshes from the same session. 0 disables the grace window.
+    /// </summary>
+    public int RefreshReuseGraceSeconds { get; set; } = 10;
 }
