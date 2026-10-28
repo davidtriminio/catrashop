@@ -45,3 +45,4 @@ Index:
 | [PR-035](PR-035-orders-and-shared-ui.md) | Storefront orders and shared UI components | `feature/storefront-account` | `develop` |
 | [PR-036](PR-036-admin-console-redesign.md) | Admin console redesign | `feature/admin-redesign` | `develop` |
 | [PR-037](PR-037-session-stability.md) | Session stability: refresh race and transient failures | `feature/session-stability` | `develop` |
+| [PR-038](PR-038-validation-limits.md) | Minimum/maximum validations audit | `feature/validation-limits` | `develop` |

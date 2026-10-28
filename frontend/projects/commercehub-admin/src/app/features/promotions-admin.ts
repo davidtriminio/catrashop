@@ -24,13 +24,13 @@ import { problemMessage } from '@ch/util/problem';
           <div class="field" style="flex:1"><label>Type</label>
             <select formControlName="discountType"><option [value]="0">Percentage</option><option [value]="1">Fixed amount</option></select>
           </div>
-          <div class="field" style="flex:1"><label>Value</label><input class="input" type="number" step="0.01" formControlName="discountValue" /></div>
+          <div class="field" style="flex:1"><label>Value</label><input class="input" type="number" min="0.01" step="0.01" formControlName="discountValue" /></div>
           <div class="field" style="flex:1"><label>Currency</label><input class="input" maxlength="3" formControlName="currency" /></div>
-          <div class="field" style="flex:1"><label>Min subtotal</label><input class="input" type="number" step="0.01" formControlName="minimumSubtotal" /></div>
+          <div class="field" style="flex:1"><label>Min subtotal</label><input class="input" type="number" min="0" step="0.01" formControlName="minimumSubtotal" /></div>
         </div>
         <div class="row">
-          <div class="field" style="flex:1"><label>Usage limit</label><input class="input" type="number" formControlName="usageLimit" placeholder="∞" /></div>
-          <div class="field" style="flex:1"><label>Per customer</label><input class="input" type="number" formControlName="perCustomerLimit" placeholder="∞" /></div>
+          <div class="field" style="flex:1"><label>Usage limit</label><input class="input" type="number" min="1" formControlName="usageLimit" placeholder="∞" /></div>
+          <div class="field" style="flex:1"><label>Per customer</label><input class="input" type="number" min="1" formControlName="perCustomerLimit" placeholder="∞" /></div>
         </div>
         <button class="btn" [disabled]="form.invalid || busy()">Create coupon</button>
       </form>
