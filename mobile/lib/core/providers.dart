@@ -1,5 +1,6 @@
 import 'dart:async';
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:local_auth/local_auth.dart';
 
@@ -105,6 +106,9 @@ class BiometricService {
 
   /// Biometrics first; the device PIN/pattern is accepted as fallback. Devices with no screen lock at all are refused.
   Future<BiometricResult> authenticate() async {
+    // Debug-only escape hatch so the app can be exercised on an emulator with no screen lock:
+    // flutter run --dart-define=SKIP_BIOMETRIC=true . Compiled out of release builds.
+    if (kDebugMode && const bool.fromEnvironment('SKIP_BIOMETRIC')) return BiometricResult.success;
     try {
       if (!await _auth.isDeviceSupported()) return BiometricResult.unsupported;
       final ok = await _auth.authenticate(localizedReason: 'Desbloquea CommerceHub Admin');
@@ -129,11 +133,12 @@ class StatusFilter extends Notifier<String?> {
 final statusFilterProvider = NotifierProvider<StatusFilter, String?>(StatusFilter.new);
 
 class OrdersState {
-  const OrdersState(this.items, this.page, this.hasNext, {this.loadingMore = false});
+  const OrdersState(this.items, this.page, this.hasNext, {this.loadingMore = false, this.totalCount = 0});
   final List<OrderSummary> items;
   final int page;
   final bool hasNext;
   final bool loadingMore;
+  final int totalCount;
 }
 
 class OrdersNotifier extends AsyncNotifier<OrdersState> {
@@ -141,7 +146,7 @@ class OrdersNotifier extends AsyncNotifier<OrdersState> {
   Future<OrdersState> build() async {
     final status = ref.watch(statusFilterProvider);
     final p = await ref.read(ordersRepositoryProvider).list(status: status);
-    return OrdersState(p.items, p.page, p.hasNext);
+    return OrdersState(p.items, p.page, p.hasNext, totalCount: p.totalCount);
   }
 
   Future<void> refresh() async {
@@ -152,12 +157,12 @@ class OrdersNotifier extends AsyncNotifier<OrdersState> {
   Future<void> loadMore() async {
     final cur = state.value;
     if (cur == null || !cur.hasNext || cur.loadingMore) return;
-    state = AsyncData(OrdersState(cur.items, cur.page, cur.hasNext, loadingMore: true));
+    state = AsyncData(OrdersState(cur.items, cur.page, cur.hasNext, loadingMore: true, totalCount: cur.totalCount));
     try {
       final p = await ref.read(ordersRepositoryProvider).list(status: ref.read(statusFilterProvider), page: cur.page + 1);
-      state = AsyncData(OrdersState([...cur.items, ...p.items], p.page, p.hasNext));
+      state = AsyncData(OrdersState([...cur.items, ...p.items], p.page, p.hasNext, totalCount: p.totalCount));
     } catch (_) {
-      state = AsyncData(OrdersState(cur.items, cur.page, cur.hasNext));
+      state = AsyncData(OrdersState(cur.items, cur.page, cur.hasNext, totalCount: cur.totalCount));
     }
   }
 }
@@ -178,6 +183,7 @@ final newOrderPollerProvider = Provider<void>((ref) {
       if (fresh.isNotEmpty) {
         await showNewOrders(fresh);
         ref.invalidate(ordersProvider);
+        ref.invalidate(summaryProvider);
       }
     } catch (_) {
       // offline / transient: next tick
@@ -187,4 +193,52 @@ final newOrderPollerProvider = Provider<void>((ref) {
   unawaited(tick()); // sets the baseline on first run
   final timer = Timer.periodic(foregroundPollInterval, (_) => tick());
   ref.onDispose(timer.cancel);
+});
+
+// --- Navigation + summary + profile ----------------------------------------------------------
+
+/// Index of the selected bottom-navigation tab (0 orders, 1 summary, 2 settings).
+class TabIndex extends Notifier<int> {
+  @override
+  int build() => 0;
+
+  void select(int index) => state = index;
+}
+
+final tabIndexProvider = NotifierProvider<TabIndex, int>(TabIndex.new);
+
+/// Order counts per status for the summary screen (counts only, no order payloads).
+class OrderSummaryCounts {
+  const OrderSummaryCounts({required this.total, required this.byStatus});
+  final int total;
+  final Map<String, int> byStatus;
+
+  int of(String status) => byStatus[status] ?? 0;
+}
+
+final summaryProvider = FutureProvider.autoDispose<OrderSummaryCounts>((ref) async {
+  final repo = ref.watch(ordersRepositoryProvider);
+  final statuses = OrderStatus.filters;
+  final results = await Future.wait([
+    repo.count(),
+    for (final s in statuses) repo.count(status: s),
+  ]);
+  return OrderSummaryCounts(
+    total: results.first,
+    byStatus: {for (var i = 0; i < statuses.length; i++) statuses[i]: results[i + 1]},
+  );
+});
+
+/// Who is signed in, read from the stored access token (display only; the server enforces access).
+class ProfileInfo {
+  const ProfileInfo({required this.email, required this.roles});
+  final String email;
+  final Set<String> roles;
+}
+
+final profileProvider = FutureProvider.autoDispose<ProfileInfo>((ref) async {
+  final tokens = await ref.watch(tokenStoreProvider).read();
+  if (tokens == null) return const ProfileInfo(email: '', roles: {});
+  final payload = decodeJwtPayload(tokens.access);
+  return ProfileInfo(email: (payload['email'] as String?) ?? '', roles: claimValues(payload, 'role'));
 });

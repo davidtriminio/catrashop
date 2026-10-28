@@ -30,15 +30,22 @@ class OrderStatus {
         _ => s,
       };
 
-  static Color color(String s) => switch (s) {
-        paid => Colors.blue,
-        processing => Colors.orange,
-        shipped => Colors.indigo,
-        delivered => Colors.green,
-        cancelled || paymentFailed => Colors.red,
-        refundRequested || refunded => Colors.purple,
-        _ => Colors.grey,
+  /// Soft background/foreground pair for a status chip (same pairs as the web badges, all AA contrast).
+  /// Lime marks "Paid": the queue an operator needs to act on.
+  static StatusTone tone(String s) => switch (s) {
+        paid => const StatusTone(Color(0xFFC8F169), Color(0xFF1C2600)),
+        processing => const StatusTone(Color(0xFFFEF3C7), Color(0xFF78350F)),
+        shipped => const StatusTone(Color(0xFFE0E7FF), Color(0xFF312E81)),
+        delivered => const StatusTone(Color(0xFFDCFCE7), Color(0xFF14532D)),
+        cancelled || paymentFailed => const StatusTone(Color(0xFFFEE2E2), Color(0xFF7F1D1D)),
+        _ => const StatusTone(Color(0xFFECECEF), Color(0xFF3F3F46)),
       };
+}
+
+class StatusTone {
+  const StatusTone(this.background, this.foreground);
+  final Color background;
+  final Color foreground;
 }
 
 /// The single next fulfilment step the API allows from a state (state machine in OrderStatus.cs).
@@ -192,8 +199,9 @@ class OrderDetail {
 }
 
 class OrderPage {
-  OrderPage(this.items, this.page, this.hasNext);
+  OrderPage(this.items, this.page, this.hasNext, [this.totalCount = 0]);
   final List<OrderSummary> items;
   final int page;
   final bool hasNext;
+  final int totalCount;
 }

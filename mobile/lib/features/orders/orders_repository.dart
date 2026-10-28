@@ -16,7 +16,17 @@ class OrdersRepository {
     }) as Map<String, dynamic>;
     final items = (d['items'] as List).map((e) => OrderSummary.fromJson(e as Map<String, dynamic>)).toList();
     final total = (d['totalCount'] as num).toInt();
-    return OrderPage(items, page, page * pageSize < total);
+    return OrderPage(items, page, page * pageSize < total, total);
+  }
+
+  /// Number of orders in a status (all orders when [status] is null), without downloading them.
+  Future<int> count({String? status}) async {
+    final d = await _api.get('/api/v1/orders/admin', query: {
+      'status': ?status,
+      'page': 1,
+      'pageSize': 1,
+    }) as Map<String, dynamic>;
+    return (d['totalCount'] as num).toInt();
   }
 
   Future<OrderDetail> detail(String id) async =>

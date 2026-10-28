@@ -41,3 +41,4 @@ Index:
 | [PR-031](PR-031-design-foundation.md) | Design foundation (tokens and primitives) | `feature/design-foundation` | `develop` |
 | [PR-032](PR-032-catalog-price-filters.md) | Catalog prices, price filter and price sorting | `feature/catalog-filters` | `develop` |
 | [PR-033](PR-033-storefront-redesign.md) | Storefront redesign: header, catalog, product page and cart | `feature/storefront-catalog` | `develop` |
+| [PR-034](PR-034-mobile-redesign.md) | Mobile app redesign | `feature/mobile-redesign` | `develop` |
