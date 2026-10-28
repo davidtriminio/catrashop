@@ -31,7 +31,7 @@ Rows already stored in another currency are not converted. A deployment with rea
 script; a deployment with only test data just needs re-seeding.
 `scripts/local/convert-currency.ps1` (added as a follow-up) converts a local database in place: one transaction,
 `-DryRun` first, optional `-Rate`, only rows still in `-From`, safe to re-run. It is documented in
-`docs/local-development.md`. **It has not been run against PostgreSQL yet** (see Verification).
+`docs/local-development.md`. It was run against a throwaway PostgreSQL database (see Verification).
 
 ## Tests (rule → test)
 | Rule | Test |
@@ -47,6 +47,11 @@ script; a deployment with only test data just needs re-seeding.
 - **Correction:** the first merge of this PR broke the storefront build (`MoneyPipe` was not imported in
   `product-list.ts`, NG1010/TS2304). My build check only looked for lowercase "error" and missed it. Fixed in a
   follow-up commit; both `ng build commercehub-web` and `commercehub-admin` now complete.
-- **Not verified:** `convert-currency.ps1` was only parse-checked and its argument guards exercised; its SQL has not
-  run against a database. Nothing else was run against PostgreSQL for this PR (the temporary role was removed), so the seed in
-  HNL and the validators over HTTP are untested end to end; no visual check in the browser or on a device.
+- **`convert-currency.ps1` against PostgreSQL** (temporary database seeded with USD data, an order with a fixed
+  coupon and a shipment): `-DryRun` rolled back and left every table identical; the real run at rate 25.5 converted
+  variants, carts, orders and items, payments, coupons (fixed value, minimum and cap), redemptions, shipping methods
+  and shipments (e.g. 12.50 -> 318.75, coupon 10 -> 255, shipping 5 -> 127.50); every payment still equals
+  items - discount + tax; a second run did nothing; a forced failure on the last table rolled back everything;
+  the API then served the products as HNL.
+- **Not verified:** the seed in HNL and the currency validators over HTTP for this PR, and any visual check in the
+  browser or on a device. Amounts that already sit in outbox messages or past notification texts are not rewritten.
