@@ -15,6 +15,8 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
 - **Validation:** cart lines are capped (`Cart:MaxQuantityPerLine`, default 20) and checked against available stock;
   variant prices must be positive with two decimals; stock figures are bounded; price filter and page-size cap are
   now tested → [PR-038](docs/git/prs/PR-038-validation-limits.md)
+- **Storefront:** product page redesigned: bounded gallery with thumbnails, compact sticky buy box, details,
+  shipping and returns, and related products → [PR-039](docs/git/prs/PR-039-product-detail-layout.md)
 
 ## v1.2.0 — Reliability fixes and the redesign
 - **Fix:** the account page no longer fails when the customer profile is created by concurrent requests

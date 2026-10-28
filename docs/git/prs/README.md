@@ -46,3 +46,4 @@ Index:
 | [PR-036](PR-036-admin-console-redesign.md) | Admin console redesign | `feature/admin-redesign` | `develop` |
 | [PR-037](PR-037-session-stability.md) | Session stability: refresh race and transient failures | `feature/session-stability` | `develop` |
 | [PR-038](PR-038-validation-limits.md) | Minimum/maximum validations audit | `feature/validation-limits` | `develop` |
+| [PR-039](PR-039-product-detail-layout.md) | Product detail page layout | `feature/product-detail-layout` | `develop` |
