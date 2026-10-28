@@ -1,3 +1,4 @@
+import { STORE_CURRENCY } from '@ch/util/store';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PromotionsAdminApi } from '@ch/api/promotions-admin.api';
@@ -25,7 +26,7 @@ import { problemMessage } from '@ch/util/problem';
             <select formControlName="discountType"><option [value]="0">Percentage</option><option [value]="1">Fixed amount</option></select>
           </div>
           <div class="field" style="flex:1"><label>Value</label><input class="input" type="number" min="0.01" step="0.01" formControlName="discountValue" /></div>
-          <div class="field" style="flex:1"><label>Currency</label><input class="input" maxlength="3" formControlName="currency" /></div>
+          <div class="field" style="flex:1"><label>Currency</label><input class="input" maxlength="3" formControlName="currency" readonly title="The store sells in one currency" /></div>
           <div class="field" style="flex:1"><label>Min subtotal</label><input class="input" type="number" min="0" step="0.01" formControlName="minimumSubtotal" /></div>
         </div>
         <div class="row">
@@ -45,7 +46,7 @@ import { problemMessage } from '@ch/util/problem';
             <tr>
               <td><strong>{{ c.code }}</strong><br /><span class="muted">{{ c.name }}</span></td>
               <td>{{ c.discountType }}</td>
-              <td>@if (c.discountType === 'Percentage') { {{ c.discountValue }}% } @else { {{ c.discountValue | money: (c.currency || 'USD') }} }</td>
+              <td>@if (c.discountType === 'Percentage') { {{ c.discountValue }}% } @else { {{ c.discountValue | money: c.currency }} }</td>
               <td>{{ c.timesRedeemed }}@if (c.usageLimit) { / {{ c.usageLimit }} }</td>
               <td>@if (c.isActive) { <span class="badge ok">Active</span> } @else { <span class="badge bad">Off</span> }</td>
               <td class="right">
@@ -74,7 +75,7 @@ export class PromotionsAdmin implements OnInit {
     name: ['', Validators.required],
     discountType: [0, Validators.required],
     discountValue: [0, [Validators.required, Validators.min(0.01)]],
-    currency: ['USD', [Validators.required, Validators.maxLength(3)]],
+    currency: [STORE_CURRENCY, [Validators.required, Validators.maxLength(3)]],
     minimumSubtotal: [0, [Validators.min(0)]],
     usageLimit: [null as number | null],
     perCustomerLimit: [null as number | null],
@@ -94,7 +95,7 @@ export class PromotionsAdmin implements OnInit {
       currency: v.currency.toUpperCase(), minimumSubtotal: Number(v.minimumSubtotal),
       usageLimit: v.usageLimit ? Number(v.usageLimit) : null,
       perCustomerLimit: v.perCustomerLimit ? Number(v.perCustomerLimit) : null,
-    }).subscribe({ next: () => { this.ok('Coupon created.'); this.form.reset({ discountType: 0, discountValue: 0, currency: 'USD', minimumSubtotal: 0 }); }, error: (e) => this.fail(e) });
+    }).subscribe({ next: () => { this.ok('Coupon created.'); this.form.reset({ discountType: 0, discountValue: 0, currency: STORE_CURRENCY, minimumSubtotal: 0 }); }, error: (e) => this.fail(e) });
   }
 
   setActive(c: Coupon, active: boolean): void {

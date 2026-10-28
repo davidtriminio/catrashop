@@ -1,3 +1,4 @@
+import { STORE_CURRENCY } from '@ch/util/store';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CatalogApi } from '@ch/api/catalog.api';
@@ -59,7 +60,7 @@ import { problemMessage } from '@ch/util/problem';
           <div class="field" style="flex:1"><label>SKU</label><input class="input" formControlName="sku" /></div>
           <div class="field" style="flex:2"><label>Variant name</label><input class="input" formControlName="variantName" /></div>
           <div class="field" style="flex:1"><label>Price</label><input class="input" type="number" min="0.01" max="1000000" step="0.01" formControlName="unitPrice" /></div>
-          <div class="field" style="flex:1"><label>Currency</label><input class="input" maxlength="3" formControlName="currency" /></div>
+          <div class="field" style="flex:1"><label>Currency</label><input class="input" maxlength="3" formControlName="currency" readonly title="The store sells in one currency" /></div>
         </div>
         <button class="btn" [disabled]="productForm.invalid || busy()">Create product (draft)</button>
       </form>
@@ -113,7 +114,7 @@ export class CatalogAdmin implements OnInit {
     sku: ['', Validators.required],
     variantName: ['', Validators.required],
     unitPrice: [0, [Validators.required, Validators.min(0.01), Validators.max(1_000_000)]],
-    currency: ['USD', [Validators.required, Validators.maxLength(3)]],
+    currency: [STORE_CURRENCY, [Validators.required, Validators.maxLength(3)]],
   });
 
   ngOnInit(): void { this.reloadRefs(); this.reloadProducts(); }
@@ -152,7 +153,7 @@ export class CatalogAdmin implements OnInit {
       name: v.name, description: v.description, categoryId: v.categoryId, brandId: v.brandId || null,
       variants: [{ sku: v.sku, name: v.variantName, unitPrice: Number(v.unitPrice), currency: v.currency.toUpperCase() }],
     }).subscribe({
-      next: () => { this.ok('Product created as draft. Publish it to make it visible.'); this.productForm.reset({ currency: 'USD', unitPrice: 0 }); this.reloadProducts(); },
+      next: () => { this.ok('Product created as draft. Publish it to make it visible.'); this.productForm.reset({ currency: STORE_CURRENCY, unitPrice: 0 }); this.reloadProducts(); },
       error: (e) => this.fail(e),
     });
   }
