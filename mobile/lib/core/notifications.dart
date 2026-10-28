@@ -1,11 +1,11 @@
 import 'package:flutter_local_notifications/flutter_local_notifications.dart';
-import 'package:intl/intl.dart';
 import 'package:workmanager/workmanager.dart';
 
 import '../features/orders/order_models.dart';
 import '../features/orders/orders_repository.dart';
 import 'api_client.dart';
 import 'config.dart';
+import 'format.dart';
 import 'token_store.dart';
 
 const _taskName = 'commercehub.orderCheck';
@@ -43,11 +43,10 @@ Future<void> requestNotificationPermission() async {
 Future<void> showNewOrders(List<OrderSummary> orders) async {
   if (orders.isEmpty) return;
   await _ensurePlugin();
-  final money = NumberFormat.currency(symbol: '', decimalDigits: 2);
   final first = orders.first;
   final title = orders.length == 1 ? 'Nuevo pedido ${first.orderNumber}' : '${orders.length} pedidos nuevos';
   final body = orders.length == 1
-      ? '${first.currency} ${money.format(first.grandTotal)} · ${first.itemCount} artículo(s)'
+      ? '${formatMoney(first.grandTotal, first.currency)} · ${first.itemCount} artículo(s)'
       : orders.map((o) => o.orderNumber).take(4).join(', ');
   await _plugin.show(
     id: orders.length == 1 ? first.orderNumber.hashCode & 0x7fffffff : 1,
