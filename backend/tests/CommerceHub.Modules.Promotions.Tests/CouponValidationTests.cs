@@ -1,6 +1,8 @@
+using CommerceHub.BuildingBlocks.Money;
 using CommerceHub.Modules.Promotions.Application.Contracts;
 using CommerceHub.Modules.Promotions.Application.Validation;
 using CommerceHub.Modules.Promotions.Domain;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace CommerceHub.Modules.Promotions.Tests;
@@ -8,7 +10,7 @@ namespace CommerceHub.Modules.Promotions.Tests;
 public class CouponValidationTests
 {
     private static readonly DateTimeOffset Start = new(2026, 9, 1, 0, 0, 0, TimeSpan.Zero);
-    private static readonly CreateCouponRequestValidator Validator = new();
+    private static readonly CreateCouponRequestValidator Validator = new(Options.Create(new StoreOptions()));
 
     private static CreateCouponRequest Percent(decimal value, DateTimeOffset? starts = null, DateTimeOffset? ends = null,
         int? usage = null, int? perCustomer = null, decimal minimum = 0m, decimal? cap = null) =>
@@ -26,10 +28,17 @@ public class CouponValidationTests
     [Fact]
     public void Fixed_amount_needs_a_positive_value_and_a_currency()
     {
-        var ok = new CreateCouponRequest("TEN", "Ten", null, DiscountType.FixedAmount, 10m, "USD", 0m, null, null, null, null, null);
+        var ok = new CreateCouponRequest("TEN", "Ten", null, DiscountType.FixedAmount, 10m, "HNL", 0m, null, null, null, null, null);
         Assert.True(Validator.Validate(ok).IsValid);
         Assert.False(Validator.Validate(ok with { Currency = null }).IsValid);
         Assert.False(Validator.Validate(ok with { DiscountValue = 0m }).IsValid);
+    }
+
+    [Fact]
+    public void Fixed_amount_coupons_must_use_the_store_currency()
+    {
+        var usd = new CreateCouponRequest("TEN", "Ten", null, DiscountType.FixedAmount, 10m, "USD", 0m, null, null, null, null, null);
+        Assert.False(Validator.Validate(usd).IsValid);
     }
 
     [Fact]

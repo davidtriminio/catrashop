@@ -27,6 +27,13 @@ dotnet user-secrets set "RabbitMq:Password" "..."
 ```
 For `dotnet ef` design-time commands set `COMMERCEHUB_CONNECTION` (falls back to a placeholder).
 
+### Store currency
+The store sells in one currency, **HNL** (lempiras), set by `Store__Currency` (default `HNL`). The API rejects
+products, shipping methods and fixed-amount coupons in any other currency. The web apps and the mobile app format
+amounts as `L 1,234.50`. If you ever change the currency, change `STORE_CURRENCY` in `frontend/shared/util/store.ts`
+too. Existing rows keep the currency they were created with: convert them with a one-off script, do not rely on the
+app to do it.
+
 ## Production on the Oracle VM (1 GB RAM, no Docker)
 
 Memory budget: the API is capped at ~450 MB (`MemoryMax`), RabbitMQ is **not** used

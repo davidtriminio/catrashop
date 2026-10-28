@@ -1,37 +1,42 @@
 using CommerceHub.Modules.Promotions.Application.Contracts;
 using CommerceHub.Modules.Promotions.Domain;
+using CommerceHub.BuildingBlocks.Money;
 using FluentValidation;
+using Microsoft.Extensions.Options;
 
 namespace CommerceHub.Modules.Promotions.Application.Validation;
 
 public sealed class CreateCouponRequestValidator : AbstractValidator<CreateCouponRequest>
 {
-    public CreateCouponRequestValidator()
+    public CreateCouponRequestValidator(IOptions<StoreOptions> options)
     {
+        var store = options.Value;
         RuleFor(x => x.Code).NotEmpty().MaximumLength(40);
         RuleFor(x => x.Name).NotEmpty().MaximumLength(120);
         RuleFor(x => x.Description).MaximumLength(500);
-        CouponRules.Apply(this);
+        CouponRules.Apply(this, store);
     }
 }
 
 public sealed class UpdateCouponRequestValidator : AbstractValidator<UpdateCouponRequest>
 {
-    public UpdateCouponRequestValidator()
+    public UpdateCouponRequestValidator(IOptions<StoreOptions> options)
     {
+        var store = options.Value;
         RuleFor(x => x.Name).NotEmpty().MaximumLength(120);
         RuleFor(x => x.Description).MaximumLength(500);
-        CouponRules.Apply(this);
+        CouponRules.Apply(this, store);
     }
 }
 
 public sealed class QuoteCouponRequestValidator : AbstractValidator<QuoteCouponRequest>
 {
-    public QuoteCouponRequestValidator()
+    public QuoteCouponRequestValidator(IOptions<StoreOptions> options)
     {
+        var store = options.Value;
         RuleFor(x => x.CouponCode).NotEmpty().MaximumLength(40);
         RuleFor(x => x.Subtotal).GreaterThanOrEqualTo(0);
-        RuleFor(x => x.Currency).NotEmpty().Length(3);
+        RuleFor(x => x.Currency).NotEmpty().Must(store.IsStoreCurrency).WithMessage(store.CurrencyMessage);
     }
 }
 
@@ -51,15 +56,15 @@ internal interface ICouponWriteRequest
 
 internal static class CouponRules
 {
-    public static void Apply<T>(AbstractValidator<T> v) where T : ICouponWriteRequest
+    public static void Apply<T>(AbstractValidator<T> v, StoreOptions store) where T : ICouponWriteRequest
     {
         v.RuleFor(x => x.DiscountValue).GreaterThan(0);
         v.RuleFor(x => x.DiscountValue).LessThanOrEqualTo(100)
             .When(x => x.DiscountType == DiscountType.Percentage)
             .WithMessage("A percentage discount must be between 0 and 100.");
-        v.RuleFor(x => x.Currency).NotEmpty().Length(3)
+        v.RuleFor(x => x.Currency).NotEmpty().Must(c => store.IsStoreCurrency(c))
             .When(x => x.DiscountType == DiscountType.FixedAmount)
-            .WithMessage("A fixed-amount coupon requires a 3-letter currency.");
+            .WithMessage($"A fixed-amount coupon requires the store currency ({store.Currency}).");
         v.RuleFor(x => x.MinimumSubtotal).GreaterThanOrEqualTo(0);
         v.RuleFor(x => x.MaxDiscountAmount!.Value).GreaterThan(0).When(x => x.MaxDiscountAmount.HasValue);
         v.RuleFor(x => x.UsageLimit!.Value).GreaterThan(0).When(x => x.UsageLimit.HasValue);

@@ -1,7 +1,9 @@
+using CommerceHub.BuildingBlocks.Money;
 using CommerceHub.BuildingBlocks.Pagination;
 using CommerceHub.Modules.Catalog.Application.Contracts;
 using CommerceHub.Modules.Catalog.Application.Services;
 using CommerceHub.Modules.Catalog.Application.Validation;
+using Microsoft.Extensions.Options;
 using Xunit;
 
 namespace CommerceHub.Modules.Catalog.Tests;
@@ -55,10 +57,10 @@ public class PageRequestTests
 
 public class ProductVariantValidationTests
 {
-    private static readonly AddVariantRequestValidator Validator = new();
+    private static readonly AddVariantRequestValidator Validator = new(Options.Create(new StoreOptions()));
 
     private static AddVariantRequest Variant(decimal price, string sku = "SKU-1", string name = "Default") =>
-        new(sku, name, price, "USD");
+        new(sku, name, price, "HNL");
 
     [Theory]
     [InlineData(0.01)]
@@ -73,6 +75,22 @@ public class ProductVariantValidationTests
     [InlineData(1000000.01)]
     public void Zero_negative_and_absurd_prices_are_rejected(double price) =>
         Assert.False(Validator.Validate(Variant((decimal)price)).IsValid);
+
+    [Theory]
+    [InlineData("HNL", true)]
+    [InlineData("hnl", true)]
+    [InlineData("USD", false)]
+    [InlineData("EUR", false)]
+    public void Only_the_store_currency_is_accepted(string currency, bool valid) =>
+        Assert.Equal(valid, Validator.Validate(new AddVariantRequest("SKU-1", "Default", 5m, currency)).IsValid);
+
+    [Fact]
+    public void The_store_currency_is_configurable()
+    {
+        var usd = new AddVariantRequestValidator(Options.Create(new StoreOptions { Currency = "USD" }));
+        Assert.True(usd.Validate(new AddVariantRequest("SKU-1", "Default", 5m, "USD")).IsValid);
+        Assert.False(usd.Validate(new AddVariantRequest("SKU-1", "Default", 5m, "HNL")).IsValid);
+    }
 
     [Fact]
     public void More_than_two_decimals_are_rejected() =>
@@ -89,8 +107,8 @@ public class ProductVariantValidationTests
     [Fact]
     public void Product_name_and_description_lengths_are_capped()
     {
-        var validator = new CreateProductRequestValidator();
-        var variants = new[] { new ProductVariantInput("SKU-1", "Default", 5m, "USD") };
+        var validator = new CreateProductRequestValidator(Options.Create(new StoreOptions()));
+        var variants = new[] { new ProductVariantInput("SKU-1", "Default", 5m, "HNL") };
 
         CreateProductRequest Product(string name, string description) =>
             new(name, description, Guid.NewGuid(), null, variants, null, null);
