@@ -2,10 +2,11 @@ import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable } from 'rxjs';
 import { API_BASE_URL } from './api-base-url';
-import { Brand, Category, Paged, ProductDetail, ProductListItem } from './models';
+import { Brand, Category, Paged, PriceRange, ProductDetail, ProductListItem } from './models';
 
 export interface ProductQuery {
-  q?: string; category?: string; brand?: string; sort?: string; page?: number; pageSize?: number;
+  q?: string; category?: string; brand?: string; sort?: string; minPrice?: number; maxPrice?: number;
+  page?: number; pageSize?: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -28,5 +29,8 @@ export class CatalogApi {
   }
   listBrands(): Observable<Brand[]> {
     return this.http.get<Brand[]>(`${this.base}/brands`);
+  }
+  priceRange(): Observable<PriceRange> {
+    return this.http.get<PriceRange>(`${this.base}/price-range`);
   }
 }

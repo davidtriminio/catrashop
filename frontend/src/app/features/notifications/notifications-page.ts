@@ -10,23 +10,23 @@ interface Topic { label: string; value: number; name: string; }
   selector: 'app-notifications-page',
   imports: [DatePipe],
   template: `
-    <div class="head">
+    <div class="page-head">
       <h1>Notifications</h1>
       <button class="btn secondary sm" (click)="markAll()" [disabled]="busy()">Mark all read</button>
     </div>
     @if (error()) { <div class="alert error">{{ error() }}</div> }
 
-    <div class="card list">
+    <div class="card flush">
       @for (n of items(); track n.id) {
-        <div class="note" [class.unread]="!n.isRead">
-          <div>
+        <div class="list-row" [class.unread]="!n.isRead">
+          <div class="note-text">
             <strong>{{ n.title }}</strong>
             <div class="muted">{{ n.body }}</div>
             <small class="muted">{{ n.createdAtUtc | date: 'medium' }}</small>
           </div>
           @if (!n.isRead) { <button class="btn secondary sm" (click)="markRead(n)">Mark read</button> }
         </div>
-      } @empty { <p class="muted">No notifications yet.</p> }
+      } @empty { <p class="empty">No notifications yet.</p> }
     </div>
 
     <div class="card">
@@ -52,11 +52,9 @@ interface Topic { label: string; value: number; name: string; }
     </div>
   `,
   styles: [`
-    .head { display: flex; align-items: center; justify-content: space-between; }
-    .list { padding: 0; }
-    .note { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.8rem 1rem; border-bottom: 1px solid var(--border); }
-    .note.unread { background: #f5f3ff; }
-    .mute { font-size: 0.85rem; color: var(--muted); display: inline-flex; gap: 0.3rem; align-items: center; }
+    .note-text { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
+    .note-text small { margin-top: var(--space-1); }
+    .mute { font-size: 0.85rem; color: var(--muted); display: inline-flex; gap: var(--space-2); align-items: center; }
   `],
 })
 export class NotificationsPage implements OnInit {

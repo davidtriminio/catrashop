@@ -6,8 +6,11 @@ through the fulfilment states (process → ship → deliver) or cancel it. See
 
 - Auth: `/api/v1/identity/login` (accounts need `orders.read_all` + `orders.manage`, i.e. OrderManager or Administrator)
 - Orders: `/api/v1/orders/admin` list/detail and `/{id}/process|ship|deliver|cancel`
+- Three tabs: **Pedidos** (filter chips, order cards, detail with timeline and a sticky action bar), **Resumen** (count per
+  status; "Por atender" = paid orders waiting) and **Ajustes** (account, lock, notifications, sign out)
 - Biometric (or device PIN) unlock on start and after 30 s in the background
 - New-order alerts: 60 s polling while open + 15 min background task (local notifications, no Firebase)
+- Same design language as the web apps (near-black + lime accent, `lib/core/theme.dart`), light and dark
 
 ## Run
 ```bash
@@ -18,6 +21,9 @@ flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5227   # Android emulator
 flutter test && flutter analyze
 ```
 Debug builds allow plain HTTP (for a local API); release builds are HTTPS-only.
+
+Emulator without a screen lock? Debug builds can skip the biometric gate (compiled out of release builds):
+`flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5227 --dart-define=SKIP_BIOMETRIC=true`
 
 ## Release builds
 **Android** — create a keystore once and keep it out of git:

@@ -45,4 +45,5 @@ public interface ICatalogReadStore
 {
     Task<PagedResult<ProductListItem>> SearchProductsAsync(ProductSearchCriteria criteria, CancellationToken ct = default);
     Task<ProductDetail?> GetProductBySlugAsync(string slug, CancellationToken ct = default);
+    Task<PriceRangeResponse> GetPriceRangeAsync(CancellationToken ct = default);
 }

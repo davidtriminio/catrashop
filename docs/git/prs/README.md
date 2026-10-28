@@ -37,3 +37,10 @@ Index:
 | [PR-027](PR-027-oracle-vm-release-systemd-apache-cloudfl.md) | Oracle VM release (systemd + Apache + Cloudflare) and Vercel config | `feature/oracle-deploy` | `develop` |
 | [PR-028](PR-028-flutter-admin-app-for-order-management.md) | Flutter admin app for order management | `feature/mobile-admin` | `develop` |
 | [PR-029](PR-029-local-setup-and-seed-scripts-guid-key-pe.md) | Local setup and seed scripts, Guid key persistence fix | `feature/local-dev` | `develop` |
+| [PR-030](PR-030-profile-race-and-dev-fixes.md) | Profile provisioning race and local-dev fixes | `feature/fix-profile-race` | `develop` |
+| [PR-031](PR-031-design-foundation.md) | Design foundation (tokens and primitives) | `feature/design-foundation` | `develop` |
+| [PR-032](PR-032-catalog-price-filters.md) | Catalog prices, price filter and price sorting | `feature/catalog-filters` | `develop` |
+| [PR-033](PR-033-storefront-redesign.md) | Storefront redesign: header, catalog, product page and cart | `feature/storefront-catalog` | `develop` |
+| [PR-034](PR-034-mobile-redesign.md) | Mobile app redesign | `feature/mobile-redesign` | `develop` |
+| [PR-035](PR-035-orders-and-shared-ui.md) | Storefront orders and shared UI components | `feature/storefront-account` | `develop` |
+| [PR-036](PR-036-admin-console-redesign.md) | Admin console redesign | `feature/admin-redesign` | `develop` |

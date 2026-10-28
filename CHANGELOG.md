@@ -11,6 +11,24 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
 ## [Unreleased]
 Nothing yet.
 
+## v1.2.0 — Reliability fixes and the redesign
+- **Fix:** the account page no longer fails when the customer profile is created by concurrent requests
+  (idempotent provisioning); `setup-db.ps1` no longer clashes with a running API; `pnpm start` works on pnpm 11
+  → [PR-030](docs/git/prs/PR-030-profile-race-and-dev-fixes.md)
+- **Design foundation:** new shared design tokens and primitives (neutral palette with a lime accent, spacing scale,
+  chips, badges, skeletons) for the storefront and admin console; cards and notifications no longer crowd each other
+  → [PR-031](docs/git/prs/PR-031-design-foundation.md)
+- **Catalog:** product list items carry their price; price filter (`minPrice`/`maxPrice`), `price_asc`/`price_desc`
+  sorting and a `price-range` endpoint → [PR-032](docs/git/prs/PR-032-catalog-price-filters.md)
+- **Storefront redesign:** responsive header, catalog with filter panel, active-filter chips, URL-driven state and
+  pager, redesigned product page and cart → [PR-033](docs/git/prs/PR-033-storefront-redesign.md)
+- **Mobile redesign:** shared design language, bottom navigation, new Summary and Settings tabs, order cards, detail
+  with timeline and sticky action bar, confirmation sheets, light/dark → [PR-034](docs/git/prs/PR-034-mobile-redesign.md)
+- **Orders and shared UI:** one status badge and one timeline component for both web apps; redesigned orders list,
+  order detail, tracking page and footer → [PR-035](docs/git/prs/PR-035-orders-and-shared-ui.md)
+- **Admin console redesign:** dashboard with order KPIs, status chips and badges in the orders list, order detail
+  with a single next-step action and timeline, new sign-in → [PR-036](docs/git/prs/PR-036-admin-console-redesign.md)
+
 ## v1.1.0 — Oracle deployment & mobile admin app
 - **Flutter admin app** (`mobile/`): order list/detail, state actions, biometric lock, local new-order alerts
   → [ADR-030](docs/adr/030-mobile-admin-app.md)

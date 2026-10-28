@@ -77,6 +77,7 @@ To see the new-order alert, keep the app open and place another order as the cus
 ~60 s a notification appears. The background check (app closed) runs about every 15 min and Android may delay it.
 The biometric lock needs a screen lock or fingerprint set on the device/emulator
 (emulator: *Settings → Security → Screen lock*, and add a fingerprint under *Extended controls → Fingerprint*).
+To skip it while developing, add `--dart-define=SKIP_BIOMETRIC=true` to `flutter run` (debug builds only).
 
 ## 6. Tests
 ```powershell

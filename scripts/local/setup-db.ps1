@@ -30,9 +30,14 @@ $backend = Join-Path $root 'backend'
 $api     = Join-Path $backend 'src/Api/CommerceHub.Api/CommerceHub.Api.csproj'
 $env:COMMERCEHUB_CONNECTION = $conn
 
+# Build once in Release and reuse it: a running API (Debug) can lock the Debug output and break `dotnet ef`'s own build.
+Write-Host '>> Building (Release)'
+dotnet build $api -c Release --nologo -v q | Out-Null
+if ($LASTEXITCODE) { throw 'Build failed' }
+
 foreach ($m in 'Identity','Catalog','Inventory','Customers','Cart','Promotions','Orders','Payments','Shipping','Notifications') {
   Write-Host ">> Migrating $m"
-  dotnet ef database update `
+  dotnet ef database update --no-build --configuration Release `
     --project "$backend/src/Modules/$m/CommerceHub.Modules.$m/CommerceHub.Modules.$m.csproj" `
     --startup-project $api --context "${m}DbContext" | Out-Null
   if ($LASTEXITCODE) { throw "Migration failed for $m" }
