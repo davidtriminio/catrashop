@@ -19,6 +19,8 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
   sorting and a `price-range` endpoint → [PR-032](docs/git/prs/PR-032-catalog-price-filters.md)
 - **Storefront redesign:** responsive header, catalog with filter panel, active-filter chips, URL-driven state and
   pager, redesigned product page and cart → [PR-033](docs/git/prs/PR-033-storefront-redesign.md)
+- **Mobile redesign:** shared design language, bottom navigation, new Summary and Settings tabs, order cards, detail
+  with timeline and sticky action bar, confirmation sheets, light/dark → [PR-034](docs/git/prs/PR-034-mobile-redesign.md)
 
 ## v1.1.0 — Oracle deployment & mobile admin app
 - **Flutter admin app** (`mobile/`): order list/detail, state actions, biometric lock, local new-order alerts
