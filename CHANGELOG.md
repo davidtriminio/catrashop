@@ -12,6 +12,9 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
 - **Fix:** sessions no longer close on parallel refreshes or transient network/429/5xx errors (web and mobile); the
   background task never spends the refresh token; the API tolerates concurrent refreshes within a short grace window
   → [PR-037](docs/git/prs/PR-037-session-stability.md)
+- **Validation:** cart lines are capped (`Cart:MaxQuantityPerLine`, default 20) and checked against available stock;
+  variant prices must be positive with two decimals; stock figures are bounded; price filter and page-size cap are
+  now tested → [PR-038](docs/git/prs/PR-038-validation-limits.md)
 
 ## v1.2.0 — Reliability fixes and the redesign
 - **Fix:** the account page no longer fails when the customer profile is created by concurrent requests
