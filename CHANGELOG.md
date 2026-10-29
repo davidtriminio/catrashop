@@ -26,6 +26,9 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
 - **i18n:** the storefront is in Spanish (`es`, fallback `en`) with Transloco, a runtime ES | EN switch, localized dates and
   plurals; the admin gets the same base, its own texts follow in a later PR
   → [PR-042](docs/git/prs/PR-042-i18n-web-spanish.md)
+- **Shipping:** national delivery by zone (the 18 departments of Honduras grouped into zones with a cost, lead time and
+  cash-on-delivery coverage) and pickup stores; the shipping cost is charged on the order, validated on the server and
+  not taxed → [PR-043](docs/git/prs/PR-043-national-shipping.md)
 
 ## v1.2.0 — Reliability fixes and the redesign
 - **Fix:** the account page no longer fails when the customer profile is created by concurrent requests
