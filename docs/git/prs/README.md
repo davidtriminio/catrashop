@@ -52,3 +52,4 @@ Index:
 | [PR-042](PR-042-i18n-web-spanish.md) | i18n phase 1: Transloco base and the storefront in Spanish | `feature/i18n-web-es` | `develop` |
 | [PR-043](PR-043-national-shipping.md) | National shipping: zones by department, pickup stores and shipping cost | `feature/national-shipping` | `develop` |
 | [PR-044](PR-044-mobile-api-url.md) | Mobile: change and remember the API address from Settings | `feature/mobile-api-url` | `develop` |
+| [PR-045](PR-045-mobile-load-retry.md) | Mobile: failed loads explain themselves and Reintentar visibly retries | `fix/mobile-load-retry` | `develop` |
