@@ -46,3 +46,51 @@ public sealed class ShipmentRepository : IShipmentRepository
     public Task<bool> ExistsForOrderAsync(Guid orderId, CancellationToken ct = default) =>
         _context.Shipments.AnyAsync(s => s.OrderId == orderId, ct);
 }
+
+public sealed class ShippingZoneRepository : IShippingZoneRepository
+{
+    private readonly ShippingDbContext _context;
+    public ShippingZoneRepository(ShippingDbContext context) => _context = context;
+
+    public void Add(ShippingZone zone) => _context.ShippingZones.Add(zone);
+
+    // Departments are an owned collection and load with the zone.
+    public Task<ShippingZone?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
+        _context.ShippingZones.FirstOrDefaultAsync(z => z.Id == id, ct);
+
+    public Task<bool> CodeExistsAsync(string code, CancellationToken ct = default) =>
+        _context.ShippingZones.AnyAsync(z => z.Code == code, ct);
+
+    public async Task<IReadOnlyList<ShippingZone>> ListAsync(bool activeOnly, CancellationToken ct = default) =>
+        await _context.ShippingZones.AsNoTracking().Where(z => !activeOnly || z.IsActive).OrderBy(z => z.Cost).ThenBy(z => z.Name).ToListAsync(ct);
+
+    public Task<ShippingZone?> GetActiveByDepartmentAsync(string departmentCode, CancellationToken ct = default) =>
+        _context.ShippingZones.AsNoTracking()
+            .FirstOrDefaultAsync(z => z.IsActive && z.Departments.Any(d => d.DepartmentCode == departmentCode), ct);
+
+    public async Task<IReadOnlyList<string>> DepartmentsInOtherZonesAsync(
+        IEnumerable<string> departmentCodes, Guid? exceptZoneId, CancellationToken ct = default)
+    {
+        var codes = departmentCodes.ToArray();
+        return await _context.ShippingZones
+            .Where(z => exceptZoneId == null || z.Id != exceptZoneId)
+            .SelectMany(z => z.Departments)
+            .Where(d => codes.Contains(d.DepartmentCode))
+            .Select(d => d.DepartmentCode)
+            .ToListAsync(ct);
+    }
+}
+
+public sealed class PickupStoreRepository : IPickupStoreRepository
+{
+    private readonly ShippingDbContext _context;
+    public PickupStoreRepository(ShippingDbContext context) => _context = context;
+
+    public void Add(PickupStore store) => _context.PickupStores.Add(store);
+
+    public Task<PickupStore?> GetByIdAsync(Guid id, CancellationToken ct = default) =>
+        _context.PickupStores.FirstOrDefaultAsync(s => s.Id == id, ct);
+
+    public async Task<IReadOnlyList<PickupStore>> ListAsync(bool activeOnly, CancellationToken ct = default) =>
+        await _context.PickupStores.AsNoTracking().Where(s => !activeOnly || s.IsActive).OrderBy(s => s.Name).ToListAsync(ct);
+}

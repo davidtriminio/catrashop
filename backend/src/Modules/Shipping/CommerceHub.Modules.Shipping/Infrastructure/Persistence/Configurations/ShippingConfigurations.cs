@@ -58,3 +58,45 @@ public sealed class ShipmentConfiguration : IEntityTypeConfiguration<Shipment>
         builder.Metadata.FindNavigation(nameof(Shipment.Events))!.SetPropertyAccessMode(PropertyAccessMode.Field);
     }
 }
+
+public sealed class ShippingZoneConfiguration : IEntityTypeConfiguration<ShippingZone>
+{
+    public void Configure(EntityTypeBuilder<ShippingZone> builder)
+    {
+        builder.ToTable("shipping_zones");
+        builder.HasKey(z => z.Id);
+        builder.Property(z => z.Code).HasMaxLength(40).IsRequired();
+        builder.HasIndex(z => z.Code).IsUnique().HasDatabaseName("ux_shipping_zones_code");
+        builder.Property(z => z.Name).HasMaxLength(100).IsRequired();
+        builder.Property(z => z.Cost).HasPrecision(18, 2);
+        builder.Property(z => z.Currency).HasMaxLength(3).IsRequired();
+
+        builder.OwnsMany(z => z.Departments, d =>
+        {
+            d.ToTable("shipping_zone_departments");
+            d.WithOwner().HasForeignKey(x => x.ZoneId);
+            d.HasKey(x => new { x.ZoneId, x.DepartmentCode });
+            d.Property(x => x.DepartmentCode).HasMaxLength(10).IsRequired();
+            // A department is served by one zone only.
+            d.HasIndex(x => x.DepartmentCode).IsUnique().HasDatabaseName("ux_shipping_zone_departments_department");
+        });
+
+        builder.Metadata.FindNavigation(nameof(ShippingZone.Departments))!.SetPropertyAccessMode(PropertyAccessMode.Field);
+    }
+}
+
+public sealed class PickupStoreConfiguration : IEntityTypeConfiguration<PickupStore>
+{
+    public void Configure(EntityTypeBuilder<PickupStore> builder)
+    {
+        builder.ToTable("pickup_stores");
+        builder.HasKey(s => s.Id);
+        builder.Property(s => s.Name).HasMaxLength(150).IsRequired();
+        builder.Property(s => s.Line1).HasMaxLength(200).IsRequired();
+        builder.Property(s => s.City).HasMaxLength(100).IsRequired();
+        builder.Property(s => s.DepartmentCode).HasMaxLength(10).IsRequired();
+        builder.Property(s => s.Phone).HasMaxLength(30);
+        builder.Property(s => s.Hours).HasMaxLength(200);
+        builder.HasIndex(s => s.IsActive).HasDatabaseName("ix_pickup_stores_active");
+    }
+}

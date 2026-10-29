@@ -14,4 +14,6 @@ public sealed class ShippingDbContext : ModuleDbContext, IShippingUnitOfWork
 
     public DbSet<ShippingMethod> ShippingMethods => Set<ShippingMethod>();
     public DbSet<Shipment> Shipments => Set<Shipment>();
+    public DbSet<ShippingZone> ShippingZones => Set<ShippingZone>();
+    public DbSet<PickupStore> PickupStores => Set<PickupStore>();
 }

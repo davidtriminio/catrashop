@@ -21,6 +21,14 @@ internal static class ShippingEndpoints
             Results.Ok(await methods.ListAsync(activeOnly: true, ct)))
         .WithSummary("List available shipping methods.");
 
+        group.MapGet("/zones", async (ShippingZoneService zones, CancellationToken ct) =>
+            Results.Ok(await zones.ListZonesAsync(activeOnly: true, ct)))
+        .WithSummary("List the delivery zones (cost, lead time, departments and cash-on-delivery coverage).");
+
+        group.MapGet("/pickup-stores", async (ShippingZoneService zones, CancellationToken ct) =>
+            Results.Ok(await zones.ListStoresAsync(activeOnly: true, ct)))
+        .WithSummary("List the stores where an order can be collected.");
+
         group.MapGet("/track/{trackingNumber}", async (string trackingNumber, ShipmentService shipments, CancellationToken ct) =>
             (await shipments.TrackAsync(trackingNumber, ct)).ToHttpResult())
         .WithSummary("Track a shipment by its tracking number (public, limited detail).");
@@ -62,6 +70,60 @@ internal static class ShippingEndpoints
 
         admin.MapPost("/methods/{id:guid}/deactivate", async (Guid id, ShippingMethodService methods, CancellationToken ct) =>
             (await methods.SetActiveAsync(id, false, ct)).ToHttpResult()).WithSummary("Deactivate a shipping method.");
+
+        admin.MapGet("/zones", async (ShippingZoneService zones, CancellationToken ct) =>
+            Results.Ok(await zones.ListZonesAsync(activeOnly: false, ct))).WithSummary("List all shipping zones, including inactive ones.");
+
+        admin.MapPost("/zones", async (
+            CreateShippingZoneRequest request, IValidator<CreateShippingZoneRequest> validator,
+            ShippingZoneService zones, CancellationToken ct) =>
+        {
+            if (await Validate(validator, request) is { } problem) return problem;
+            return (await zones.CreateAsync(request, ct)).ToHttpResult(z => Results.Created($"/api/v1/shipping/admin/zones/{z.Id}", z));
+        })
+        .WithSummary("Create a shipping zone.");
+
+        admin.MapPut("/zones/{id:guid}", async (
+            Guid id, UpdateShippingZoneRequest request, IValidator<UpdateShippingZoneRequest> validator,
+            ShippingZoneService zones, CancellationToken ct) =>
+        {
+            if (await Validate(validator, request) is { } problem) return problem;
+            return (await zones.UpdateAsync(id, request, ct)).ToHttpResult();
+        })
+        .WithSummary("Update a shipping zone (cost, lead time, coverage and departments).");
+
+        admin.MapPost("/zones/{id:guid}/activate", async (Guid id, ShippingZoneService zones, CancellationToken ct) =>
+            (await zones.SetZoneActiveAsync(id, true, ct)).ToHttpResult()).WithSummary("Activate a shipping zone.");
+
+        admin.MapPost("/zones/{id:guid}/deactivate", async (Guid id, ShippingZoneService zones, CancellationToken ct) =>
+            (await zones.SetZoneActiveAsync(id, false, ct)).ToHttpResult()).WithSummary("Deactivate a shipping zone.");
+
+        admin.MapGet("/pickup-stores", async (ShippingZoneService zones, CancellationToken ct) =>
+            Results.Ok(await zones.ListStoresAsync(activeOnly: false, ct))).WithSummary("List all pickup stores, including inactive ones.");
+
+        admin.MapPost("/pickup-stores", async (
+            SavePickupStoreRequest request, IValidator<SavePickupStoreRequest> validator,
+            ShippingZoneService zones, CancellationToken ct) =>
+        {
+            if (await Validate(validator, request) is { } problem) return problem;
+            return (await zones.CreateStoreAsync(request, ct)).ToHttpResult(s => Results.Created($"/api/v1/shipping/admin/pickup-stores/{s.Id}", s));
+        })
+        .WithSummary("Create a pickup store.");
+
+        admin.MapPut("/pickup-stores/{id:guid}", async (
+            Guid id, SavePickupStoreRequest request, IValidator<SavePickupStoreRequest> validator,
+            ShippingZoneService zones, CancellationToken ct) =>
+        {
+            if (await Validate(validator, request) is { } problem) return problem;
+            return (await zones.UpdateStoreAsync(id, request, ct)).ToHttpResult();
+        })
+        .WithSummary("Update a pickup store.");
+
+        admin.MapPost("/pickup-stores/{id:guid}/activate", async (Guid id, ShippingZoneService zones, CancellationToken ct) =>
+            (await zones.SetStoreActiveAsync(id, true, ct)).ToHttpResult()).WithSummary("Enable a pickup store.");
+
+        admin.MapPost("/pickup-stores/{id:guid}/deactivate", async (Guid id, ShippingZoneService zones, CancellationToken ct) =>
+            (await zones.SetStoreActiveAsync(id, false, ct)).ToHttpResult()).WithSummary("Disable a pickup store.");
 
         admin.MapPost("/shipments", async (
             CreateShipmentRequest request, IValidator<CreateShipmentRequest> validator,
