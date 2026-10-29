@@ -17,7 +17,7 @@ public sealed class Order : AggregateRoot<Guid>
     private Order() { } // EF
 
     private Order(Guid id, string orderNumber, Guid customerId, Guid cartId, string currency,
-        ShippingAddress shippingAddress, decimal discountTotal, decimal taxTotal, DateTimeOffset nowUtc) : base(id)
+        ShippingAddress shippingAddress, decimal discountTotal, decimal taxTotal, OrderDelivery delivery, DateTimeOffset nowUtc) : base(id)
     {
         OrderNumber = orderNumber;
         CustomerId = customerId;
@@ -26,6 +26,11 @@ public sealed class Order : AggregateRoot<Guid>
         ShippingAddress = shippingAddress;
         DiscountTotal = discountTotal;
         TaxTotal = taxTotal;
+        DeliveryMode = delivery.Mode;
+        DepartmentCode = delivery.DepartmentCode;
+        PickupStoreId = delivery.PickupStoreId;
+        PickupStoreName = delivery.PickupStoreName;
+        ShippingTotal = delivery.ShippingTotal;
         Status = OrderStatus.Pending;
         CreatedAtUtc = nowUtc;
         UpdatedAtUtc = nowUtc;
@@ -43,8 +48,23 @@ public sealed class Order : AggregateRoot<Guid>
 
     public decimal DiscountTotal { get; private set; }
     public decimal TaxTotal { get; private set; }
+
+    /// <summary>Delivered to an address or collected at a store.</summary>
+    public DeliveryMode DeliveryMode { get; private set; }
+
+    /// <summary>The destination department (ISO 3166-2, e.g. "HN-FM") for a delivery; null for a pickup.</summary>
+    public string? DepartmentCode { get; private set; }
+
+    public Guid? PickupStoreId { get; private set; }
+
+    /// <summary>The pickup store's name at the time of checkout.</summary>
+    public string? PickupStoreName { get; private set; }
+
+    /// <summary>The delivery cost charged for the destination zone (0 for a pickup). Not subject to tax.</summary>
+    public decimal ShippingTotal { get; private set; }
+
     public decimal Subtotal => _items.Sum(i => i.LineTotal);
-    public decimal GrandTotal => Subtotal - DiscountTotal + TaxTotal;
+    public decimal GrandTotal => Subtotal - DiscountTotal + TaxTotal + ShippingTotal;
 
     public DateTimeOffset CreatedAtUtc { get; private set; }
     public DateTimeOffset UpdatedAtUtc { get; private set; }
@@ -55,10 +75,10 @@ public sealed class Order : AggregateRoot<Guid>
     public static Result<Order> Create(
         string orderNumber, Guid customerId, Guid cartId, string currency, ShippingAddress shippingAddress,
         IEnumerable<(Guid ProductId, Guid VariantId, string Sku, string ProductName, decimal UnitPrice, int Quantity)> lines,
-        decimal discountTotal, decimal taxTotal, DateTimeOffset nowUtc)
+        decimal discountTotal, decimal taxTotal, DateTimeOffset nowUtc, OrderDelivery? delivery = null)
     {
         var order = new Order(Guid.NewGuid(), orderNumber, customerId, cartId, currency.ToUpperInvariant(),
-            shippingAddress, discountTotal, taxTotal, nowUtc);
+            shippingAddress, discountTotal, taxTotal, delivery ?? OrderDelivery.None, nowUtc);
 
         foreach (var l in lines)
             order._items.Add(new OrderItem(Guid.NewGuid(), order.Id, l.ProductId, l.VariantId, l.Sku, l.ProductName, l.UnitPrice, l.Quantity));
