@@ -5,7 +5,7 @@ test.describe('authentication shell (no backend required)', () => {
     await page.goto('/account');
 
     await expect(page).toHaveURL(/\/login\?returnUrl=%2Faccount/);
-    await expect(page.getByRole('heading', { name: 'Sign in' })).toBeVisible();
+    await expect(page.getByRole('heading', { name: 'Iniciar sesión' })).toBeVisible();
   });
 
   test('the login form renders and enables the submit button once filled', async ({ page }) => {
@@ -13,7 +13,7 @@ test.describe('authentication shell (no backend required)', () => {
 
     const email = page.locator('#email');
     const password = page.locator('#password');
-    const submit = page.getByRole('button', { name: 'Sign in' });
+    const submit = page.getByRole('button', { name: 'Iniciar sesión' });
 
     await expect(email).toBeVisible();
     await expect(password).toBeVisible();
@@ -27,7 +27,7 @@ test.describe('authentication shell (no backend required)', () => {
 
   test('the register link navigates to the registration page', async ({ page }) => {
     await page.goto('/login');
-    await page.getByRole('link', { name: 'Create one' }).click();
+    await page.getByRole('link', { name: 'Crea una' }).click();
 
     await expect(page).toHaveURL(/\/register$/);
   });
