@@ -30,7 +30,7 @@ For `dotnet ef` design-time commands set `COMMERCEHUB_CONNECTION` (falls back to
 ### Store currency
 The store sells in one currency, **HNL** (lempiras), set by `Store__Currency` (default `HNL`). The API rejects
 products, shipping methods and fixed-amount coupons in any other currency. The web apps and the mobile app format
-amounts as `L 1,234.50`. If you ever change the currency, change `STORE_CURRENCY` in `frontend/shared/util/store.ts`
+amounts as `LPS. 1,234.50`. If you ever change the currency, change `STORE_CURRENCY` in `frontend/shared/util/store.ts`
 too. Existing rows keep the currency they were created with: convert them with a one-off script, do not rely on the
 app to do it.
 
