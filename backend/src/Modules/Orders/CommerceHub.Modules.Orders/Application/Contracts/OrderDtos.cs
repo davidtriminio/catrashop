@@ -3,9 +3,16 @@ namespace CommerceHub.Modules.Orders.Application.Contracts;
 // --- Requests -----------------------------------------------------------------------------------
 
 public sealed record ShippingAddressRequest(
-    string RecipientName, string Line1, string? Line2, string City, string? Region, string PostalCode, string Country);
+    string RecipientName, string Line1, string? Line2, string City, string? Region, string PostalCode, string Country,
+    string? DepartmentCode = null);
 
-public sealed record CheckoutRequest(ShippingAddressRequest ShippingAddress, string? CouponCode = null);
+/// <summary>
+/// <c>DeliveryMode</c> is "Delivery" (needs <c>ShippingAddress</c> with a department) or "Pickup" (needs a
+/// <c>PickupStoreId</c> and the name of whoever collects the order). The shipping cost is decided by the server.
+/// </summary>
+public sealed record CheckoutRequest(
+    ShippingAddressRequest? ShippingAddress, string? CouponCode = null, string DeliveryMode = "Delivery",
+    Guid? PickupStoreId = null, string? PickupRecipientName = null);
 
 public sealed record CancelOrderRequest(string? Reason);
 
@@ -30,7 +37,11 @@ public sealed record OrderDetailResponse(
     decimal Subtotal,
     decimal DiscountTotal,
     decimal TaxTotal,
+    decimal ShippingTotal,
     decimal GrandTotal,
+    string DeliveryMode,
+    Guid? PickupStoreId,
+    string? PickupStoreName,
     ShippingAddressRequest ShippingAddress,
     IReadOnlyList<OrderItemResponse> Items,
     IReadOnlyList<OrderStatusHistoryResponse> History,

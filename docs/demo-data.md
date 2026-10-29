@@ -52,8 +52,14 @@ These are anonymous and output-cached (Phase 22), so identical repeated reads ar
 ```
 POST /api/v1/cart/items                    # add a variant (price is captured at add time)
 PUT  /api/v1/cart/items/{itemId}           # change quantity
-POST /api/v1/orders/checkout               # {shippingAddress, couponCode?}
+POST /api/v1/orders/checkout               # {deliveryMode, shippingAddress | pickupStoreId + pickupRecipientName, couponCode?}
+GET  /api/v1/shipping/zones                # delivery zones: cost, lead time, departments, cash-on-delivery coverage
+GET  /api/v1/shipping/pickup-stores        # stores where an order can be collected
 ```
+
+`deliveryMode` is `Delivery` (the default; the address needs `country: "HN"` and a `departmentCode` such as `HN-FM`) or
+`Pickup`. The shipping cost is **always** taken from the destination zone by the server (a pickup is free), is added to
+the order total and is not taxed; anything a client sends about the cost is ignored.
 
 Checkout reserves stock, optionally redeems a coupon, creates the order in `PaymentPending`, and enqueues
 `OrderCreated`. See the [checkout sequence](architecture/README.md#checkout-sequence). A coupon can be previewed

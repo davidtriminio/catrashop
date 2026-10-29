@@ -7,6 +7,7 @@ using CommerceHub.Modules.Orders.Application.Contracts;
 using CommerceHub.Modules.Orders.Contracts;
 using CommerceHub.Modules.Orders.Domain;
 using CommerceHub.Modules.Promotions.Contracts;
+using DeliveryMode = CommerceHub.Modules.Orders.Domain.DeliveryMode;
 using Microsoft.Extensions.Options;
 
 namespace CommerceHub.Modules.Orders.Application.Services;
@@ -23,6 +24,7 @@ public sealed class OrderCheckoutService
     private readonly ICartQuery _cart;
     private readonly IInventoryOperations _inventory;
     private readonly IPromotionApplication _promotions;
+    private readonly IShippingQuotation _shipping;
     private readonly IOrderRepository _orders;
     private readonly IIntegrationEventPublisher _events;
     private readonly IOrderUnitOfWork _unitOfWork;
@@ -33,6 +35,7 @@ public sealed class OrderCheckoutService
         ICartQuery cart,
         IInventoryOperations inventory,
         IPromotionApplication promotions,
+        IShippingQuotation shipping,
         IOrderRepository orders,
         IIntegrationEventPublisher events,
         IOrderUnitOfWork unitOfWork,
@@ -42,6 +45,7 @@ public sealed class OrderCheckoutService
         _cart = cart;
         _inventory = inventory;
         _promotions = promotions;
+        _shipping = shipping;
         _orders = orders;
         _events = events;
         _unitOfWork = unitOfWork;
@@ -79,11 +83,17 @@ public sealed class OrderCheckoutService
 
         var taxTotal = Math.Round((cart.Subtotal - discountTotal) * (_options.TaxRatePercent / 100m), 2, MidpointRounding.AwayFromZero);
 
-        var shipping = ToShippingAddress(request.ShippingAddress);
+        // Where and how the order travels, and what that costs, is decided here from the server's own zones and
+        // stores — never from anything the client sends beyond the department or store it picked.
+        var destination = await ResolveDestinationAsync(request, cart.Currency, ct);
+        if (destination.IsFailure)
+            return destination.Error;
+        var (shipping, delivery) = destination.Value;
+
         var lines = cart.Lines.Select(l => (l.ProductId, l.VariantId, l.Sku, l.ProductName, l.UnitPrice, l.Quantity));
 
         var orderResult = Order.Create(GenerateOrderNumber(now), customerId, cart.CartId, cart.Currency,
-            shipping, lines, discountTotal, taxTotal, now);
+            shipping, lines, discountTotal, taxTotal, now, delivery);
         if (orderResult.IsFailure)
             return orderResult.Error;
         var order = orderResult.Value;
@@ -119,12 +129,37 @@ public sealed class OrderCheckoutService
         return ToResponse(order);
     }
 
+    private async Task<Result<(Domain.ShippingAddress Address, OrderDelivery Delivery)>> ResolveDestinationAsync(
+        CheckoutRequest request, string currency, CancellationToken ct)
+    {
+        Enum.TryParse<DeliveryMode>(request.DeliveryMode, ignoreCase: true, out var mode);
+
+        if (mode == DeliveryMode.Pickup)
+        {
+            var store = request.PickupStoreId is { } id ? await _shipping.GetPickupStoreAsync(id, ct) : null;
+            if (store is null)
+                return OrderErrors.PickupStoreUnavailable;
+
+            // The "address" of a pickup order is the store, so the order keeps a record of where it was collected.
+            var address = new Domain.ShippingAddress(request.PickupRecipientName!.Trim(), store.Name, store.Line1, store.City,
+                store.DepartmentName, "-", "HN");
+            return (address, new OrderDelivery(DeliveryMode.Pickup, store.DepartmentCode, store.Id, store.Name, 0m));
+        }
+
+        var a = request.ShippingAddress!;
+        var quote = await _shipping.QuoteDeliveryAsync(a.DepartmentCode ?? "", ct);
+        if (quote is null)
+            return OrderErrors.DeliveryNotAvailable;
+        if (!string.Equals(quote.Currency, currency, StringComparison.OrdinalIgnoreCase))
+            return OrderErrors.ShippingCurrencyMismatch;
+
+        var delivered = new Domain.ShippingAddress(a.RecipientName.Trim(), a.Line1.Trim(), a.Line2?.Trim(), a.City.Trim(),
+            quote.DepartmentName, a.PostalCode.Trim(), "HN");
+        return (delivered, new OrderDelivery(DeliveryMode.Delivery, quote.DepartmentCode, null, null, quote.Cost));
+    }
+
     private static CheckoutResponse ToResponse(Order order) =>
         new(order.Id, order.OrderNumber, order.Status.ToString(), order.Currency, order.GrandTotal);
-
-    private static Domain.ShippingAddress ToShippingAddress(ShippingAddressRequest a) =>
-        new(a.RecipientName.Trim(), a.Line1.Trim(), a.Line2?.Trim(), a.City.Trim(), a.Region?.Trim(),
-            a.PostalCode.Trim(), a.Country.Trim().ToUpperInvariant());
 
     private static string GenerateOrderNumber(DateTimeOffset now) =>
         $"ORD-{now:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..8].ToUpperInvariant()}";

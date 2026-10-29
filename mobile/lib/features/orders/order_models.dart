@@ -146,7 +146,9 @@ class OrderDetail {
     required this.subtotal,
     required this.discountTotal,
     required this.taxTotal,
+    this.shippingTotal = 0,
     required this.grandTotal,
+    this.pickupStoreName,
     required this.recipient,
     required this.addressLines,
     required this.items,
@@ -161,7 +163,13 @@ class OrderDetail {
   final double subtotal;
   final double discountTotal;
   final double taxTotal;
+
+  /// Delivery cost charged for the destination zone (0 for pickup and for orders from before national shipping).
+  final double shippingTotal;
   final double grandTotal;
+
+  /// Set when the customer collects the order at a store instead of receiving it.
+  final String? pickupStoreName;
   final String recipient;
   final List<String> addressLines;
   final List<OrderItem> items;
@@ -183,7 +191,9 @@ class OrderDetail {
       subtotal: (j['subtotal'] as num).toDouble(),
       discountTotal: (j['discountTotal'] as num).toDouble(),
       taxTotal: (j['taxTotal'] as num).toDouble(),
+      shippingTotal: ((j['shippingTotal'] as num?) ?? 0).toDouble(),
       grandTotal: (j['grandTotal'] as num).toDouble(),
+      pickupStoreName: j['deliveryMode'] == 'Pickup' ? j['pickupStoreName'] as String? : null,
       recipient: a['recipientName'] as String,
       addressLines: [
         s('line1'),

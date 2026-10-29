@@ -26,7 +26,6 @@ namespace CommerceHub.Modules.Shipping.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("CommerceHub.Infrastructure.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -71,10 +70,70 @@ namespace CommerceHub.Modules.Shipping.Infrastructure.Persistence.Migrations
                     b.ToTable("outbox_messages", "shipping");
                 });
 
+            modelBuilder.Entity("CommerceHub.Modules.Shipping.Domain.PickupStore", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("City")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("city");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("DepartmentCode")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("department_code");
+
+                    b.Property<string>("Hours")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("hours");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Line1")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("line1");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("name");
+
+                    b.Property<string>("Phone")
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("phone");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.HasKey("Id")
+                        .HasName("pk_pickup_stores");
+
+                    b.HasIndex("IsActive")
+                        .HasDatabaseName("ix_pickup_stores_active");
+
+                    b.ToTable("pickup_stores", "shipping");
+                });
+
             modelBuilder.Entity("CommerceHub.Modules.Shipping.Domain.Shipment", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -150,7 +209,6 @@ namespace CommerceHub.Modules.Shipping.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("CommerceHub.Modules.Shipping.Domain.ShippingMethod", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -201,6 +259,69 @@ namespace CommerceHub.Modules.Shipping.Infrastructure.Persistence.Migrations
                         .HasDatabaseName("ux_shipping_methods_code");
 
                     b.ToTable("shipping_methods", "shipping");
+                });
+
+            modelBuilder.Entity("CommerceHub.Modules.Shipping.Domain.ShippingZone", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<bool>("CashOnDeliveryCovered")
+                        .HasColumnType("boolean")
+                        .HasColumnName("cash_on_delivery_covered");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)")
+                        .HasColumnName("code");
+
+                    b.Property<decimal>("Cost")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasColumnName("cost");
+
+                    b.Property<DateTimeOffset>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at_utc");
+
+                    b.Property<string>("Currency")
+                        .IsRequired()
+                        .HasMaxLength(3)
+                        .HasColumnType("character varying(3)")
+                        .HasColumnName("currency");
+
+                    b.Property<int>("EstimatedDaysMax")
+                        .HasColumnType("integer")
+                        .HasColumnName("estimated_days_max");
+
+                    b.Property<int>("EstimatedDaysMin")
+                        .HasColumnType("integer")
+                        .HasColumnName("estimated_days_min");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTimeOffset>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at_utc");
+
+                    b.HasKey("Id")
+                        .HasName("pk_shipping_zones");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ux_shipping_zones_code");
+
+                    b.ToTable("shipping_zones", "shipping");
                 });
 
             modelBuilder.Entity("CommerceHub.Modules.Shipping.Domain.Shipment", b =>
@@ -263,7 +384,6 @@ namespace CommerceHub.Modules.Shipping.Infrastructure.Persistence.Migrations
                     b.OwnsMany("CommerceHub.Modules.Shipping.Domain.ShipmentEvent", "Events", b1 =>
                         {
                             b1.Property<Guid>("Id")
-                                .ValueGeneratedOnAdd()
                                 .HasColumnType("uuid")
                                 .HasColumnName("id");
 
@@ -303,6 +423,36 @@ namespace CommerceHub.Modules.Shipping.Infrastructure.Persistence.Migrations
                         .IsRequired();
 
                     b.Navigation("Events");
+                });
+
+            modelBuilder.Entity("CommerceHub.Modules.Shipping.Domain.ShippingZone", b =>
+                {
+                    b.OwnsMany("CommerceHub.Modules.Shipping.Domain.ShippingZoneDepartment", "Departments", b1 =>
+                        {
+                            b1.Property<Guid>("ZoneId")
+                                .HasColumnType("uuid")
+                                .HasColumnName("zone_id");
+
+                            b1.Property<string>("DepartmentCode")
+                                .HasMaxLength(10)
+                                .HasColumnType("character varying(10)")
+                                .HasColumnName("department_code");
+
+                            b1.HasKey("ZoneId", "DepartmentCode")
+                                .HasName("pk_shipping_zone_departments");
+
+                            b1.HasIndex("DepartmentCode")
+                                .IsUnique()
+                                .HasDatabaseName("ux_shipping_zone_departments_department");
+
+                            b1.ToTable("shipping_zone_departments", "shipping");
+
+                            b1.WithOwner()
+                                .HasForeignKey("ZoneId")
+                                .HasConstraintName("fk_shipping_zone_departments_shipping_zones_zone_id");
+                        });
+
+                    b.Navigation("Departments");
                 });
 #pragma warning restore 612, 618
         }

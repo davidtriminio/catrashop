@@ -84,9 +84,33 @@ foreach ($p in $products) {
   $variantIds += $detail.variants[0].id
 }
 
+# --- National shipping: zones by department and pickup stores ---------------------------------------
+# Costs are example values: edit them in the admin (Shipping). The 409 for an existing zone is ignored, so this is
+# safe to re-run. Together the zones cover all 18 departments of Honduras.
+Write-Host '>> Shipping zones'
+$zones = @(
+  @{ code = 'central';   name = 'Central';           cost = 30;  min = 1; max = 2; cod = $true;  departments = @('HN-FM', 'HN-CM', 'HN-LP', 'HN-EP') },
+  @{ code = 'norte';     name = 'Norte';             cost = 100; min = 2; max = 3; cod = $true;  departments = @('HN-CR', 'HN-AT', 'HN-YO', 'HN-SB') },
+  @{ code = 'occidente'; name = 'Occidente';         cost = 130; min = 3; max = 4; cod = $false; departments = @('HN-CP', 'HN-OC', 'HN-LE', 'HN-IN') },
+  @{ code = 'sur-oriente'; name = 'Sur y oriente';   cost = 130; min = 3; max = 4; cod = $false; departments = @('HN-CH', 'HN-VA', 'HN-OL', 'HN-CL') },
+  @{ code = 'islas-mosquitia'; name = 'Islas y Mosquitia'; cost = 250; min = 5; max = 7; cod = $false; departments = @('HN-IB', 'HN-GD') }
+)
+foreach ($z in $zones) {
+  Call POST '/api/v1/shipping/admin/zones' @{
+    code = $z.code; name = $z.name; cost = $z.cost; currency = 'HNL'; estimatedDaysMin = $z.min; estimatedDaysMax = $z.max
+    cashOnDeliveryCovered = $z.cod; departmentCodes = $z.departments
+  } $admin -Soft | Out-Null
+}
+
+Write-Host '>> Pickup stores'
+if (-not (Call GET '/api/v1/shipping/pickup-stores')) {
+  Call POST '/api/v1/shipping/admin/pickup-stores' @{ name = 'Tienda Centro'; line1 = 'Blvd. Morazan, frente a Plaza Central'; city = 'Tegucigalpa'; departmentCode = 'HN-FM'; phone = '2222-0000'; hours = 'Lun-Sab 9:00-18:00' } $admin -Soft | Out-Null
+  Call POST '/api/v1/shipping/admin/pickup-stores' @{ name = 'Tienda San Pedro Sula'; line1 = 'Col. Trejo, 3 calle'; city = 'San Pedro Sula'; departmentCode = 'HN-CR'; phone = '2550-0000'; hours = 'Lun-Sab 9:00-18:00' } $admin -Soft | Out-Null
+}
+
 # --- Orders in different states ----------------------------------------------------------------
 Write-Host '>> Orders'
-$address = @{ recipientName = 'Cliente Prueba'; line1 = 'Col. Palmira, Calle 5'; city = 'Tegucigalpa'; region = 'FM'; postalCode = '11101'; country = 'HN' }
+$address = @{ recipientName = 'Cliente Prueba'; line1 = 'Col. Palmira, Calle 5'; city = 'Tegucigalpa'; postalCode = '11101'; country = 'HN'; departmentCode = 'HN-FM' }
 $orderIds = @()
 for ($i = 0; $i -lt 4; $i++) {
   Call POST '/api/v1/cart/items' @{ variantId = $variantIds[$i % $variantIds.Count]; quantity = 1 + ($i % 3) } $cust | Out-Null

@@ -13,6 +13,15 @@ public static class OrderErrors
     public static Error InvalidTransition(OrderStatus from, OrderStatus to) =>
         Error.Conflict("orders.invalid_transition", $"An order cannot move from {from} to {to}.");
 
+    public static readonly Error DeliveryNotAvailable =
+        Error.Validation("orders.delivery.not_available", "We do not deliver to that department.");
+
+    public static readonly Error PickupStoreUnavailable =
+        Error.Validation("orders.pickup.store_unavailable", "The selected pickup store is not available.");
+
+    public static readonly Error ShippingCurrencyMismatch =
+        Error.Validation("orders.delivery.currency_mismatch", "The shipping cost is not in the currency of the order.");
+
     public static readonly Error NoLines =
         Error.Validation("orders.no_lines", "An order must have at least one line.");
 }

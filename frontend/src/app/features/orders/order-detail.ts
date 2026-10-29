@@ -55,17 +55,18 @@ import { MoneyPipe } from '@ch/util/money.pipe';
             <div class="line"><span class="muted">{{ 'orderDetail.subtotal' | transloco }}</span><span>{{ o.subtotal | money: o.currency }}</span></div>
             @if (o.discountTotal > 0) { <div class="line"><span class="muted">{{ 'orderDetail.discount' | transloco }}</span><span>−{{ o.discountTotal | money: o.currency }}</span></div> }
             <div class="line"><span class="muted">{{ 'orderDetail.tax' | transloco }}</span><span>{{ o.taxTotal | money: o.currency }}</span></div>
+            <div class="line"><span class="muted">{{ 'orderDetail.shipping' | transloco }}</span><span>@if (o.shippingTotal > 0) { {{ o.shippingTotal | money: o.currency }} } @else { {{ 'checkout.free' | transloco }} }</span></div>
             <div class="line total"><span>{{ 'orderDetail.total' | transloco }}</span><strong>{{ o.grandTotal | money: o.currency }}</strong></div>
           </div>
         </div>
 
         <div class="side">
           <div class="card">
-            <h2>{{ 'orderDetail.shipTo' | transloco }}</h2>
+            <h2>{{ (o.deliveryMode === 'Pickup' ? 'orderDetail.pickupAt' : 'orderDetail.shipTo') | transloco }}</h2>
             <p class="addr">
               <strong>{{ o.shippingAddress.recipientName }}</strong><br />
               {{ o.shippingAddress.line1 }}@if (o.shippingAddress.line2) { , {{ o.shippingAddress.line2 }} }<br />
-              {{ o.shippingAddress.city }}, {{ o.shippingAddress.postalCode }}<br />
+              {{ o.shippingAddress.city }}@if (o.shippingAddress.postalCode !== '-') { , {{ o.shippingAddress.postalCode }} }<br />
               {{ o.shippingAddress.country }}
             </p>
           </div>

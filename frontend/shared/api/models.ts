@@ -89,8 +89,17 @@ export interface CouponQuote { couponCode: string; discountAmount: number; curre
 export interface ShippingAddress {
   recipientName: string; line1: string; line2: string | null; city: string;
   region: string | null; postalCode: string; country: string;
+  /** ISO 3166-2 code of the department (e.g. HN-FM); required for a delivery. */
+  departmentCode?: string | null;
 }
-export interface CheckoutRequest { shippingAddress: ShippingAddress; couponCode?: string | null; }
+export type DeliveryMode = 'Delivery' | 'Pickup';
+export interface CheckoutRequest {
+  shippingAddress: ShippingAddress | null;
+  couponCode?: string | null;
+  deliveryMode: DeliveryMode;
+  pickupStoreId?: string | null;
+  pickupRecipientName?: string | null;
+}
 export interface CheckoutResponse { orderId: string; orderNumber: string; status: string; currency: string; grandTotal: number; }
 export interface OrderSummary {
   id: string; orderNumber: string; status: string; currency: string; grandTotal: number; itemCount: number; createdAtUtc: string;
@@ -102,7 +111,8 @@ export interface OrderItem {
 export interface OrderStatusHistoryEntry { status: string; note: string | null; occurredAtUtc: string; }
 export interface OrderDetail {
   id: string; orderNumber: string; customerId: string; status: string; currency: string;
-  subtotal: number; discountTotal: number; taxTotal: number; grandTotal: number;
+  subtotal: number; discountTotal: number; taxTotal: number; shippingTotal: number; grandTotal: number;
+  deliveryMode: DeliveryMode; pickupStoreId: string | null; pickupStoreName: string | null;
   shippingAddress: ShippingAddress; items: OrderItem[]; history: OrderStatusHistoryEntry[]; createdAtUtc: string;
 }
 export interface CancelOrderRequest { reason?: string | null; }
@@ -116,6 +126,16 @@ export interface PaymentResponse {
 
 // --- Shipping -----------------------------------------------------------------------------------
 export interface ShippingMethod { id: string; code: string; name: string; cost: number; currency: string; estimatedDays: number; isActive: boolean; }
+export interface Department { code: string; name: string; }
+export interface ShippingZone {
+  id: string; code: string; name: string; cost: number; currency: string;
+  estimatedDaysMin: number; estimatedDaysMax: number; cashOnDeliveryCovered: boolean; isActive: boolean;
+  departments: Department[];
+}
+export interface PickupStore {
+  id: string; name: string; line1: string; city: string; departmentCode: string; departmentName: string;
+  phone: string | null; hours: string | null; isActive: boolean;
+}
 export interface ShipmentEvent { status: string; note: string | null; occurredAtUtc: string; }
 export interface Tracking { trackingNumber: string; carrier: string; status: string; city: string; country: string; events: ShipmentEvent[]; }
 
@@ -190,6 +210,14 @@ export interface CreateCouponRequest {
 // --- Shipping (admin) ---------------------------------------------------------------------------
 export interface CreateShippingMethodRequest { code: string; name: string; cost: number; currency: string; estimatedDays: number; }
 export interface UpdateShippingMethodRequest { name: string; cost: number; currency: string; estimatedDays: number; }
+export interface UpdateShippingZoneRequest {
+  name: string; cost: number; currency: string; estimatedDaysMin: number; estimatedDaysMax: number;
+  cashOnDeliveryCovered: boolean; departmentCodes: string[];
+}
+export interface CreateShippingZoneRequest extends UpdateShippingZoneRequest { code: string; }
+export interface SavePickupStoreRequest {
+  name: string; line1: string; city: string; departmentCode: string; phone: string | null; hours: string | null;
+}
 
 // --- Notifications (admin) ----------------------------------------------------------------------
 /** type: NotificationType enum value (serialized as a number on write). */

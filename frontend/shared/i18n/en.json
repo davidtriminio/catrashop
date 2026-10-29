@@ -160,7 +160,7 @@
       "other": "{{count}} items"
     },
     "subtotal": "Subtotal ({{items}})",
-    "taxesNote": "Taxes and any discount are calculated at checkout.",
+    "taxesNote": "Shipping, taxes and any discount are calculated at checkout.",
     "checkout": "Proceed to checkout",
     "continue": "Continue shopping"
   },
@@ -178,9 +178,6 @@
     "recipientName": "Recipient name",
     "line1": "Address line 1",
     "line2": "Address line 2 (optional)",
-    "shippingMethod": "Shipping method (estimate)",
-    "days": "{{count}}d",
-    "estimateNote": "Shown as an estimate; the order total is confirmed by the server.",
     "placeOrder": "Place order",
     "placing": "Placing order…",
     "failed": "Checkout failed.",
@@ -190,8 +187,30 @@
     "apply": "Apply",
     "couponApplied": "Coupon {{code}}: −{{amount}}",
     "couponInvalid": "Coupon is not valid.",
-    "shippingEstimate": "Shipping (est.)",
-    "taxesNote": "Taxes are calculated on the confirmed order."
+    "taxesNote": "Taxes are calculated on the confirmed order.",
+    "delivery": "Delivery",
+    "mode": {
+      "delivery": "Home delivery",
+      "pickup": "Pick up in store"
+    },
+    "department": "Department",
+    "departmentPlaceholder": "Select a department",
+    "noZones": "No delivery zones are available yet.",
+    "zoneInfo": "{{zone}} · {{cost}} · {{days}}",
+    "daysSingle": {
+      "one": "{{days}} day",
+      "other": "{{days}} days"
+    },
+    "daysRange": "{{min}}–{{max}} days",
+    "free": "Free",
+    "shipping": "Shipping",
+    "shippingPending": "Choose a department",
+    "pickupTitle": "Store pickup",
+    "pickupStore": "Store",
+    "pickupStorePlaceholder": "Select a store",
+    "pickupRecipient": "Name of who will collect it",
+    "pickupHours": "Hours: {{hours}}",
+    "pickupNote": "Picking up in store has no shipping cost."
   },
   "orders": {
     "title": "Your orders",
@@ -221,7 +240,9 @@
     "paid": "Payment received.",
     "payFailed": "Payment failed.",
     "cancelled": "Order cancelled.",
-    "cancelFailed": "Could not cancel this order."
+    "cancelFailed": "Could not cancel this order.",
+    "shipping": "Shipping",
+    "pickupAt": "Pick up at"
   },
   "tracking": {
     "title": "Track a shipment",

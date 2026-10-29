@@ -23,6 +23,10 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(o => o.Currency).HasMaxLength(3).IsRequired();
         builder.Property(o => o.DiscountTotal).HasPrecision(18, 2);
         builder.Property(o => o.TaxTotal).HasPrecision(18, 2);
+        builder.Property(o => o.ShippingTotal).HasPrecision(18, 2).HasDefaultValue(0m);
+        builder.Property(o => o.DeliveryMode).HasConversion<string>().HasMaxLength(10).HasDefaultValue(DeliveryMode.Delivery);
+        builder.Property(o => o.DepartmentCode).HasMaxLength(10);
+        builder.Property(o => o.PickupStoreName).HasMaxLength(150);
 
         // Computed — not stored.
         builder.Ignore(o => o.Subtotal);

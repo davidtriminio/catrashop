@@ -38,6 +38,26 @@ public sealed record FulfillableOrder(
     Guid OrderId, Guid CustomerId, string Status,
     string RecipientName, string Line1, string? Line2, string City, string? Region, string PostalCode, string Country);
 
+/// <summary>
+/// Public, in-process contract the Orders module calls at checkout to price a delivery or resolve a pickup store.
+/// Defined here and implemented by the Shipping module (which already depends on Orders), so Orders never has to
+/// reference Shipping. The cost always comes from the destination zone — never from the payment method or the client.
+/// </summary>
+public interface IShippingQuotation
+{
+    /// <summary>The cost and lead time of delivering to a department, or null when no active zone serves it.</summary>
+    Task<DeliveryQuote?> QuoteDeliveryAsync(string departmentCode, CancellationToken ct = default);
+
+    /// <summary>An active pickup store, or null when it does not exist or is not enabled.</summary>
+    Task<PickupStoreInfo?> GetPickupStoreAsync(Guid storeId, CancellationToken ct = default);
+}
+
+public sealed record DeliveryQuote(
+    string DepartmentCode, string DepartmentName, string ZoneCode, decimal Cost, string Currency,
+    int EstimatedDaysMin, int EstimatedDaysMax, bool CashOnDeliveryCovered);
+
+public sealed record PickupStoreInfo(Guid Id, string Name, string Line1, string City, string DepartmentCode, string DepartmentName);
+
 /// <summary>A customer-facing summary of one order (public, read-only) — e.g. for the AI assistant's status tool.</summary>
 public sealed record CustomerOrderView(string OrderNumber, string Status, decimal GrandTotal, string Currency, DateTimeOffset CreatedAtUtc);
 

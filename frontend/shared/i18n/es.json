@@ -160,7 +160,7 @@
       "other": "{{count}} artículos"
     },
     "subtotal": "Subtotal ({{items}})",
-    "taxesNote": "Los impuestos y cualquier descuento se calculan al pagar.",
+    "taxesNote": "El envío, los impuestos y cualquier descuento se calculan al pagar.",
     "checkout": "Ir a pagar",
     "continue": "Seguir comprando"
   },
@@ -178,9 +178,6 @@
     "recipientName": "Nombre del destinatario",
     "line1": "Dirección, línea 1",
     "line2": "Dirección, línea 2 (opcional)",
-    "shippingMethod": "Método de envío (estimado)",
-    "days": "{{count}} d",
-    "estimateNote": "Se muestra como estimado; el servidor confirma el total del pedido.",
     "placeOrder": "Realizar pedido",
     "placing": "Realizando pedido…",
     "failed": "No se pudo completar el pago.",
@@ -190,8 +187,30 @@
     "apply": "Aplicar",
     "couponApplied": "Cupón {{code}}: −{{amount}}",
     "couponInvalid": "El cupón no es válido.",
-    "shippingEstimate": "Envío (est.)",
-    "taxesNote": "Los impuestos se calculan sobre el pedido confirmado."
+    "taxesNote": "Los impuestos se calculan sobre el pedido confirmado.",
+    "delivery": "Entrega",
+    "mode": {
+      "delivery": "Entrega a domicilio",
+      "pickup": "Recoger en tienda"
+    },
+    "department": "Departamento",
+    "departmentPlaceholder": "Selecciona un departamento",
+    "noZones": "Aún no hay zonas de entrega disponibles.",
+    "zoneInfo": "{{zone}} · {{cost}} · {{days}}",
+    "daysSingle": {
+      "one": "{{days}} día",
+      "other": "{{days}} días"
+    },
+    "daysRange": "{{min}}–{{max}} días",
+    "free": "Gratis",
+    "shipping": "Envío",
+    "shippingPending": "Elige un departamento",
+    "pickupTitle": "Retiro en tienda",
+    "pickupStore": "Tienda",
+    "pickupStorePlaceholder": "Selecciona una tienda",
+    "pickupRecipient": "Nombre de quien recoge",
+    "pickupHours": "Horario: {{hours}}",
+    "pickupNote": "Recoger en tienda no tiene costo de envío."
   },
   "orders": {
     "title": "Tus pedidos",
@@ -221,7 +240,9 @@
     "paid": "Pago recibido.",
     "payFailed": "El pago falló.",
     "cancelled": "Pedido cancelado.",
-    "cancelFailed": "No se pudo cancelar este pedido."
+    "cancelFailed": "No se pudo cancelar este pedido.",
+    "shipping": "Envío",
+    "pickupAt": "Recoger en"
   },
   "tracking": {
     "title": "Rastrear un envío",

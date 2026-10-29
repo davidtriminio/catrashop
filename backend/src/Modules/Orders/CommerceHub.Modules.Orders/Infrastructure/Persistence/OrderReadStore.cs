@@ -43,6 +43,7 @@ public sealed class OrderReadStore : IOrderReadStore
                 Subtotal = o.Items.Sum(i => i.UnitPrice * i.Quantity),
                 o.DiscountTotal,
                 o.TaxTotal,
+                o.ShippingTotal,
                 ItemCount = o.Items.Sum(i => i.Quantity),
                 o.CreatedAtUtc
             })
@@ -50,7 +51,7 @@ public sealed class OrderReadStore : IOrderReadStore
 
         var items = rows
             .Select(o => new OrderSummaryResponse(o.Id, o.OrderNumber, o.Status.ToString(), o.Currency,
-                o.Subtotal - o.DiscountTotal + o.TaxTotal, o.ItemCount, o.CreatedAtUtc))
+                o.Subtotal - o.DiscountTotal + o.TaxTotal + o.ShippingTotal, o.ItemCount, o.CreatedAtUtc))
             .ToArray();
 
         return new PagedResult<OrderSummaryResponse>(items, request.Page, request.PageSize, total);
@@ -69,13 +70,14 @@ public sealed class OrderReadStore : IOrderReadStore
                 Subtotal = o.Items.Sum(i => i.UnitPrice * i.Quantity),
                 o.DiscountTotal,
                 o.TaxTotal,
+                o.ShippingTotal,
                 o.CreatedAtUtc
             })
             .FirstOrDefaultAsync(ct);
 
         return row is null
             ? null
-            : new CustomerOrderView(row.OrderNumber, row.Status.ToString(), row.Subtotal - row.DiscountTotal + row.TaxTotal, row.Currency, row.CreatedAtUtc);
+            : new CustomerOrderView(row.OrderNumber, row.Status.ToString(), row.Subtotal - row.DiscountTotal + row.TaxTotal + row.ShippingTotal, row.Currency, row.CreatedAtUtc);
     }
 
     public async Task<OrderDetailResponse?> GetDetailAsync(Guid orderId, Guid? customerId, CancellationToken ct = default)
@@ -91,8 +93,9 @@ public sealed class OrderReadStore : IOrderReadStore
         var a = order.ShippingAddress;
         return new OrderDetailResponse(
             order.Id, order.OrderNumber, order.CustomerId, order.Status.ToString(), order.Currency,
-            order.Subtotal, order.DiscountTotal, order.TaxTotal, order.GrandTotal,
-            new ShippingAddressRequest(a.RecipientName, a.Line1, a.Line2, a.City, a.Region, a.PostalCode, a.Country),
+            order.Subtotal, order.DiscountTotal, order.TaxTotal, order.ShippingTotal, order.GrandTotal,
+            order.DeliveryMode.ToString(), order.PickupStoreId, order.PickupStoreName,
+            new ShippingAddressRequest(a.RecipientName, a.Line1, a.Line2, a.City, a.Region, a.PostalCode, a.Country, order.DepartmentCode),
             order.Items
                 .Select(i => new OrderItemResponse(i.Id, i.ProductId, i.VariantId, i.Sku, i.ProductName, i.UnitPrice, i.Quantity, i.LineTotal))
                 .ToArray(),

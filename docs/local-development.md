@@ -33,7 +33,7 @@ Check: `Invoke-RestMethod http://localhost:5227/health/live`
 ## 3. Seed (admin user, catalog, stock, customer, 4 orders)
 With the API running, in another terminal:
 ```powershell
-./scripts/local/seed.ps1
+./scripts/local/seed.ps1                      # also creates 5 delivery zones (all 18 departments) and 2 pickup stores
 ```
 It registers the users through the API, promotes the admin with one SQL `INSERT` (no endpoint exists for that),
 creates 3 published products with stock, and places 4 orders: 2 `Paid`, 1 `Processing`, 1 `Shipped` — so every

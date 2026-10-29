@@ -22,6 +22,19 @@ public static class ShippingErrors
     public static readonly Error ShipmentAlreadyExists =
         Error.Conflict("shipping.shipment_exists", "A shipment already exists for this order.");
 
+    public static Error ZoneCodeInUse(string code) =>
+        Error.Conflict("shipping.zone.code_in_use", $"A shipping zone with code '{code}' already exists.");
+
+    public static readonly Error ZoneNotFound =
+        Error.NotFound("shipping.zone.not_found", "Shipping zone not found.");
+
+    public static Error DepartmentsInUse(IEnumerable<string> codes) =>
+        Error.Conflict("shipping.zone.department_in_use",
+            $"These departments already belong to another zone: {string.Join(", ", codes)}.");
+
+    public static readonly Error PickupStoreNotFound =
+        Error.NotFound("shipping.pickup_store.not_found", "Pickup store not found.");
+
     public static readonly Error ShipmentNotFound =
         Error.NotFound("shipping.shipment.not_found", "Shipment not found.");
 

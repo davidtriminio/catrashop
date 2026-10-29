@@ -26,7 +26,6 @@ namespace CommerceHub.Modules.Orders.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("CommerceHub.Infrastructure.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -74,7 +73,6 @@ namespace CommerceHub.Modules.Orders.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("CommerceHub.Modules.Orders.Domain.Order", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -96,6 +94,19 @@ namespace CommerceHub.Modules.Orders.Infrastructure.Persistence.Migrations
                         .HasColumnType("uuid")
                         .HasColumnName("customer_id");
 
+                    b.Property<string>("DeliveryMode")
+                        .IsRequired()
+                        .ValueGeneratedOnAdd()
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasDefaultValue("Delivery")
+                        .HasColumnName("delivery_mode");
+
+                    b.Property<string>("DepartmentCode")
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)")
+                        .HasColumnName("department_code");
+
                     b.Property<decimal>("DiscountTotal")
                         .HasPrecision(18, 2)
                         .HasColumnType("numeric(18,2)")
@@ -106,6 +117,22 @@ namespace CommerceHub.Modules.Orders.Infrastructure.Persistence.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("character varying(30)")
                         .HasColumnName("order_number");
+
+                    b.Property<Guid?>("PickupStoreId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("pickup_store_id");
+
+                    b.Property<string>("PickupStoreName")
+                        .HasMaxLength(150)
+                        .HasColumnType("character varying(150)")
+                        .HasColumnName("pickup_store_name");
+
+                    b.Property<decimal>("ShippingTotal")
+                        .ValueGeneratedOnAdd()
+                        .HasPrecision(18, 2)
+                        .HasColumnType("numeric(18,2)")
+                        .HasDefaultValue(0m)
+                        .HasColumnName("shipping_total");
 
                     b.Property<string>("Status")
                         .IsRequired()
@@ -147,7 +174,6 @@ namespace CommerceHub.Modules.Orders.Infrastructure.Persistence.Migrations
                     b.OwnsMany("CommerceHub.Modules.Orders.Domain.OrderItem", "Items", b1 =>
                         {
                             b1.Property<Guid>("Id")
-                                .ValueGeneratedOnAdd()
                                 .HasColumnType("uuid")
                                 .HasColumnName("id");
 
@@ -200,7 +226,6 @@ namespace CommerceHub.Modules.Orders.Infrastructure.Persistence.Migrations
                     b.OwnsMany("CommerceHub.Modules.Orders.Domain.OrderStatusHistory", "StatusHistory", b1 =>
                         {
                             b1.Property<Guid>("Id")
-                                .ValueGeneratedOnAdd()
                                 .HasColumnType("uuid")
                                 .HasColumnName("id");
 

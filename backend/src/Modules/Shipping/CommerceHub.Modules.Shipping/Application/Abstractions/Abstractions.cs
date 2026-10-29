@@ -22,6 +22,27 @@ public interface IShippingMethodRepository
     Task<IReadOnlyList<ShippingMethod>> ListAsync(bool activeOnly, CancellationToken ct = default);
 }
 
+public interface IShippingZoneRepository
+{
+    void Add(ShippingZone zone);
+    Task<ShippingZone?> GetByIdAsync(Guid id, CancellationToken ct = default);
+    Task<bool> CodeExistsAsync(string code, CancellationToken ct = default);
+    Task<IReadOnlyList<ShippingZone>> ListAsync(bool activeOnly, CancellationToken ct = default);
+
+    /// <summary>The active zone that serves a department, or null when none does.</summary>
+    Task<ShippingZone?> GetActiveByDepartmentAsync(string departmentCode, CancellationToken ct = default);
+
+    /// <summary>Of these department codes, the ones already assigned to a zone other than <paramref name="exceptZoneId"/>.</summary>
+    Task<IReadOnlyList<string>> DepartmentsInOtherZonesAsync(IEnumerable<string> departmentCodes, Guid? exceptZoneId, CancellationToken ct = default);
+}
+
+public interface IPickupStoreRepository
+{
+    void Add(PickupStore store);
+    Task<PickupStore?> GetByIdAsync(Guid id, CancellationToken ct = default);
+    Task<IReadOnlyList<PickupStore>> ListAsync(bool activeOnly, CancellationToken ct = default);
+}
+
 public interface IShipmentRepository
 {
     void Add(Shipment shipment);
