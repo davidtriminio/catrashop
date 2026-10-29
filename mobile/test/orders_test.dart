@@ -73,6 +73,45 @@ void main() {
       });
       expect(d.addressLines, ['Calle 1', '11101 Tegucigalpa', 'HN']);
       expect(d.items.single.quantity, 2);
+      expect(d.shippingTotal, 0, reason: 'orders from before national shipping carry no shipping field');
+      expect(d.pickupStoreName, isNull);
+    });
+
+    Map<String, dynamic> detailJson(Map<String, dynamic> extra) => {
+          'id': 'a2',
+          'orderNumber': 'CH-1002',
+          'customerId': 'c1',
+          'status': 'Paid',
+          'currency': 'HNL',
+          'subtotal': 200,
+          'discountTotal': 0,
+          'taxTotal': 30,
+          'grandTotal': 260,
+          'shippingAddress': {
+            'recipientName': 'Ana',
+            'line1': 'Tienda Centro',
+            'line2': 'Blvd. Morazán',
+            'city': 'Tegucigalpa',
+            'region': 'Francisco Morazán',
+            'postalCode': '-',
+            'country': 'HN',
+          },
+          'items': [],
+          'history': [],
+          'createdAtUtc': '2026-10-15T11:59:00+00:00',
+          ...extra,
+        };
+
+    test('OrderDetail reads the shipping cost of a delivery', () {
+      final d = OrderDetail.fromJson(detailJson({'shippingTotal': 30, 'deliveryMode': 'Delivery', 'pickupStoreName': null}));
+      expect(d.shippingTotal, 30);
+      expect(d.pickupStoreName, isNull);
+    });
+
+    test('OrderDetail knows an order collected at a store', () {
+      final d = OrderDetail.fromJson(detailJson({'shippingTotal': 0, 'deliveryMode': 'Pickup', 'pickupStoreName': 'Tienda Centro'}));
+      expect(d.pickupStoreName, 'Tienda Centro');
+      expect(d.shippingTotal, 0);
     });
   });
 

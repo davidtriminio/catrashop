@@ -151,7 +151,7 @@ class _Body extends StatelessWidget {
           ),
         ),
 
-        _section(context, 'Envío'),
+        _section(context, o.pickupStoreName != null ? 'Recoger en tienda' : 'Envío'),
         Card(
           child: Padding(
             padding: const EdgeInsets.all(Gap.s4),
@@ -160,7 +160,9 @@ class _Body extends StatelessWidget {
               const SizedBox(width: Gap.s3),
               Expanded(
                 child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                  Text(o.recipient, style: theme.textTheme.titleMedium),
+                  if (o.pickupStoreName != null) Text(o.pickupStoreName!, style: theme.textTheme.titleMedium),
+                  Text(o.pickupStoreName != null ? 'Retira: ${o.recipient}' : o.recipient,
+                      style: o.pickupStoreName != null ? theme.textTheme.bodyMedium : theme.textTheme.titleMedium),
                   const SizedBox(height: Gap.s1),
                   for (final l in o.addressLines) Text(l, style: theme.textTheme.bodyMedium?.copyWith(color: muted)),
                 ]),
@@ -193,6 +195,7 @@ class _Body extends StatelessWidget {
               _total(context, 'Subtotal', o.subtotal, o.currency),
               if (o.discountTotal > 0) _total(context, 'Descuento', -o.discountTotal, o.currency),
               _total(context, 'Impuestos', o.taxTotal, o.currency),
+              if (o.shippingTotal > 0) _total(context, 'Envío', o.shippingTotal, o.currency),
               const SizedBox(height: Gap.s1),
               _total(context, 'Total', o.grandTotal, o.currency, strong: true),
             ]),
