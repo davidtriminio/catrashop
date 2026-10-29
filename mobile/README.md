@@ -22,6 +22,13 @@ flutter test && flutter analyze
 ```
 Debug builds allow plain HTTP (for a local API); release builds are HTTPS-only.
 
+### Changing the API address without rebuilding
+**Ajustes → Servidor → Cambiar** edits the address this device talks to (an absolute `http(s)://` URL; **Probar**
+checks `/health/live`). It is saved in the Keychain/Keystore, so it survives closing the app, and **Restablecer** goes
+back to the address the app was built with (`--dart-define=API_BASE_URL`, default `https://api.davidtriminio.dev`).
+Changing it signs the admin out, because the session belongs to the previous server. The background order check uses
+the saved address too.
+
 Emulator without a screen lock? Debug builds can skip the biometric gate (compiled out of release builds):
 `flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5227 --dart-define=SKIP_BIOMETRIC=true`
 
