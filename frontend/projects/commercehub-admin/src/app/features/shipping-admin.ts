@@ -5,13 +5,17 @@ import { ShippingApi } from '@ch/api/shipping.api';
 import { ShippingAdminApi } from '@ch/api/shipping-admin.api';
 import { ShippingMethod } from '@ch/api/models';
 import { MoneyPipe } from '@ch/util/money.pipe';
+import { ShippingZones } from './shipping-zones';
 import { problemMessage } from '@ch/util/problem';
 
 @Component({
   selector: 'app-shipping-admin',
-  imports: [ReactiveFormsModule, MoneyPipe],
+  imports: [ReactiveFormsModule, MoneyPipe, ShippingZones],
   template: `
-    <h1>Shipping methods</h1>
+    <h1>Shipping</h1>
+    <app-shipping-zones />
+    <h2 class="section-title">Shipping methods</h2>
+    <p class="muted">Methods only label the shipment an operator creates for a paid order; the cost charged to the customer comes from the zone above.</p>
     @if (error()) { <div class="alert error">{{ error() }}</div> }
     @if (message()) { <div class="alert success">{{ message() }}</div> }
 

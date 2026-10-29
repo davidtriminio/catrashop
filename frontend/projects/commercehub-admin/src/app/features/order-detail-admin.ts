@@ -51,17 +51,18 @@ type Action = 'process' | 'ship' | 'deliver' | 'cancel';
             <div class="line"><span class="muted">Subtotal</span><span>{{ o.subtotal | money: o.currency }}</span></div>
             @if (o.discountTotal > 0) { <div class="line"><span class="muted">Discount</span><span>−{{ o.discountTotal | money: o.currency }}</span></div> }
             <div class="line"><span class="muted">Tax</span><span>{{ o.taxTotal | money: o.currency }}</span></div>
+            <div class="line"><span class="muted">Shipping</span><span>{{ o.shippingTotal | money: o.currency }}</span></div>
             <div class="line total"><span>Total</span><strong>{{ o.grandTotal | money: o.currency }}</strong></div>
           </div>
         </div>
 
         <div class="side">
           <div class="card">
-            <h2>Ship to</h2>
+            <h2>{{ o.deliveryMode === 'Pickup' ? 'Pickup at store' : 'Ship to' }}</h2>
             <p class="addr">
               <strong>{{ o.shippingAddress.recipientName }}</strong><br />
               {{ o.shippingAddress.line1 }}@if (o.shippingAddress.line2) { , {{ o.shippingAddress.line2 }} }<br />
-              {{ o.shippingAddress.city }}, {{ o.shippingAddress.postalCode }}<br />
+              {{ o.shippingAddress.city }}@if (o.shippingAddress.postalCode !== '-') { , {{ o.shippingAddress.postalCode }} }<br />
               {{ o.shippingAddress.country }}
             </p>
           </div>
