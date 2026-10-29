@@ -1,10 +1,12 @@
 import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { CatalogApi, ProductQuery } from '@ch/api/catalog.api';
 import { Brand, Category, Paged, PriceRange, ProductListItem } from '@ch/api/models';
+import { I18n } from '@ch/i18n/i18n';
 import { MoneyPipe } from '@ch/util/money.pipe';
-import { problemMessage } from '@ch/util/problem';
+import { PluralPipe } from '@ch/util/plural.pipe';
 import { buildPages } from '@ch/util/pagination';
 
 const PAGE_SIZE = 12;
@@ -15,50 +17,50 @@ interface ActiveFilter { key: string; label: string; params: Record<string, null
 
 @Component({
   selector: 'app-product-list',
-  imports: [RouterLink, MoneyPipe],
+  imports: [RouterLink, MoneyPipe, PluralPipe, TranslocoPipe],
   template: `
-    <nav class="crumbs" aria-label="Breadcrumb"><a routerLink="/">Home</a><span>/</span><span aria-current="page">Shop</span></nav>
+    <nav class="crumbs" [attr.aria-label]="'orderDetail.breadcrumb' | transloco"><a routerLink="/">{{ 'catalog.home' | transloco }}</a><span>/</span><span aria-current="page">{{ 'nav.shop' | transloco }}</span></nav>
 
     <div class="page-head">
       <div>
-        <h1>Shop</h1>
+        <h1>{{ 'nav.shop' | transloco }}</h1>
         <p class="muted count">
-          @if (result(); as r) { {{ r.totalCount }} {{ r.totalCount === 1 ? 'product' : 'products' }} } @else { &nbsp; }
+          @if (result(); as r) { {{ 'catalog.products' | plural: r.totalCount }} } @else { &nbsp; }
         </p>
       </div>
       <div class="toolbar">
         <button class="btn secondary sm filters-toggle" type="button" (click)="filtersOpen.set(!filtersOpen())" [attr.aria-expanded]="filtersOpen()">
-          Filters@if (activeFilters().length) { <span class="badge accent">{{ activeFilters().length }}</span> }
+          {{ 'catalog.filters' | transloco }}@if (activeFilters().length) { <span class="badge accent">{{ activeFilters().length }}</span> }
         </button>
         <label class="sort">
-          <span class="muted">Sort by</span>
-          <select [value]="sort()" (change)="update({ sort: value($event) || null })" aria-label="Sort products">
-            <option value="">Name A–Z</option>
-            <option value="name_desc">Name Z–A</option>
-            <option value="price_asc">Price: low to high</option>
-            <option value="price_desc">Price: high to low</option>
-            <option value="newest">Newest</option>
+          <span class="muted">{{ 'catalog.sortBy' | transloco }}</span>
+          <select [value]="sort()" (change)="update({ sort: value($event) || null })" [attr.aria-label]="'catalog.sortLabel' | transloco">
+            <option value="">{{ 'catalog.sort.nameAsc' | transloco }}</option>
+            <option value="name_desc">{{ 'catalog.sort.nameDesc' | transloco }}</option>
+            <option value="price_asc">{{ 'catalog.sort.priceAsc' | transloco }}</option>
+            <option value="price_desc">{{ 'catalog.sort.priceDesc' | transloco }}</option>
+            <option value="newest">{{ 'catalog.sort.newest' | transloco }}</option>
           </select>
         </label>
       </div>
     </div>
 
     <div class="layout">
-      <aside class="filters card" [class.open]="filtersOpen()" aria-label="Filters">
+      <aside class="filters card" [class.open]="filtersOpen()" [attr.aria-label]="'catalog.filters' | transloco">
         <div class="f-head">
-          <h2>Filters</h2>
-          @if (activeFilters().length) { <button class="link" type="button" (click)="clearAll()">Clear all</button> }
+          <h2>{{ 'catalog.filters' | transloco }}</h2>
+          @if (activeFilters().length) { <button class="link" type="button" (click)="clearAll()">{{ 'catalog.clearAll' | transloco }}</button> }
         </div>
 
         <section>
-          <h3>Search</h3>
-          <input class="input" type="search" placeholder="Search products…" [value]="q()" (input)="onSearch($event)" aria-label="Search products" />
+          <h3>{{ 'catalog.search' | transloco }}</h3>
+          <input class="input" type="search" [placeholder]="'catalog.searchPlaceholder' | transloco" [value]="q()" (input)="onSearch($event)" [attr.aria-label]="'catalog.searchLabel' | transloco" />
         </section>
 
         <section>
-          <h3>Category</h3>
+          <h3>{{ 'catalog.category' | transloco }}</h3>
           <div class="options">
-            <label class="opt"><input type="radio" name="category" [checked]="!category()" (change)="update({ category: null })" /> All categories</label>
+            <label class="opt"><input type="radio" name="category" [checked]="!category()" (change)="update({ category: null })" /> {{ 'catalog.allCategories' | transloco }}</label>
             @for (c of categories(); track c.id) {
               <label class="opt"><input type="radio" name="category" [checked]="category() === c.slug" (change)="update({ category: c.slug })" /> {{ c.name }}</label>
             }
@@ -67,9 +69,9 @@ interface ActiveFilter { key: string; label: string; params: Record<string, null
 
         @if (brands().length) {
           <section>
-            <h3>Brand</h3>
+            <h3>{{ 'catalog.brand' | transloco }}</h3>
             <div class="options">
-              <label class="opt"><input type="radio" name="brand" [checked]="!brand()" (change)="update({ brand: null })" /> All brands</label>
+              <label class="opt"><input type="radio" name="brand" [checked]="!brand()" (change)="update({ brand: null })" /> {{ 'catalog.allBrands' | transloco }}</label>
               @for (b of brands(); track b.id) {
                 <label class="opt"><input type="radio" name="brand" [checked]="brand() === b.slug" (change)="update({ brand: b.slug })" /> {{ b.name }}</label>
               }
@@ -78,15 +80,15 @@ interface ActiveFilter { key: string; label: string; params: Record<string, null
         }
 
         <section>
-          <h3>Price</h3>
+          <h3>{{ 'catalog.price' | transloco }}</h3>
           <div class="price">
-            <input class="input" type="number" min="0" inputmode="decimal" placeholder="Min" [value]="minPrice() ?? ''" (change)="setPrice('minPrice', $event)" aria-label="Minimum price" />
+            <input class="input" type="number" min="0" inputmode="decimal" [placeholder]="'catalog.min' | transloco" [value]="minPrice() ?? ''" (change)="setPrice('minPrice', $event)" [attr.aria-label]="'catalog.minLabel' | transloco" />
             <span class="muted">–</span>
-            <input class="input" type="number" min="0" inputmode="decimal" placeholder="Max" [value]="maxPrice() ?? ''" (change)="setPrice('maxPrice', $event)" aria-label="Maximum price" />
+            <input class="input" type="number" min="0" inputmode="decimal" [placeholder]="'catalog.max' | transloco" [value]="maxPrice() ?? ''" (change)="setPrice('maxPrice', $event)" [attr.aria-label]="'catalog.maxLabel' | transloco" />
           </div>
           @if (range(); as pr) {
             @if (pr.min !== null && pr.max !== null) {
-              <p class="muted hint">Prices range from {{ pr.min | money: pr.currency }} to {{ pr.max | money: pr.currency }}</p>
+              <p class="muted hint">{{ 'catalog.priceRange' | transloco: { min: (pr.min | money: pr.currency), max: (pr.max | money: pr.currency) } }}</p>
             }
           }
         </section>
@@ -96,9 +98,9 @@ interface ActiveFilter { key: string; label: string; params: Record<string, null
         @if (activeFilters().length) {
           <div class="chips active">
             @for (f of activeFilters(); track f.key) {
-              <button class="chip active" type="button" (click)="update(f.params)">{{ f.label }} <span aria-hidden="true">×</span><span class="sr">remove filter</span></button>
+              <button class="chip active" type="button" (click)="update(f.params)">{{ f.label }} <span aria-hidden="true">×</span><span class="sr">{{ 'catalog.removeFilter' | transloco }}</span></button>
             }
-            <button class="link" type="button" (click)="clearAll()">Clear all</button>
+            <button class="link" type="button" (click)="clearAll()">{{ 'catalog.clearAll' | transloco }}</button>
           </div>
         }
 
@@ -111,9 +113,9 @@ interface ActiveFilter { key: string; label: string; params: Record<string, null
         } @else if (result(); as r) {
           @if (r.items.length === 0) {
             <div class="empty card">
-              <h2>No products match</h2>
-              <p>Try removing a filter or searching for something else.</p>
-              @if (activeFilters().length) { <button class="btn" type="button" (click)="clearAll()">Clear all filters</button> }
+              <h2>{{ 'catalog.noMatchTitle' | transloco }}</h2>
+              <p>{{ 'catalog.noMatchText' | transloco }}</p>
+              @if (activeFilters().length) { <button class="btn" type="button" (click)="clearAll()">{{ 'catalog.clearFilters' | transloco }}</button> }
             </div>
           } @else {
             <div class="products" [class.dim]="loading()">
@@ -122,16 +124,16 @@ interface ActiveFilter { key: string; label: string; params: Record<string, null
                   <div class="thumb" [style.background]="p.primaryImageUrl ? null : tint(p.name)">
                     @if (p.primaryImageUrl) { <img [src]="p.primaryImageUrl" [alt]="p.name" loading="lazy" /> }
                     @else { <span class="mono" aria-hidden="true">{{ p.name.charAt(0) }}</span> }
-                    @if (p.variantCount > 1) { <span class="badge accent variants">{{ p.variantCount }} options</span> }
+                    @if (p.variantCount > 1) { <span class="badge accent variants">{{ 'catalog.options' | transloco: { count: p.variantCount } }}</span> }
                   </div>
                   <div class="meta">
                     <span class="eyebrow">{{ p.brandName || p.categoryName }}</span>
                     <strong class="name">{{ p.name }}</strong>
                     <span class="price-line">
                       @if (p.minPrice !== null) {
-                        @if (p.maxPrice !== null && p.maxPrice !== p.minPrice) { <span class="muted from">From</span> }
+                        @if (p.maxPrice !== null && p.maxPrice !== p.minPrice) { <span class="muted from">{{ 'catalog.from' | transloco }}</span> }
                         {{ p.minPrice | money: p.currency }}
-                      } @else { <span class="muted">Price on request</span> }
+                      } @else { <span class="muted">{{ 'catalog.priceOnRequest' | transloco }}</span> }
                     </span>
                   </div>
                 </a>
@@ -139,13 +141,13 @@ interface ActiveFilter { key: string; label: string; params: Record<string, null
             </div>
 
             @if (r.totalPages > 1) {
-              <nav class="pager" aria-label="Pagination">
-                <button class="btn secondary sm" type="button" [disabled]="!r.hasPrevious" (click)="goTo(r.page - 1)">Previous</button>
+              <nav class="pager" [attr.aria-label]="'pagination.label' | transloco">
+                <button class="btn secondary sm" type="button" [disabled]="!r.hasPrevious" (click)="goTo(r.page - 1)">{{ 'pagination.previous' | transloco }}</button>
                 @for (item of pages(); track $index) {
                   @if (item === '…') { <span class="gap muted">…</span> }
                   @else { <button class="page" type="button" [class.current]="item === r.page" [attr.aria-current]="item === r.page ? 'page' : null" (click)="goTo(item)">{{ item }}</button> }
                 }
-                <button class="btn secondary sm" type="button" [disabled]="!r.hasNext" (click)="goTo(r.page + 1)">Next</button>
+                <button class="btn secondary sm" type="button" [disabled]="!r.hasNext" (click)="goTo(r.page + 1)">{{ 'pagination.next' | transloco }}</button>
               </nav>
             }
           }
@@ -222,6 +224,7 @@ interface ActiveFilter { key: string; label: string; params: Record<string, null
 })
 export class ProductList implements OnInit {
   private readonly api = inject(CatalogApi);
+  private readonly i18n = inject(I18n);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -248,6 +251,7 @@ export class ProductList implements OnInit {
   readonly pages = computed(() => buildPages(this.result()?.page ?? 1, this.result()?.totalPages ?? 0));
 
   readonly activeFilters = computed<ActiveFilter[]>(() => {
+    this.i18n.lang(); // labels are translated: recompute when the language changes
     const filters: ActiveFilter[] = [];
     if (this.q()) filters.push({ key: 'q', label: `“${this.q()}”`, params: { q: null } });
     const category = this.categories().find((c) => c.slug === this.category());
@@ -257,7 +261,7 @@ export class ProductList implements OnInit {
     if (this.minPrice() !== null || this.maxPrice() !== null) {
       const lo = this.minPrice() ?? 0;
       const hi = this.maxPrice();
-      filters.push({ key: 'price', label: hi === null ? `From ${lo}` : `${lo} – ${hi}`, params: { minPrice: null, maxPrice: null } });
+      filters.push({ key: 'price', label: hi === null ? this.i18n.t('catalog.priceFrom', { min: lo }) : `${lo} – ${hi}`, params: { minPrice: null, maxPrice: null } });
     }
     return filters;
   });
@@ -327,7 +331,7 @@ export class ProductList implements OnInit {
     };
     this.api.searchProducts(query).subscribe({
       next: (r) => { this.result.set(r); this.loading.set(false); },
-      error: (err) => { this.error.set(problemMessage(err)); this.loading.set(false); },
+      error: (err) => { this.error.set(this.i18n.problem(err)); this.loading.set(false); },
     });
   }
 }

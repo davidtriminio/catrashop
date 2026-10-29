@@ -1,29 +1,31 @@
 import { MAX_LINE_QUANTITY } from '@ch/util/quantity';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthStore } from '@ch/auth/auth.store';
 import { CartStore } from '../../core/cart/cart.store';
+import { I18n } from '@ch/i18n/i18n';
 import { MoneyPipe } from '@ch/util/money.pipe';
-import { problemMessage } from '@ch/util/problem';
+import { PluralPipe } from '@ch/util/plural.pipe';
 
 @Component({
   selector: 'app-cart-page',
-  imports: [RouterLink, MoneyPipe],
+  imports: [RouterLink, MoneyPipe, PluralPipe, TranslocoPipe],
   template: `
-    <div class="page-head"><h1>Your cart</h1></div>
+    <div class="page-head"><h1>{{ 'cart.title' | transloco }}</h1></div>
 
     @if (!auth.isAuthenticated()) {
       <div class="card empty">
-        <h2>Sign in to see your cart</h2>
-        <p>Your cart is saved to your account.</p>
-        <a routerLink="/login" class="btn">Sign in</a>
+        <h2>{{ 'cart.signInTitle' | transloco }}</h2>
+        <p>{{ 'cart.signInText' | transloco }}</p>
+        <a routerLink="/login" class="btn">{{ 'nav.signIn' | transloco }}</a>
       </div>
     } @else if (cart.cart(); as c) {
       @if (c.items.length === 0) {
         <div class="card empty">
-          <h2>Your cart is empty</h2>
-          <p>Browse the shop and add something you like.</p>
-          <a routerLink="/products" class="btn">Browse products</a>
+          <h2>{{ 'cart.emptyTitle' | transloco }}</h2>
+          <p>{{ 'cart.emptyText' | transloco }}</p>
+          <a routerLink="/products" class="btn">{{ 'cart.browse' | transloco }}</a>
         </div>
       } @else {
         @if (error()) { <div class="alert error">{{ error() }}</div> }
@@ -34,13 +36,13 @@ import { problemMessage } from '@ch/util/problem';
                 <div class="thumb" aria-hidden="true">{{ item.productName.charAt(0) }}</div>
                 <div class="what">
                   <strong>{{ item.productName }}</strong>
-                  <span class="muted">{{ item.sku }} · {{ item.unitPrice | money: c.currency }} each</span>
-                  <button class="remove" type="button" (click)="remove(item.id)">Remove</button>
+                  <span class="muted">{{ item.sku }} · {{ 'cart.each' | transloco: { price: (item.unitPrice | money: c.currency) } }}</span>
+                  <button class="remove" type="button" (click)="remove(item.id)">{{ 'cart.remove' | transloco }}</button>
                 </div>
                 <div class="stepper">
-                  <button type="button" [attr.aria-label]="'Decrease ' + item.productName" (click)="setQty(item.id, item.quantity - 1)">−</button>
+                  <button type="button" [attr.aria-label]="'cart.decrease' | transloco: { name: item.productName }" (click)="setQty(item.id, item.quantity - 1)">−</button>
                   <span>{{ item.quantity }}</span>
-                  <button type="button" [attr.aria-label]="'Increase ' + item.productName" (click)="setQty(item.id, item.quantity + 1)" [disabled]="item.quantity >= maxQuantity">+</button>
+                  <button type="button" [attr.aria-label]="'cart.increase' | transloco: { name: item.productName }" (click)="setQty(item.id, item.quantity + 1)" [disabled]="item.quantity >= maxQuantity">+</button>
                 </div>
                 <strong class="total">{{ item.lineTotal | money: c.currency }}</strong>
               </div>
@@ -48,11 +50,11 @@ import { problemMessage } from '@ch/util/problem';
           </div>
 
           <aside class="summary card">
-            <h2>Order summary</h2>
-            <div class="row sum"><span class="spacer muted">Subtotal ({{ c.itemCount }} {{ c.itemCount === 1 ? 'item' : 'items' }})</span><strong>{{ c.subtotal | money: c.currency }}</strong></div>
-            <p class="muted small">Taxes and any discount are calculated at checkout.</p>
-            <a routerLink="/checkout" class="btn block">Proceed to checkout</a>
-            <a routerLink="/products" class="continue">Continue shopping</a>
+            <h2>{{ 'cart.summary' | transloco }}</h2>
+            <div class="row sum"><span class="spacer muted">{{ 'cart.subtotal' | transloco: { items: ('cart.items' | plural: c.itemCount) } }}</span><strong>{{ c.subtotal | money: c.currency }}</strong></div>
+            <p class="muted small">{{ 'cart.taxesNote' | transloco }}</p>
+            <a routerLink="/checkout" class="btn block">{{ 'cart.checkout' | transloco }}</a>
+            <a routerLink="/products" class="continue">{{ 'cart.continue' | transloco }}</a>
           </aside>
         </div>
       }
@@ -94,6 +96,7 @@ import { problemMessage } from '@ch/util/problem';
   `],
 })
 export class CartPage implements OnInit {
+  private readonly i18n = inject(I18n);
   readonly auth = inject(AuthStore);
   readonly cart = inject(CartStore);
   readonly maxQuantity = MAX_LINE_QUANTITY;
@@ -105,12 +108,12 @@ export class CartPage implements OnInit {
     if (quantity < 0 || quantity > this.maxQuantity) return;
     this.error.set(null);
     this.cart.updateQuantity(itemId, quantity).subscribe({
-      error: (err) => { this.error.set(problemMessage(err)); this.cart.refresh(); },
+      error: (err) => { this.error.set(this.i18n.problem(err)); this.cart.refresh(); },
     });
   }
 
   remove(itemId: string): void {
     this.error.set(null);
-    this.cart.remove(itemId).subscribe({ error: (err) => this.error.set(problemMessage(err)) });
+    this.cart.remove(itemId).subscribe({ error: (err) => this.error.set(this.i18n.problem(err)) });
   }
 }

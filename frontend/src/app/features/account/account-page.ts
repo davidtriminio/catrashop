@@ -1,82 +1,83 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { CustomersApi } from '@ch/api/customers.api';
 import { Address, CustomerProfile, WishlistItem } from '@ch/api/models';
-import { problemMessage } from '@ch/util/problem';
+import { I18n } from '@ch/i18n/i18n';
+import { LocalDatePipe } from '@ch/util/local-date.pipe';
 
 @Component({
   selector: 'app-account-page',
-  imports: [ReactiveFormsModule, DatePipe],
+  imports: [ReactiveFormsModule, LocalDatePipe, TranslocoPipe],
   template: `
-    <h1>My account</h1>
+    <h1>{{ 'account.title' | transloco }}</h1>
     @if (error()) { <div class="alert error">{{ error() }}</div> }
     @if (message()) { <div class="alert success">{{ message() }}</div> }
 
     <section class="card">
-      <h2>Profile</h2>
+      <h2>{{ 'account.profile' | transloco }}</h2>
       @if (profile()) {
         <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
           <p class="muted">{{ profile()?.email }}</p>
           <div class="row">
-            <div class="field" style="flex:1"><label>First name</label><input class="input" formControlName="firstName" /></div>
-            <div class="field" style="flex:1"><label>Last name</label><input class="input" formControlName="lastName" /></div>
+            <div class="field" style="flex:1"><label>{{ 'auth.firstName' | transloco }}</label><input class="input" formControlName="firstName" /></div>
+            <div class="field" style="flex:1"><label>{{ 'auth.lastName' | transloco }}</label><input class="input" formControlName="lastName" /></div>
           </div>
-          <div class="field" style="max-width:260px"><label>Phone</label><input class="input" formControlName="phone" /></div>
-          <button class="btn" type="submit" [disabled]="profileForm.invalid || busy()">Save profile</button>
+          <div class="field" style="max-width:260px"><label>{{ 'account.phone' | transloco }}</label><input class="input" formControlName="phone" /></div>
+          <button class="btn" type="submit" [disabled]="profileForm.invalid || busy()">{{ 'account.saveProfile' | transloco }}</button>
         </form>
       }
     </section>
 
     <section class="card">
-      <h2>Addresses</h2>
+      <h2>{{ 'account.addresses' | transloco }}</h2>
       @for (a of addresses(); track a.id) {
         <div class="addr">
           <div>
             <strong>{{ a.label }}</strong>
-            @if (a.isDefaultShipping) { <span class="badge ok">Default shipping</span> }
-            @if (a.isDefaultBilling) { <span class="badge">Default billing</span> }
+            @if (a.isDefaultShipping) { <span class="badge ok">{{ 'account.defaultShipping' | transloco }}</span> }
+            @if (a.isDefaultBilling) { <span class="badge">{{ 'account.defaultBilling' | transloco }}</span> }
             <div class="muted">{{ a.recipientName }} — {{ a.line1 }}, {{ a.city }} {{ a.postalCode }}, {{ a.country }}</div>
           </div>
           <div class="row">
-            @if (!a.isDefaultShipping) { <button class="btn secondary sm" (click)="defaultShipping(a)">Set shipping</button> }
-            @if (!a.isDefaultBilling) { <button class="btn secondary sm" (click)="defaultBilling(a)">Set billing</button> }
-            <button class="btn danger sm" (click)="removeAddress(a)">Delete</button>
+            @if (!a.isDefaultShipping) { <button class="btn secondary sm" (click)="defaultShipping(a)">{{ 'account.setShipping' | transloco }}</button> }
+            @if (!a.isDefaultBilling) { <button class="btn secondary sm" (click)="defaultBilling(a)">{{ 'account.setBilling' | transloco }}</button> }
+            <button class="btn danger sm" (click)="removeAddress(a)">{{ 'account.delete' | transloco }}</button>
           </div>
         </div>
-      } @empty { <p class="muted">No saved addresses.</p> }
+      } @empty { <p class="muted">{{ 'account.noAddresses' | transloco }}</p> }
 
       <details class="new">
-        <summary>Add an address</summary>
+        <summary>{{ 'account.addAddress' | transloco }}</summary>
         <form [formGroup]="addressForm" (ngSubmit)="addAddress()">
           <div class="row">
-            <div class="field" style="flex:1"><label>Label</label><input class="input" formControlName="label" placeholder="Home" /></div>
-            <div class="field" style="flex:2"><label>Recipient</label><input class="input" formControlName="recipientName" /></div>
+            <div class="field" style="flex:1"><label>{{ 'account.label' | transloco }}</label><input class="input" formControlName="label" [placeholder]="'account.labelPlaceholder' | transloco" /></div>
+            <div class="field" style="flex:2"><label>{{ 'account.recipient' | transloco }}</label><input class="input" formControlName="recipientName" /></div>
           </div>
-          <div class="field"><label>Line 1</label><input class="input" formControlName="line1" /></div>
-          <div class="field"><label>Line 2</label><input class="input" formControlName="line2" /></div>
+          <div class="field"><label>{{ 'account.line1' | transloco }}</label><input class="input" formControlName="line1" /></div>
+          <div class="field"><label>{{ 'account.line2' | transloco }}</label><input class="input" formControlName="line2" /></div>
           <div class="row">
-            <div class="field" style="flex:2"><label>City</label><input class="input" formControlName="city" /></div>
-            <div class="field" style="flex:1"><label>Region</label><input class="input" formControlName="region" /></div>
+            <div class="field" style="flex:2"><label>{{ 'account.city' | transloco }}</label><input class="input" formControlName="city" /></div>
+            <div class="field" style="flex:1"><label>{{ 'account.region' | transloco }}</label><input class="input" formControlName="region" /></div>
           </div>
           <div class="row">
-            <div class="field" style="flex:1"><label>Postal code</label><input class="input" formControlName="postalCode" /></div>
-            <div class="field" style="flex:1"><label>Country (ISO-2)</label><input class="input" maxlength="2" formControlName="country" /></div>
-            <div class="field" style="flex:1"><label>Phone</label><input class="input" formControlName="phone" /></div>
+            <div class="field" style="flex:1"><label>{{ 'account.postalCode' | transloco }}</label><input class="input" formControlName="postalCode" /></div>
+            <div class="field" style="flex:1"><label>{{ 'account.country' | transloco }}</label><input class="input" maxlength="2" formControlName="country" /></div>
+            <div class="field" style="flex:1"><label>{{ 'account.phone' | transloco }}</label><input class="input" formControlName="phone" /></div>
           </div>
-          <button class="btn" type="submit" [disabled]="addressForm.invalid || busy()">Add address</button>
+          <button class="btn" type="submit" [disabled]="addressForm.invalid || busy()">{{ 'account.addAddressSubmit' | transloco }}</button>
         </form>
       </details>
     </section>
 
     <section class="card">
-      <h2>Wishlist</h2>
+      <h2>{{ 'account.wishlist' | transloco }}</h2>
       @for (w of wishlist(); track w.productId) {
         <div class="addr">
-          <div><span class="muted">Product</span> {{ w.productId }}<div class="muted">Added {{ w.addedAtUtc | date: 'mediumDate' }}</div></div>
-          <button class="btn secondary sm" (click)="removeWishlist(w)">Remove</button>
+          <div><span class="muted">{{ 'account.product' | transloco }}</span> {{ w.productId }}<div class="muted">{{ 'account.added' | transloco: { date: (w.addedAtUtc | localDate: 'date') } }}</div></div>
+          <button class="btn secondary sm" (click)="removeWishlist(w)">{{ 'cart.remove' | transloco }}</button>
         </div>
-      } @empty { <p class="muted">Your wishlist is empty.</p> }
+      } @empty { <p class="muted">{{ 'account.wishlistEmpty' | transloco }}</p> }
     </section>
   `,
   styles: [`
@@ -89,6 +90,7 @@ import { problemMessage } from '@ch/util/problem';
 export class AccountPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly api = inject(CustomersApi);
+  private readonly i18n = inject(I18n);
 
   readonly profile = signal<CustomerProfile | null>(null);
   readonly addresses = signal<Address[]>([]);
@@ -118,7 +120,7 @@ export class AccountPage implements OnInit {
   ngOnInit(): void {
     this.api.profile().subscribe({
       next: (p) => { this.profile.set(p); this.profileForm.patchValue({ firstName: p.firstName, lastName: p.lastName, phone: p.phone ?? '' }); },
-      error: (err) => this.error.set(problemMessage(err)),
+      error: (err) => this.error.set(this.i18n.problem(err)),
     });
     this.loadAddresses();
     this.api.wishlist().subscribe({ next: (w) => this.wishlist.set(w), error: () => {} });
@@ -129,13 +131,13 @@ export class AccountPage implements OnInit {
   }
 
   private ok(msg: string): void { this.message.set(msg); this.error.set(null); this.busy.set(false); }
-  private fail(err: unknown): void { this.error.set(problemMessage(err)); this.busy.set(false); }
+  private fail(err: unknown): void { this.error.set(this.i18n.problem(err)); this.busy.set(false); }
 
   saveProfile(): void {
     if (this.profileForm.invalid) return;
     this.busy.set(true);
     this.api.updateProfile(this.profileForm.getRawValue()).subscribe({
-      next: (p) => { this.profile.set(p); this.ok('Profile updated.'); },
+      next: (p) => { this.profile.set(p); this.ok(this.i18n.t('account.messages.profileUpdated')); },
       error: (err) => this.fail(err),
     });
   }
@@ -145,28 +147,28 @@ export class AccountPage implements OnInit {
     this.busy.set(true);
     const v = this.addressForm.getRawValue();
     this.api.addAddress({ ...v, country: v.country.toUpperCase() }).subscribe({
-      next: () => { this.ok('Address added.'); this.addressForm.reset(); this.loadAddresses(); },
+      next: () => { this.ok(this.i18n.t('account.messages.addressAdded')); this.addressForm.reset(); this.loadAddresses(); },
       error: (err) => this.fail(err),
     });
   }
 
   removeAddress(a: Address): void {
     this.busy.set(true);
-    this.api.removeAddress(a.id).subscribe({ next: () => { this.ok('Address removed.'); this.loadAddresses(); }, error: (err) => this.fail(err) });
+    this.api.removeAddress(a.id).subscribe({ next: () => { this.ok(this.i18n.t('account.messages.addressRemoved')); this.loadAddresses(); }, error: (err) => this.fail(err) });
   }
   defaultShipping(a: Address): void {
     this.busy.set(true);
-    this.api.setDefaultShipping(a.id).subscribe({ next: () => { this.ok('Default shipping updated.'); this.loadAddresses(); }, error: (err) => this.fail(err) });
+    this.api.setDefaultShipping(a.id).subscribe({ next: () => { this.ok(this.i18n.t('account.messages.shippingUpdated')); this.loadAddresses(); }, error: (err) => this.fail(err) });
   }
   defaultBilling(a: Address): void {
     this.busy.set(true);
-    this.api.setDefaultBilling(a.id).subscribe({ next: () => { this.ok('Default billing updated.'); this.loadAddresses(); }, error: (err) => this.fail(err) });
+    this.api.setDefaultBilling(a.id).subscribe({ next: () => { this.ok(this.i18n.t('account.messages.billingUpdated')); this.loadAddresses(); }, error: (err) => this.fail(err) });
   }
 
   removeWishlist(w: WishlistItem): void {
     this.busy.set(true);
     this.api.removeWishlist(w.productId).subscribe({
-      next: () => { this.ok('Removed from wishlist.'); this.wishlist.update((items) => items.filter((i) => i.productId !== w.productId)); },
+      next: () => { this.ok(this.i18n.t('account.messages.wishlistRemoved')); this.wishlist.update((items) => items.filter((i) => i.productId !== w.productId)); },
       error: (err) => this.fail(err),
     });
   }

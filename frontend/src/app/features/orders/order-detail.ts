@@ -1,25 +1,26 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { OrderDetail, Tracking } from '@ch/api/models';
 import { OrdersApi } from '@ch/api/orders.api';
 import { PaymentsApi } from '@ch/api/payments.api';
 import { ShippingApi } from '@ch/api/shipping.api';
 import { StatusBadge } from '@ch/ui/status-badge';
 import { Timeline } from '@ch/ui/timeline';
+import { I18n } from '@ch/i18n/i18n';
+import { LocalDatePipe } from '@ch/util/local-date.pipe';
 import { MoneyPipe } from '@ch/util/money.pipe';
-import { problemMessage } from '@ch/util/problem';
 
 @Component({
   selector: 'app-order-detail',
-  imports: [DatePipe, RouterLink, MoneyPipe, StatusBadge, Timeline],
+  imports: [LocalDatePipe, RouterLink, MoneyPipe, StatusBadge, Timeline, TranslocoPipe],
   template: `
     @if (loading()) { <div class="card"><div class="skeleton" style="height:1.4rem;width:40%"></div></div> }
     @if (error()) { <div class="alert error">{{ error() }}</div> }
 
     @if (order(); as o) {
-      <nav class="crumbs" aria-label="Breadcrumb">
-        <a routerLink="/orders">Orders</a><span>/</span><span aria-current="page">{{ o.orderNumber }}</span>
+      <nav class="crumbs" [attr.aria-label]="'orderDetail.breadcrumb' | transloco">
+        <a routerLink="/orders">{{ 'nav.orders' | transloco }}</a><span>/</span><span aria-current="page">{{ o.orderNumber }}</span>
       </nav>
 
       <div class="page-head">
@@ -28,18 +29,18 @@ import { problemMessage } from '@ch/util/problem';
           <ch-status-badge [status]="o.status" />
         </div>
         <div class="actions">
-          @if (canPay()) { <button class="btn" [disabled]="busy()" (click)="pay(o)">Pay now</button> }
-          @if (canCancel()) { <button class="btn secondary danger-text" [disabled]="busy()" (click)="cancel(o)">Cancel order</button> }
+          @if (canPay()) { <button class="btn" [disabled]="busy()" (click)="pay(o)">{{ 'orderDetail.payNow' | transloco }}</button> }
+          @if (canCancel()) { <button class="btn secondary danger-text" [disabled]="busy()" (click)="cancel(o)">{{ 'orderDetail.cancel' | transloco }}</button> }
         </div>
       </div>
-      <p class="muted placed">Placed {{ o.createdAtUtc | date: 'MMMM d, y, h:mm a' }}</p>
+      <p class="muted placed">{{ 'orderDetail.placed' | transloco: { date: (o.createdAtUtc | localDate: 'long') } }}</p>
 
       @if (actionError()) { <div class="alert error">{{ actionError() }}</div> }
       @if (actionMessage()) { <div class="alert success">{{ actionMessage() }}</div> }
 
       <div class="cols grids">
         <div class="card">
-          <h2>Items</h2>
+          <h2>{{ 'orderDetail.items' | transloco }}</h2>
           @for (item of o.items; track item.id) {
             <div class="item">
               <div class="thumb" aria-hidden="true">{{ item.productName.charAt(0) }}</div>
@@ -51,16 +52,16 @@ import { problemMessage } from '@ch/util/problem';
             </div>
           }
           <div class="totals">
-            <div class="line"><span class="muted">Subtotal</span><span>{{ o.subtotal | money: o.currency }}</span></div>
-            @if (o.discountTotal > 0) { <div class="line"><span class="muted">Discount</span><span>−{{ o.discountTotal | money: o.currency }}</span></div> }
-            <div class="line"><span class="muted">Tax</span><span>{{ o.taxTotal | money: o.currency }}</span></div>
-            <div class="line total"><span>Total</span><strong>{{ o.grandTotal | money: o.currency }}</strong></div>
+            <div class="line"><span class="muted">{{ 'orderDetail.subtotal' | transloco }}</span><span>{{ o.subtotal | money: o.currency }}</span></div>
+            @if (o.discountTotal > 0) { <div class="line"><span class="muted">{{ 'orderDetail.discount' | transloco }}</span><span>−{{ o.discountTotal | money: o.currency }}</span></div> }
+            <div class="line"><span class="muted">{{ 'orderDetail.tax' | transloco }}</span><span>{{ o.taxTotal | money: o.currency }}</span></div>
+            <div class="line total"><span>{{ 'orderDetail.total' | transloco }}</span><strong>{{ o.grandTotal | money: o.currency }}</strong></div>
           </div>
         </div>
 
         <div class="side">
           <div class="card">
-            <h2>Ship to</h2>
+            <h2>{{ 'orderDetail.shipTo' | transloco }}</h2>
             <p class="addr">
               <strong>{{ o.shippingAddress.recipientName }}</strong><br />
               {{ o.shippingAddress.line1 }}@if (o.shippingAddress.line2) { , {{ o.shippingAddress.line2 }} }<br />
@@ -71,14 +72,14 @@ import { problemMessage } from '@ch/util/problem';
 
           @if (tracking(); as t) {
             <div class="card">
-              <h2>Shipment</h2>
-              <p class="track"><span class="muted">Tracking</span> <strong>{{ t.trackingNumber }}</strong> <ch-status-badge [status]="t.status" /></p>
+              <h2>{{ 'orderDetail.shipment' | transloco }}</h2>
+              <p class="track"><span class="muted">{{ 'orderDetail.tracking' | transloco }}</span> <strong>{{ t.trackingNumber }}</strong> <ch-status-badge [status]="t.status" /></p>
               <ch-timeline [items]="t.events" />
             </div>
           }
 
           <div class="card">
-            <h2>History</h2>
+            <h2>{{ 'orderDetail.history' | transloco }}</h2>
             <ch-timeline [items]="o.history" />
           </div>
         </div>
@@ -109,6 +110,7 @@ import { problemMessage } from '@ch/util/problem';
 })
 export class OrderDetailPage implements OnInit {
   private readonly api = inject(OrdersApi);
+  private readonly i18n = inject(I18n);
   private readonly payments = inject(PaymentsApi);
   private readonly shipping = inject(ShippingApi);
   private readonly route = inject(ActivatedRoute);
@@ -141,23 +143,23 @@ export class OrderDetailPage implements OnInit {
         this.loading.set(false);
         this.shipping.shipmentForOrder(o.id).subscribe({ next: (t) => this.tracking.set(t), error: () => this.tracking.set(null) });
       },
-      error: (err) => { this.error.set(problemMessage(err, 'Order not found.')); this.loading.set(false); },
+      error: (err) => { this.error.set(this.i18n.problem(err, 'orderDetail.notFound')); this.loading.set(false); },
     });
   }
 
   pay(o: OrderDetail): void {
     this.busy.set(true); this.actionError.set(null); this.actionMessage.set(null);
     this.payments.pay({ orderId: o.id }).subscribe({
-      next: () => { this.actionMessage.set('Payment received.'); this.busy.set(false); this.reload(); },
-      error: (err) => { this.actionError.set(problemMessage(err, 'Payment failed.')); this.busy.set(false); },
+      next: () => { this.actionMessage.set(this.i18n.t('orderDetail.paid')); this.busy.set(false); this.reload(); },
+      error: (err) => { this.actionError.set(this.i18n.problem(err, 'orderDetail.payFailed')); this.busy.set(false); },
     });
   }
 
   cancel(o: OrderDetail): void {
     this.busy.set(true); this.actionError.set(null); this.actionMessage.set(null);
     this.api.cancel(o.id, { reason: 'Cancelled by customer' }).subscribe({
-      next: () => { this.actionMessage.set('Order cancelled.'); this.busy.set(false); this.reload(); },
-      error: (err) => { this.actionError.set(problemMessage(err, 'Could not cancel this order.')); this.busy.set(false); },
+      next: () => { this.actionMessage.set(this.i18n.t('orderDetail.cancelled')); this.busy.set(false); this.reload(); },
+      error: (err) => { this.actionError.set(this.i18n.problem(err, 'orderDetail.cancelFailed')); this.busy.set(false); },
     });
   }
 }

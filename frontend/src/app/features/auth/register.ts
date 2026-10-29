@@ -1,43 +1,44 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthStore } from '@ch/auth/auth.store';
 import { CartStore } from '../../core/cart/cart.store';
-import { problemMessage } from '@ch/util/problem';
+import { I18n } from '@ch/i18n/i18n';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink],
+  imports: [ReactiveFormsModule, RouterLink, TranslocoPipe],
   template: `
     <div class="auth-wrap">
       <div class="card">
-        <h1>Create your account</h1>
+        <h1>{{ 'auth.register.title' | transloco }}</h1>
         @if (error()) { <div class="alert error">{{ error() }}</div> }
         <form [formGroup]="form" (ngSubmit)="submit()">
           <div class="row">
             <div class="field" style="flex:1">
-              <label for="firstName">First name</label>
+              <label for="firstName">{{ 'auth.firstName' | transloco }}</label>
               <input id="firstName" class="input" formControlName="firstName" autocomplete="given-name" />
             </div>
             <div class="field" style="flex:1">
-              <label for="lastName">Last name</label>
+              <label for="lastName">{{ 'auth.lastName' | transloco }}</label>
               <input id="lastName" class="input" formControlName="lastName" autocomplete="family-name" />
             </div>
           </div>
           <div class="field">
-            <label for="email">Email</label>
+            <label for="email">{{ 'auth.email' | transloco }}</label>
             <input id="email" class="input" type="email" formControlName="email" autocomplete="email" />
           </div>
           <div class="field">
-            <label for="password">Password</label>
+            <label for="password">{{ 'auth.password' | transloco }}</label>
             <input id="password" class="input" type="password" formControlName="password" autocomplete="new-password" />
-            <small class="muted">At least 8 characters.</small>
+            <small class="muted">{{ 'auth.register.passwordHint' | transloco }}</small>
           </div>
           <button class="btn block" type="submit" [disabled]="form.invalid || busy()">
-            {{ busy() ? 'Creating…' : 'Create account' }}
+            {{ (busy() ? 'auth.register.busy' : 'auth.register.submit') | transloco }}
           </button>
         </form>
-        <p class="muted switch">Already have an account? <a routerLink="/login">Sign in</a></p>
+        <p class="muted switch">{{ 'auth.register.haveAccount' | transloco }} <a routerLink="/login">{{ 'auth.login.title' | transloco }}</a></p>
       </div>
     </div>
   `,
@@ -48,6 +49,7 @@ import { problemMessage } from '@ch/util/problem';
 })
 export class Register {
   private readonly fb = inject(FormBuilder);
+  private readonly i18n = inject(I18n);
   private readonly auth = inject(AuthStore);
   private readonly cart = inject(CartStore);
   private readonly router = inject(Router);
@@ -68,7 +70,7 @@ export class Register {
     this.error.set(null);
     this.auth.register(this.form.getRawValue()).subscribe({
       next: () => { this.cart.refresh(); this.router.navigateByUrl('/products'); },
-      error: (err) => { this.error.set(problemMessage(err, 'Could not create the account.')); this.busy.set(false); },
+      error: (err) => { this.error.set(this.i18n.problem(err, 'auth.register.error')); this.busy.set(false); },
     });
   }
 }
