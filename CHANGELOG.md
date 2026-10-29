@@ -29,6 +29,8 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
 - **Shipping:** national delivery by zone (the 18 departments of Honduras grouped into zones with a cost, lead time and
   cash-on-delivery coverage) and pickup stores; the shipping cost is charged on the order, validated on the server and
   not taxed → [PR-043](docs/git/prs/PR-043-national-shipping.md)
+- **Mobile:** the API address can be changed from Settings and is remembered on the device (Restablecer returns to the
+  built-in one) → [PR-044](docs/git/prs/PR-044-mobile-api-url.md)
 
 ## v1.2.0 — Reliability fixes and the redesign
 - **Fix:** the account page no longer fails when the customer profile is created by concurrent requests
