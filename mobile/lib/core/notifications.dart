@@ -4,6 +4,7 @@ import 'package:workmanager/workmanager.dart';
 import '../features/orders/order_models.dart';
 import '../features/orders/orders_repository.dart';
 import 'api_client.dart';
+import 'api_url.dart';
 import 'config.dart';
 import 'format.dart';
 import 'token_store.dart';
@@ -73,7 +74,7 @@ void backgroundDispatcher() {
     try {
       final store = TokenStore();
       if (await store.read() == null) return true; // signed out
-      final watcher = NewOrderWatcher(OrdersRepository(ApiClient(store, canRefresh: false)), store);
+      final watcher = NewOrderWatcher(OrdersRepository(ApiClient(store, baseUrl: await resolveApiUrl(), canRefresh: false)), store);
       await showNewOrders(await watcher.check());
       return true;
     } catch (_) {
