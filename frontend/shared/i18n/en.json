@@ -1,0 +1,288 @@
+{
+  "common": {
+    "loading": "Loading…"
+  },
+  "errors": {
+    "generic": "Something went wrong. Please try again.",
+    "offline": "Cannot reach the server. Is the API running?"
+  },
+  "language": {
+    "label": "Language",
+    "es": "Español",
+    "en": "English"
+  },
+  "nav": {
+    "main": "Main",
+    "shop": "Shop",
+    "orders": "Orders",
+    "account": "Account",
+    "alerts": "Alerts",
+    "cart": "Cart",
+    "signIn": "Sign in",
+    "signOut": "Sign out"
+  },
+  "footer": {
+    "about": "A demo storefront. Prices and stock are illustrative.",
+    "label": "Footer",
+    "yourOrders": "Your orders",
+    "track": "Track a shipment"
+  },
+  "pagination": {
+    "label": "Pagination",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "timeline": {
+    "empty": "Nothing recorded yet."
+  },
+  "status": {
+    "pending": "Pending",
+    "paymentPending": "Payment pending",
+    "paid": "Paid",
+    "paymentFailed": "Payment failed",
+    "processing": "Processing",
+    "shipped": "Shipped",
+    "delivered": "Delivered",
+    "cancelled": "Cancelled",
+    "refundRequested": "Refund requested",
+    "refunded": "Refunded",
+    "labelCreated": "Label created",
+    "pickedUp": "Picked up",
+    "inTransit": "In transit",
+    "outForDelivery": "Out for delivery",
+    "failed": "Failed",
+    "returned": "Returned"
+  },
+  "auth": {
+    "email": "Email",
+    "password": "Password",
+    "firstName": "First name",
+    "lastName": "Last name",
+    "login": {
+      "title": "Sign in",
+      "welcome": "Welcome back to CommerceHub.",
+      "submit": "Sign in",
+      "busy": "Signing in…",
+      "noAccount": "No account?",
+      "createOne": "Create one",
+      "error": "Invalid email or password."
+    },
+    "register": {
+      "title": "Create your account",
+      "passwordHint": "At least 8 characters.",
+      "submit": "Create account",
+      "busy": "Creating…",
+      "haveAccount": "Already have an account?",
+      "error": "Could not create the account."
+    }
+  },
+  "catalog": {
+    "home": "Home",
+    "products": {
+      "one": "{{count}} product",
+      "other": "{{count}} products"
+    },
+    "filters": "Filters",
+    "clearAll": "Clear all",
+    "clearFilters": "Clear all filters",
+    "removeFilter": "remove filter",
+    "sortBy": "Sort by",
+    "sortLabel": "Sort products",
+    "sort": {
+      "nameAsc": "Name A–Z",
+      "nameDesc": "Name Z–A",
+      "priceAsc": "Price: low to high",
+      "priceDesc": "Price: high to low",
+      "newest": "Newest"
+    },
+    "search": "Search",
+    "searchPlaceholder": "Search products…",
+    "searchLabel": "Search products",
+    "category": "Category",
+    "allCategories": "All categories",
+    "brand": "Brand",
+    "allBrands": "All brands",
+    "price": "Price",
+    "min": "Min",
+    "max": "Max",
+    "minLabel": "Minimum price",
+    "maxLabel": "Maximum price",
+    "priceFrom": "From {{min}}",
+    "priceRange": "Prices range from {{min}} to {{max}}",
+    "noMatchTitle": "No products match",
+    "noMatchText": "Try removing a filter or searching for something else.",
+    "options": "{{count}} options",
+    "from": "From",
+    "priceOnRequest": "Price on request"
+  },
+  "product": {
+    "images": "Product images",
+    "image": "Image {{n}}",
+    "option": "Option",
+    "quantity": "Quantity",
+    "decrease": "Decrease quantity",
+    "increase": "Increase quantity",
+    "maxPerOrder": "Maximum {{max}} per order.",
+    "addToCart": "Add to cart",
+    "wishlist": "Wishlist",
+    "viewCart": "View cart",
+    "perkDelivery": "Delivery options and cost are calculated at checkout.",
+    "perkTrack": "Track your order any time from My orders.",
+    "about": "About this product",
+    "details": "Details",
+    "sku": "SKU",
+    "policiesTitle": "Shipping & returns",
+    "shippingTitle": "Shipping",
+    "shippingText": "Available shipping methods, costs and estimated delivery times are shown at checkout once you choose your address.",
+    "returnsTitle": "Returns",
+    "returnsText": "Returns follow the store's return policy. If something is wrong with your order, contact the store before sending anything back.",
+    "moreIn": "More in {{category}}",
+    "notFound": "Product not found.",
+    "added": "Added to your cart.",
+    "addFailed": "Could not add to cart.",
+    "wishlistSaved": "Saved to your wishlist.",
+    "wishlistFailed": "Could not update wishlist."
+  },
+  "cart": {
+    "title": "Your cart",
+    "signInTitle": "Sign in to see your cart",
+    "signInText": "Your cart is saved to your account.",
+    "emptyTitle": "Your cart is empty",
+    "emptyText": "Browse the shop and add something you like.",
+    "browse": "Browse products",
+    "each": "{{price}} each",
+    "remove": "Remove",
+    "decrease": "Decrease {{name}}",
+    "increase": "Increase {{name}}",
+    "summary": "Order summary",
+    "items": {
+      "one": "{{count}} item",
+      "other": "{{count}} items"
+    },
+    "subtotal": "Subtotal ({{items}})",
+    "taxesNote": "Taxes and any discount are calculated at checkout.",
+    "checkout": "Proceed to checkout",
+    "continue": "Continue shopping"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "placed": "Order {{number}} placed",
+    "status": "Status:",
+    "totalDue": "Total due:",
+    "processing": "Processing…",
+    "viewOrder": "View order",
+    "cartEmpty": "Your cart is empty.",
+    "shippingAddress": "Shipping address",
+    "savedAddress": "Use a saved address",
+    "newAddress": "— New address —",
+    "recipientName": "Recipient name",
+    "line1": "Address line 1",
+    "line2": "Address line 2 (optional)",
+    "shippingMethod": "Shipping method (estimate)",
+    "days": "{{count}}d",
+    "estimateNote": "Shown as an estimate; the order total is confirmed by the server.",
+    "placeOrder": "Place order",
+    "placing": "Placing order…",
+    "failed": "Checkout failed.",
+    "summary": "Summary",
+    "couponCode": "Coupon code",
+    "couponPlaceholder": "e.g. SAVE10",
+    "apply": "Apply",
+    "couponApplied": "Coupon {{code}}: −{{amount}}",
+    "couponInvalid": "Coupon is not valid.",
+    "shippingEstimate": "Shipping (est.)",
+    "taxesNote": "Taxes are calculated on the confirmed order."
+  },
+  "orders": {
+    "title": "Your orders",
+    "count": {
+      "one": "{{count}} order",
+      "other": "{{count}} orders"
+    },
+    "emptyTitle": "No orders yet",
+    "emptyText": "When you place an order it will show up here.",
+    "startShopping": "Start shopping"
+  },
+  "orderDetail": {
+    "breadcrumb": "Breadcrumb",
+    "payNow": "Pay now",
+    "cancel": "Cancel order",
+    "placed": "Placed {{date}}",
+    "items": "Items",
+    "subtotal": "Subtotal",
+    "discount": "Discount",
+    "tax": "Tax",
+    "total": "Total",
+    "shipTo": "Ship to",
+    "shipment": "Shipment",
+    "tracking": "Tracking",
+    "history": "History",
+    "notFound": "Order not found.",
+    "paid": "Payment received.",
+    "payFailed": "Payment failed.",
+    "cancelled": "Order cancelled.",
+    "cancelFailed": "Could not cancel this order."
+  },
+  "tracking": {
+    "title": "Track a shipment",
+    "placeholder": "Tracking number (e.g. CH…)",
+    "number": "Tracking number",
+    "track": "Track",
+    "destination": "Destination: {{city}}, {{country}}",
+    "notFound": "No shipment found for that tracking number."
+  },
+  "notifications": {
+    "title": "Notifications",
+    "markAll": "Mark all read",
+    "markRead": "Mark read",
+    "empty": "No notifications yet.",
+    "preferences": "Preferences",
+    "preferencesNote": "Transactional messages (orders, payments) are always sent. You can mute marketing messages per channel.",
+    "topic": "Topic",
+    "mute": "Mute",
+    "topics": {
+      "promotion": "Promotions",
+      "backInStock": "Back in stock"
+    },
+    "channels": {
+      "inApp": "In-app",
+      "email": "Email"
+    }
+  },
+  "account": {
+    "title": "My account",
+    "profile": "Profile",
+    "saveProfile": "Save profile",
+    "phone": "Phone",
+    "addresses": "Addresses",
+    "defaultShipping": "Default shipping",
+    "defaultBilling": "Default billing",
+    "setShipping": "Set shipping",
+    "setBilling": "Set billing",
+    "delete": "Delete",
+    "noAddresses": "No saved addresses.",
+    "addAddress": "Add an address",
+    "addAddressSubmit": "Add address",
+    "label": "Label",
+    "labelPlaceholder": "Home",
+    "recipient": "Recipient",
+    "line1": "Line 1",
+    "line2": "Line 2",
+    "city": "City",
+    "region": "Region",
+    "postalCode": "Postal code",
+    "country": "Country (ISO-2)",
+    "wishlist": "Wishlist",
+    "product": "Product",
+    "added": "Added {{date}}",
+    "wishlistEmpty": "Your wishlist is empty.",
+    "messages": {
+      "profileUpdated": "Profile updated.",
+      "addressAdded": "Address added.",
+      "addressRemoved": "Address removed.",
+      "shippingUpdated": "Default shipping updated.",
+      "billingUpdated": "Default billing updated.",
+      "wishlistRemoved": "Removed from wishlist."
+    }
+  }
+}
