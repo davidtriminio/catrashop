@@ -1,109 +1,111 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { CustomersApi } from '@ch/api/customers.api';
 import { Address, CheckoutResponse, CouponQuote, ShippingMethod } from '@ch/api/models';
 import { OrdersApi } from '@ch/api/orders.api';
 import { PaymentsApi } from '@ch/api/payments.api';
 import { PromotionsApi } from '@ch/api/promotions.api';
 import { ShippingApi } from '@ch/api/shipping.api';
+import { StatusBadge } from '@ch/ui/status-badge';
 import { CartStore } from '../../core/cart/cart.store';
+import { I18n } from '@ch/i18n/i18n';
 import { MoneyPipe } from '@ch/util/money.pipe';
-import { problemMessage } from '@ch/util/problem';
 
 @Component({
   selector: 'app-checkout-page',
-  imports: [ReactiveFormsModule, RouterLink, MoneyPipe],
+  imports: [ReactiveFormsModule, RouterLink, MoneyPipe, StatusBadge, TranslocoPipe],
   template: `
-    <h1>Checkout</h1>
+    <h1>{{ 'checkout.title' | transloco }}</h1>
 
     @if (placed(); as order) {
       <div class="card confirm">
-        <h2>Order {{ order.orderNumber }} placed</h2>
-        <p>Status: <span class="badge warn">{{ order.status }}</span></p>
-        <p>Total due: <strong>{{ order.grandTotal | money: order.currency }}</strong></p>
+        <h2>{{ 'checkout.placed' | transloco: { number: order.orderNumber } }}</h2>
+        <p>{{ 'checkout.status' | transloco }} <ch-status-badge [status]="order.status" /></p>
+        <p>{{ 'checkout.totalDue' | transloco }} <strong>{{ order.grandTotal | money: order.currency }}</strong></p>
         @if (payError()) { <div class="alert error">{{ payError() }}</div> }
         <div class="row">
           <button class="btn" [disabled]="paying()" (click)="pay(order)">
-            {{ paying() ? 'Processing…' : 'Pay now' }}
+            {{ (paying() ? 'checkout.processing' : 'orderDetail.payNow') | transloco }}
           </button>
-          <a class="btn secondary" [routerLink]="['/orders', order.orderId]">View order</a>
+          <a class="btn secondary" [routerLink]="['/orders', order.orderId]">{{ 'checkout.viewOrder' | transloco }}</a>
         </div>
       </div>
     } @else if (cart.cart(); as c) {
       @if (c.items.length === 0) {
-        <div class="card"><p class="muted">Your cart is empty.</p><a routerLink="/products" class="btn">Browse products</a></div>
+        <div class="card"><p class="muted">{{ 'checkout.cartEmpty' | transloco }}</p><a routerLink="/products" class="btn">{{ 'cart.browse' | transloco }}</a></div>
       } @else {
         <div class="checkout">
           <form class="card" [formGroup]="form" (ngSubmit)="placeOrder()">
-            <h2>Shipping address</h2>
+            <h2>{{ 'checkout.shippingAddress' | transloco }}</h2>
 
             @if (addresses().length) {
               <div class="field">
-                <label for="saved">Use a saved address</label>
+                <label for="saved">{{ 'checkout.savedAddress' | transloco }}</label>
                 <select id="saved" (change)="prefill($event)">
-                  <option value="">— New address —</option>
+                  <option value="">{{ 'checkout.newAddress' | transloco }}</option>
                   @for (a of addresses(); track a.id) { <option [value]="a.id">{{ a.label }} — {{ a.line1 }}, {{ a.city }}</option> }
                 </select>
               </div>
             }
 
-            <div class="field"><label>Recipient name</label><input class="input" formControlName="recipientName" /></div>
-            <div class="field"><label>Address line 1</label><input class="input" formControlName="line1" /></div>
-            <div class="field"><label>Address line 2 (optional)</label><input class="input" formControlName="line2" /></div>
+            <div class="field"><label>{{ 'checkout.recipientName' | transloco }}</label><input class="input" formControlName="recipientName" /></div>
+            <div class="field"><label>{{ 'checkout.line1' | transloco }}</label><input class="input" formControlName="line1" /></div>
+            <div class="field"><label>{{ 'checkout.line2' | transloco }}</label><input class="input" formControlName="line2" /></div>
             <div class="row">
-              <div class="field" style="flex:2"><label>City</label><input class="input" formControlName="city" /></div>
-              <div class="field" style="flex:1"><label>Region</label><input class="input" formControlName="region" /></div>
+              <div class="field" style="flex:2"><label>{{ 'account.city' | transloco }}</label><input class="input" formControlName="city" /></div>
+              <div class="field" style="flex:1"><label>{{ 'account.region' | transloco }}</label><input class="input" formControlName="region" /></div>
             </div>
             <div class="row">
-              <div class="field" style="flex:1"><label>Postal code</label><input class="input" formControlName="postalCode" /></div>
-              <div class="field" style="flex:1"><label>Country (ISO-2)</label><input class="input" maxlength="2" formControlName="country" /></div>
+              <div class="field" style="flex:1"><label>{{ 'account.postalCode' | transloco }}</label><input class="input" formControlName="postalCode" /></div>
+              <div class="field" style="flex:1"><label>{{ 'account.country' | transloco }}</label><input class="input" maxlength="2" formControlName="country" /></div>
             </div>
 
             @if (methods().length) {
               <div class="field">
-                <label for="method">Shipping method (estimate)</label>
+                <label for="method">{{ 'checkout.shippingMethod' | transloco }}</label>
                 <select id="method" [value]="selectedMethod()?.code ?? ''" (change)="selectMethod($event)">
                   @for (m of methods(); track m.id) {
-                    <option [value]="m.code">{{ m.name }} — {{ m.cost | money: m.currency }} ({{ m.estimatedDays }}d)</option>
+                    <option [value]="m.code">{{ m.name }} — {{ m.cost | money: m.currency }} ({{ 'checkout.days' | transloco: { count: m.estimatedDays } }})</option>
                   }
                 </select>
-                <small class="muted">Shown as an estimate; the order total is confirmed by the server.</small>
+                <small class="muted">{{ 'checkout.estimateNote' | transloco }}</small>
               </div>
             }
 
             @if (error()) { <div class="alert error">{{ error() }}</div> }
             <button class="btn block" type="submit" [disabled]="form.invalid || placing()">
-              {{ placing() ? 'Placing order…' : 'Place order' }}
+              {{ (placing() ? 'checkout.placing' : 'checkout.placeOrder') | transloco }}
             </button>
           </form>
 
           <aside class="summary card">
-            <h2>Summary</h2>
-            <div class="line"><span>Subtotal</span><span>{{ c.subtotal | money: c.currency }}</span></div>
+            <h2>{{ 'checkout.summary' | transloco }}</h2>
+            <div class="line"><span>{{ 'orderDetail.subtotal' | transloco }}</span><span>{{ c.subtotal | money: c.currency }}</span></div>
 
             <div class="field coupon">
-              <label for="coupon">Coupon code</label>
+              <label for="coupon">{{ 'checkout.couponCode' | transloco }}</label>
               <div class="row">
-                <input id="coupon" class="input" [value]="couponCode()" (input)="setCoupon($event)" placeholder="e.g. SAVE10" />
-                <button type="button" class="btn secondary" [disabled]="!couponCode() || checking()" (click)="applyCoupon(c.subtotal, c.currency)">Apply</button>
+                <input id="coupon" class="input" [value]="couponCode()" (input)="setCoupon($event)" [placeholder]="'checkout.couponPlaceholder' | transloco" />
+                <button type="button" class="btn secondary" [disabled]="!couponCode() || checking()" (click)="applyCoupon(c.subtotal, c.currency)">{{ 'checkout.apply' | transloco }}</button>
               </div>
               @if (couponError()) { <div class="alert error">{{ couponError() }}</div> }
-              @if (quote(); as qz) { <div class="alert success">Coupon {{ qz.couponCode }}: −{{ qz.discountAmount | money: qz.currency }}</div> }
+              @if (quote(); as qz) { <div class="alert success">{{ 'checkout.couponApplied' | transloco: { code: qz.couponCode, amount: (qz.discountAmount | money: qz.currency) } }}</div> }
             </div>
 
             @if (quote(); as qz) {
-              <div class="line"><span>Discount</span><span>−{{ qz.discountAmount | money: c.currency }}</span></div>
+              <div class="line"><span>{{ 'orderDetail.discount' | transloco }}</span><span>−{{ qz.discountAmount | money: c.currency }}</span></div>
             }
             @if (selectedMethod(); as m) {
-              <div class="line muted"><span>Shipping (est.)</span><span>{{ m.cost | money: m.currency }}</span></div>
+              <div class="line muted"><span>{{ 'checkout.shippingEstimate' | transloco }}</span><span>{{ m.cost | money: m.currency }}</span></div>
             }
-            <p class="muted">Taxes are calculated on the confirmed order.</p>
+            <p class="muted">{{ 'checkout.taxesNote' | transloco }}</p>
           </aside>
         </div>
       }
     } @else {
-      <p class="muted">Loading…</p>
+      <p class="muted">{{ 'common.loading' | transloco }}</p>
     }
   `,
   styles: [`
@@ -116,6 +118,7 @@ import { problemMessage } from '@ch/util/problem';
 })
 export class CheckoutPage implements OnInit {
   private readonly fb = inject(FormBuilder);
+  private readonly i18n = inject(I18n);
   private readonly orders = inject(OrdersApi);
   private readonly payments = inject(PaymentsApi);
   private readonly promotions = inject(PromotionsApi);
@@ -193,7 +196,7 @@ export class CheckoutPage implements OnInit {
     this.couponError.set(null);
     this.promotions.quote(this.couponCode(), subtotal, currency).subscribe({
       next: (q) => { this.quote.set(q); this.checking.set(false); },
-      error: (err) => { this.quote.set(null); this.couponError.set(problemMessage(err, 'Coupon is not valid.')); this.checking.set(false); },
+      error: (err) => { this.quote.set(null); this.couponError.set(this.i18n.problem(err, 'checkout.couponInvalid')); this.checking.set(false); },
     });
   }
 
@@ -210,7 +213,7 @@ export class CheckoutPage implements OnInit {
       couponCode: this.quote() ? this.couponCode() : null,
     }).subscribe({
       next: (order) => { this.placed.set(order); this.cart.refresh(); this.placing.set(false); },
-      error: (err) => { this.error.set(problemMessage(err, 'Checkout failed.')); this.placing.set(false); },
+      error: (err) => { this.error.set(this.i18n.problem(err, 'checkout.failed')); this.placing.set(false); },
     });
   }
 
@@ -219,7 +222,7 @@ export class CheckoutPage implements OnInit {
     this.payError.set(null);
     this.payments.pay({ orderId: order.orderId }).subscribe({
       next: () => { this.cart.refresh(); this.router.navigate(['/orders', order.orderId]); },
-      error: (err) => { this.payError.set(problemMessage(err, 'Payment failed.')); this.paying.set(false); },
+      error: (err) => { this.payError.set(this.i18n.problem(err, 'orderDetail.payFailed')); this.paying.set(false); },
     });
   }
 }

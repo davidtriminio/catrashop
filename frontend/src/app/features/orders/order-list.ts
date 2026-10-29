@@ -1,21 +1,23 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { OrdersApi } from '@ch/api/orders.api';
 import { OrderSummary, Paged } from '@ch/api/models';
 import { StatusBadge } from '@ch/ui/status-badge';
+import { I18n } from '@ch/i18n/i18n';
+import { LocalDatePipe } from '@ch/util/local-date.pipe';
 import { MoneyPipe } from '@ch/util/money.pipe';
-import { problemMessage } from '@ch/util/problem';
+import { PluralPipe } from '@ch/util/plural.pipe';
 import { buildPages } from '@ch/util/pagination';
 
 @Component({
   selector: 'app-order-list',
-  imports: [RouterLink, DatePipe, MoneyPipe, StatusBadge],
+  imports: [RouterLink, LocalDatePipe, MoneyPipe, PluralPipe, StatusBadge, TranslocoPipe],
   template: `
     <div class="page-head">
       <div>
-        <h1>Your orders</h1>
-        @if (result(); as r) { <p class="muted count">{{ r.totalCount }} {{ r.totalCount === 1 ? 'order' : 'orders' }}</p> }
+        <h1>{{ 'orders.title' | transloco }}</h1>
+        @if (result(); as r) { <p class="muted count">{{ 'orders.count' | plural: r.totalCount }}</p> }
       </div>
     </div>
     @if (error()) { <div class="alert error">{{ error() }}</div> }
@@ -27,9 +29,9 @@ import { buildPages } from '@ch/util/pagination';
     } @else if (result(); as r) {
       @if (r.items.length === 0) {
         <div class="card empty">
-          <h2>No orders yet</h2>
-          <p>When you place an order it will show up here.</p>
-          <a routerLink="/products" class="btn">Start shopping</a>
+          <h2>{{ 'orders.emptyTitle' | transloco }}</h2>
+          <p>{{ 'orders.emptyText' | transloco }}</p>
+          <a routerLink="/products" class="btn">{{ 'orders.startShopping' | transloco }}</a>
         </div>
       } @else {
         <div class="card flush" [class.dim]="loading()">
@@ -37,7 +39,7 @@ import { buildPages } from '@ch/util/pagination';
             <a class="list-row order" [routerLink]="['/orders', o.id]">
               <div class="who">
                 <strong>{{ o.orderNumber }}</strong>
-                <span class="muted">{{ o.createdAtUtc | date: 'MMM d, y' }} · {{ o.itemCount }} {{ o.itemCount === 1 ? 'item' : 'items' }}</span>
+                <span class="muted">{{ o.createdAtUtc | localDate: 'date' }} · {{ 'cart.items' | plural: o.itemCount }}</span>
               </div>
               <ch-status-badge [status]="o.status" />
               <strong class="total">{{ o.grandTotal | money: o.currency }}</strong>
@@ -47,13 +49,13 @@ import { buildPages } from '@ch/util/pagination';
         </div>
 
         @if (r.totalPages > 1) {
-          <nav class="pager" aria-label="Pagination">
-            <button class="btn secondary sm" type="button" [disabled]="!r.hasPrevious" (click)="go(r.page - 1)">Previous</button>
+          <nav class="pager" [attr.aria-label]="'pagination.label' | transloco">
+            <button class="btn secondary sm" type="button" [disabled]="!r.hasPrevious" (click)="go(r.page - 1)">{{ 'pagination.previous' | transloco }}</button>
             @for (item of pages(); track $index) {
               @if (item === '…') { <span class="muted">…</span> }
               @else { <button class="page" type="button" [class.current]="item === r.page" (click)="go(item)">{{ item }}</button> }
             }
-            <button class="btn secondary sm" type="button" [disabled]="!r.hasNext" (click)="go(r.page + 1)">Next</button>
+            <button class="btn secondary sm" type="button" [disabled]="!r.hasNext" (click)="go(r.page + 1)">{{ 'pagination.next' | transloco }}</button>
           </nav>
         }
       }
@@ -84,6 +86,7 @@ import { buildPages } from '@ch/util/pagination';
 })
 export class OrderList implements OnInit {
   private readonly api = inject(OrdersApi);
+  private readonly i18n = inject(I18n);
   private page = 1;
 
   readonly result = signal<Paged<OrderSummary> | null>(null);
@@ -104,7 +107,7 @@ export class OrderList implements OnInit {
     this.error.set(null);
     this.api.listMine(this.page, 10).subscribe({
       next: (r) => { this.result.set(r); this.loading.set(false); },
-      error: (err) => { this.error.set(problemMessage(err)); this.loading.set(false); },
+      error: (err) => { this.error.set(this.i18n.problem(err)); this.loading.set(false); },
     });
   }
 }

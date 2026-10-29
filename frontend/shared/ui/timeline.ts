@@ -1,5 +1,6 @@
-import { DatePipe } from '@angular/common';
 import { Component, input } from '@angular/core';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { LocalDatePipe } from '../util/local-date.pipe';
 import { StatusBadge } from './status-badge';
 
 export interface TimelineItem {
@@ -11,7 +12,7 @@ export interface TimelineItem {
 /** Vertical timeline, newest first, with the latest step emphasised. */
 @Component({
   selector: 'ch-timeline',
-  imports: [DatePipe, StatusBadge],
+  imports: [LocalDatePipe, StatusBadge, TranslocoPipe],
   template: `
     <ol class="timeline">
       @for (e of ordered(); track e.occurredAtUtc + e.status; let first = $first) {
@@ -19,11 +20,11 @@ export interface TimelineItem {
           <span class="dot" aria-hidden="true"></span>
           <div class="body">
             <ch-status-badge [status]="e.status" />
-            <time class="muted">{{ e.occurredAtUtc | date: 'MMM d, y, h:mm a' }}</time>
+            <time class="muted">{{ e.occurredAtUtc | localDate: 'datetime' }}</time>
             @if (e.note) { <p class="note muted">{{ e.note }}</p> }
           </div>
         </li>
-      } @empty { <li class="muted">Nothing recorded yet.</li> }
+      } @empty { <li class="muted">{{ 'timeline.empty' | transloco }}</li> }
     </ol>
   `,
   styles: [`

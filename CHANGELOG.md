@@ -23,6 +23,9 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
 - **Fix:** administrators can manage coupons and send notifications (the Administrator role was missing the
   `promotions.manage` and `notifications.manage` permissions); a test now keeps module permissions and the role in
   step → [PR-041](docs/git/prs/PR-041-admin-permissions.md)
+- **i18n:** the storefront is in Spanish (`es`, fallback `en`) with Transloco, a runtime ES | EN switch, localized dates and
+  plurals; the admin gets the same base, its own texts follow in a later PR
+  → [PR-042](docs/git/prs/PR-042-i18n-web-spanish.md)
 
 ## v1.2.0 — Reliability fixes and the redesign
 - **Fix:** the account page no longer fails when the customer profile is created by concurrent requests

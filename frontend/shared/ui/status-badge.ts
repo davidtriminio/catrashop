@@ -1,4 +1,5 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, inject, input } from '@angular/core';
+import { I18n } from '../i18n/i18n';
 
 type Tone = 'accent' | 'warn' | 'info' | 'ok' | 'bad' | 'neutral';
 
@@ -11,11 +12,17 @@ type Tone = 'accent' | 'warn' | 'info' | 'ok' | 'bad' | 'neutral';
   template: `<span class="badge" [class]="tone() === 'neutral' ? '' : tone()">{{ label() }}</span>`,
 })
 export class StatusBadge {
+  private readonly i18n = inject(I18n);
+
   readonly status = input.required<string>();
 
+  /** Translated through `status.<camelCase>`; a status the server adds later still shows, in readable English. */
   readonly label = computed(() => {
-    const spaced = this.status().replace(/([a-z])([A-Z])/g, '$1 $2');
-    return spaced.charAt(0).toUpperCase() + spaced.slice(1).toLowerCase();
+    this.i18n.lang(); // recompute when the language changes
+    const status = this.status();
+    const spaced = status.replace(/([a-z])([A-Z])/g, '$1 $2');
+    const readable = spaced.charAt(0).toUpperCase() + spaced.slice(1).toLowerCase();
+    return this.i18n.tOr(`status.${status.charAt(0).toLowerCase()}${status.slice(1)}`, readable);
   });
 
   readonly tone = computed<Tone>(() => toneFor(this.status()));

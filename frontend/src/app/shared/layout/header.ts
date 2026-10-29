@@ -1,27 +1,30 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthStore } from '@ch/auth/auth.store';
+import { LanguageSwitcher } from '@ch/ui/language-switcher';
 import { CartStore } from '../../core/cart/cart.store';
 
 @Component({
   selector: 'app-header',
-  imports: [RouterLink, RouterLinkActive],
+  imports: [RouterLink, RouterLinkActive, TranslocoPipe, LanguageSwitcher],
   template: `
     <header class="site-header">
       <div class="container bar">
         <a routerLink="/" class="brand">Commerce<span>Hub</span></a>
 
-        <nav class="nav" aria-label="Main">
-          <a routerLink="/products" routerLinkActive="active">Shop</a>
+        <nav class="nav" [attr.aria-label]="'nav.main' | transloco">
+          <a routerLink="/products" routerLinkActive="active">{{ 'nav.shop' | transloco }}</a>
           @if (auth.isAuthenticated()) {
-            <a routerLink="/orders" routerLinkActive="active">Orders</a>
-            <a routerLink="/account" routerLinkActive="active">Account</a>
-            <a routerLink="/notifications" routerLinkActive="active">Alerts</a>
+            <a routerLink="/orders" routerLinkActive="active">{{ 'nav.orders' | transloco }}</a>
+            <a routerLink="/account" routerLinkActive="active">{{ 'nav.account' | transloco }}</a>
+            <a routerLink="/notifications" routerLinkActive="active">{{ 'nav.alerts' | transloco }}</a>
           }
         </nav>
 
         <div class="actions">
-          <a routerLink="/cart" class="cart" routerLinkActive="active" aria-label="Cart">
+          <ch-language-switcher />
+          <a routerLink="/cart" class="cart" routerLinkActive="active" [attr.aria-label]="'nav.cart' | transloco">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M5 8h14l-1.2 11a1 1 0 0 1-1 .9H7.2a1 1 0 0 1-1-.9L5 8Z" /><path d="M9 8V7a3 3 0 0 1 6 0v1" />
             </svg>
@@ -29,9 +32,9 @@ import { CartStore } from '../../core/cart/cart.store';
           </a>
           @if (auth.isAuthenticated()) {
             <span class="avatar" [title]="auth.user()?.firstName ?? ''">{{ initial() }}</span>
-            <button class="btn secondary sm" (click)="logout()">Sign out</button>
+            <button class="btn secondary sm" (click)="logout()">{{ 'nav.signOut' | transloco }}</button>
           } @else {
-            <a routerLink="/login" class="btn sm">Sign in</a>
+            <a routerLink="/login" class="btn sm">{{ 'nav.signIn' | transloco }}</a>
           }
         </div>
       </div>

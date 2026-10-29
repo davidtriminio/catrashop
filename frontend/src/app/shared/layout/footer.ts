@@ -1,21 +1,22 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 
 @Component({
   selector: 'app-footer',
-  imports: [RouterLink],
+  imports: [RouterLink, TranslocoPipe],
   template: `
     <footer class="site-footer">
       <div class="container foot">
         <div class="about">
           <span class="brand">Commerce<span>Hub</span></span>
-          <p class="muted">A demo storefront. Prices and stock are illustrative.</p>
+          <p class="muted">{{ 'footer.about' | transloco }}</p>
         </div>
-        <nav class="links" aria-label="Footer">
-          <a routerLink="/products">Shop</a>
-          <a routerLink="/orders">Your orders</a>
-          <a routerLink="/track">Track a shipment</a>
-          <a routerLink="/account">Account</a>
+        <nav class="links" [attr.aria-label]="'footer.label' | transloco">
+          <a routerLink="/products">{{ 'nav.shop' | transloco }}</a>
+          <a routerLink="/orders">{{ 'footer.yourOrders' | transloco }}</a>
+          <a routerLink="/track">{{ 'footer.track' | transloco }}</a>
+          <a routerLink="/account">{{ 'nav.account' | transloco }}</a>
         </nav>
       </div>
     </footer>

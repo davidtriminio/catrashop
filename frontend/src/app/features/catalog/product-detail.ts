@@ -1,12 +1,13 @@
 import { Component, computed, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { CatalogApi } from '@ch/api/catalog.api';
 import { CustomersApi } from '@ch/api/customers.api';
 import { ProductDetail as ProductDetailModel, ProductListItem, ProductVariant } from '@ch/api/models';
 import { AuthStore } from '@ch/auth/auth.store';
+import { I18n } from '@ch/i18n/i18n';
 import { MoneyPipe } from '@ch/util/money.pipe';
-import { problemMessage } from '@ch/util/problem';
 import { MAX_LINE_QUANTITY, clampQuantity } from '@ch/util/quantity';
 import { CartStore } from '../../core/cart/cart.store';
 
@@ -14,7 +15,7 @@ const RELATED_COUNT = 4;
 
 @Component({
   selector: 'app-product-detail',
-  imports: [RouterLink, MoneyPipe],
+  imports: [RouterLink, MoneyPipe, TranslocoPipe],
   template: `
     @if (loading()) {
       <div class="top"><div class="skeleton gallery-skeleton"></div><div class="skeleton buy-skeleton"></div></div>
@@ -22,8 +23,8 @@ const RELATED_COUNT = 4;
     @if (error()) { <div class="alert error">{{ error() }}</div> }
 
     @if (product(); as p) {
-      <nav class="crumbs" aria-label="Breadcrumb">
-        <a routerLink="/">Home</a><span>/</span><a routerLink="/products">Shop</a><span>/</span><span aria-current="page">{{ p.name }}</span>
+      <nav class="crumbs" [attr.aria-label]="'orderDetail.breadcrumb' | transloco">
+        <a routerLink="/">{{ 'catalog.home' | transloco }}</a><span>/</span><a routerLink="/products">{{ 'nav.shop' | transloco }}</a><span>/</span><span aria-current="page">{{ p.name }}</span>
       </nav>
 
       <div class="top">
@@ -36,9 +37,9 @@ const RELATED_COUNT = 4;
             }
           </div>
           @if (p.images.length > 1) {
-            <div class="thumbs" role="tablist" aria-label="Product images">
+            <div class="thumbs" role="tablist" [attr.aria-label]="'product.images' | transloco">
               @for (img of p.images; track img.url; let i = $index) {
-                <button type="button" class="thumb" role="tab" [class.active]="i === imageIndex()" [attr.aria-selected]="i === imageIndex()" [attr.aria-label]="'Image ' + (i + 1)" (click)="imageIndex.set(i)">
+                <button type="button" class="thumb" role="tab" [class.active]="i === imageIndex()" [attr.aria-selected]="i === imageIndex()" [attr.aria-label]="'product.image' | transloco: { n: i + 1 }" (click)="imageIndex.set(i)">
                   <img [src]="img.url" [alt]="''" loading="lazy" />
                 </button>
               }
@@ -57,8 +58,8 @@ const RELATED_COUNT = 4;
             }
 
             @if (activeVariants().length > 1) {
-              <div class="group" role="radiogroup" aria-label="Option">
-                <span class="label">Option</span>
+              <div class="group" role="radiogroup" [attr.aria-label]="'product.option' | transloco">
+                <span class="label">{{ 'product.option' | transloco }}</span>
                 <div class="chips">
                   @for (v of activeVariants(); track v.id) {
                     <button type="button" class="chip" role="radio" [class.active]="v.id === selectedVariantId()" [attr.aria-checked]="v.id === selectedVariantId()" (click)="selectedVariantId.set(v.id)">
@@ -70,28 +71,28 @@ const RELATED_COUNT = 4;
             }
 
             <div class="group qty">
-              <span class="label">Quantity</span>
+              <span class="label">{{ 'product.quantity' | transloco }}</span>
               <div class="stepper">
-                <button type="button" aria-label="Decrease quantity" (click)="step(-1)" [disabled]="quantity() <= 1">−</button>
+                <button type="button" [attr.aria-label]="'product.decrease' | transloco" (click)="step(-1)" [disabled]="quantity() <= 1">−</button>
                 <span aria-live="polite">{{ quantity() }}</span>
-                <button type="button" aria-label="Increase quantity" (click)="step(1)" [disabled]="quantity() >= maxQuantity">+</button>
+                <button type="button" [attr.aria-label]="'product.increase' | transloco" (click)="step(1)" [disabled]="quantity() >= maxQuantity">+</button>
               </div>
-              @if (quantity() >= maxQuantity) { <span class="muted limit">Maximum {{ maxQuantity }} per order.</span> }
+              @if (quantity() >= maxQuantity) { <span class="muted limit">{{ 'product.maxPerOrder' | transloco: { max: maxQuantity } }}</span> }
             </div>
 
-            @if (message()) { <div class="alert success">{{ message() }} <a routerLink="/cart">View cart</a></div> }
+            @if (message()) { <div class="alert success">{{ message() }} <a routerLink="/cart">{{ 'product.viewCart' | transloco }}</a></div> }
             @if (actionError()) { <div class="alert error">{{ actionError() }}</div> }
 
             <div class="buy">
-              <button class="btn" [disabled]="!selectedVariantId() || busy()" (click)="addToCart()">Add to cart</button>
+              <button class="btn" [disabled]="!selectedVariantId() || busy()" (click)="addToCart()">{{ 'product.addToCart' | transloco }}</button>
               @if (auth.isAuthenticated()) {
-                <button class="btn secondary" [disabled]="busy()" (click)="addToWishlist(p.id)">♥ Wishlist</button>
+                <button class="btn secondary" [disabled]="busy()" (click)="addToWishlist(p.id)">♥ {{ 'product.wishlist' | transloco }}</button>
               }
             </div>
 
             <ul class="perks">
-              <li>Delivery options and cost are calculated at checkout.</li>
-              <li>Track your order any time from My orders.</li>
+              <li>{{ 'product.perkDelivery' | transloco }}</li>
+              <li>{{ 'product.perkTrack' | transloco }}</li>
             </ul>
           </div>
         </aside>
@@ -99,32 +100,32 @@ const RELATED_COUNT = 4;
 
       <div class="sections">
         <section class="card about">
-          <h2>About this product</h2>
+          <h2>{{ 'product.about' | transloco }}</h2>
           <p class="desc">{{ p.description }}</p>
         </section>
 
         <section class="card specs">
-          <h2>Details</h2>
+          <h2>{{ 'product.details' | transloco }}</h2>
           <dl>
-            <dt>Category</dt><dd>{{ p.categoryName }}</dd>
-            @if (p.brandName) { <dt>Brand</dt><dd>{{ p.brandName }}</dd> }
-            @if (selectedVariant(); as v) { <dt>SKU</dt><dd>{{ v.sku }}</dd> }
+            <dt>{{ 'catalog.category' | transloco }}</dt><dd>{{ p.categoryName }}</dd>
+            @if (p.brandName) { <dt>{{ 'catalog.brand' | transloco }}</dt><dd>{{ p.brandName }}</dd> }
+            @if (selectedVariant(); as v) { <dt>{{ 'product.sku' | transloco }}</dt><dd>{{ v.sku }}</dd> }
             @for (a of p.attributes; track a.name) { <dt>{{ a.name }}</dt><dd>{{ a.value }}</dd> }
           </dl>
         </section>
 
         <section class="card policies">
-          <h2>Shipping &amp; returns</h2>
-          <h3>Shipping</h3>
-          <p>Available shipping methods, costs and estimated delivery times are shown at checkout once you choose your address.</p>
-          <h3>Returns</h3>
-          <p>Returns follow the store's return policy. If something is wrong with your order, contact the store before sending anything back.</p>
+          <h2>{{ 'product.policiesTitle' | transloco }}</h2>
+          <h3>{{ 'product.shippingTitle' | transloco }}</h3>
+          <p>{{ 'product.shippingText' | transloco }}</p>
+          <h3>{{ 'product.returnsTitle' | transloco }}</h3>
+          <p>{{ 'product.returnsText' | transloco }}</p>
         </section>
       </div>
 
       @if (related().length) {
         <section class="related" aria-labelledby="related-title">
-          <h2 id="related-title">More in {{ p.categoryName }}</h2>
+          <h2 id="related-title">{{ 'product.moreIn' | transloco: { category: p.categoryName } }}</h2>
           <div class="related-grid">
             @for (r of related(); track r.id) {
               <a class="rcard card flush" [routerLink]="['/products', r.slug]">
@@ -136,7 +137,7 @@ const RELATED_COUNT = 4;
                   <strong>{{ r.name }}</strong>
                   @if (r.minPrice !== null) {
                     <span class="rprice">
-                      @if (r.maxPrice !== null && r.maxPrice !== r.minPrice) { <span class="muted">From</span> }
+                      @if (r.maxPrice !== null && r.maxPrice !== r.minPrice) { <span class="muted">{{ 'catalog.from' | transloco }}</span> }
                       {{ r.minPrice | money: r.currency }}
                     </span>
                   }
@@ -225,6 +226,7 @@ const RELATED_COUNT = 4;
 })
 export class ProductDetail {
   private readonly api = inject(CatalogApi);
+  private readonly i18n = inject(I18n);
   private readonly customers = inject(CustomersApi);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
@@ -276,7 +278,7 @@ export class ProductDetail {
         this.loading.set(false);
         this.loadRelated(p);
       },
-      error: (err) => { this.error.set(problemMessage(err, 'Product not found.')); this.loading.set(false); },
+      error: (err) => { this.error.set(this.i18n.problem(err, 'product.notFound')); this.loading.set(false); },
     });
   }
 
@@ -308,8 +310,8 @@ export class ProductDetail {
     this.actionError.set(null);
     this.message.set(null);
     this.cart.add(this.selectedVariantId(), this.quantity()).subscribe({
-      next: () => { this.message.set('Added to your cart.'); this.busy.set(false); },
-      error: (err) => { this.actionError.set(problemMessage(err, 'Could not add to cart.')); this.busy.set(false); },
+      next: () => { this.message.set(this.i18n.t('product.added')); this.busy.set(false); },
+      error: (err) => { this.actionError.set(this.i18n.problem(err, 'product.addFailed')); this.busy.set(false); },
     });
   }
 
@@ -317,8 +319,8 @@ export class ProductDetail {
     this.busy.set(true);
     this.actionError.set(null);
     this.customers.addWishlist(productId).subscribe({
-      next: () => { this.message.set('Saved to your wishlist.'); this.busy.set(false); },
-      error: (err) => { this.actionError.set(problemMessage(err, 'Could not update wishlist.')); this.busy.set(false); },
+      next: () => { this.message.set(this.i18n.t('product.wishlistSaved')); this.busy.set(false); },
+      error: (err) => { this.actionError.set(this.i18n.problem(err, 'product.wishlistFailed')); this.busy.set(false); },
     });
   }
 }

@@ -1,18 +1,19 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { NotificationsApi } from '@ch/api/notifications.api';
 import { Notification, NotificationPreferences } from '@ch/api/models';
-import { problemMessage } from '@ch/util/problem';
+import { I18n } from '@ch/i18n/i18n';
+import { LocalDatePipe } from '@ch/util/local-date.pipe';
 
-interface Topic { label: string; value: number; name: string; }
+interface Topic { labelKey: string; value: number; name: string; }
 
 @Component({
   selector: 'app-notifications-page',
-  imports: [DatePipe],
+  imports: [LocalDatePipe, TranslocoPipe],
   template: `
     <div class="page-head">
-      <h1>Notifications</h1>
-      <button class="btn secondary sm" (click)="markAll()" [disabled]="busy()">Mark all read</button>
+      <h1>{{ 'notifications.title' | transloco }}</h1>
+      <button class="btn secondary sm" (click)="markAll()" [disabled]="busy()">{{ 'notifications.markAll' | transloco }}</button>
     </div>
     @if (error()) { <div class="alert error">{{ error() }}</div> }
 
@@ -22,26 +23,26 @@ interface Topic { label: string; value: number; name: string; }
           <div class="note-text">
             <strong>{{ n.title }}</strong>
             <div class="muted">{{ n.body }}</div>
-            <small class="muted">{{ n.createdAtUtc | date: 'medium' }}</small>
+            <small class="muted">{{ n.createdAtUtc | localDate: 'datetime' }}</small>
           </div>
-          @if (!n.isRead) { <button class="btn secondary sm" (click)="markRead(n)">Mark read</button> }
+          @if (!n.isRead) { <button class="btn secondary sm" (click)="markRead(n)">{{ 'notifications.markRead' | transloco }}</button> }
         </div>
-      } @empty { <p class="empty">No notifications yet.</p> }
+      } @empty { <p class="empty">{{ 'notifications.empty' | transloco }}</p> }
     </div>
 
     <div class="card">
-      <h2>Preferences</h2>
-      <p class="muted">Transactional messages (orders, payments) are always sent. You can mute marketing messages per channel.</p>
+      <h2>{{ 'notifications.preferences' | transloco }}</h2>
+      <p class="muted">{{ 'notifications.preferencesNote' | transloco }}</p>
       <table>
-        <thead><tr><th>Topic</th>@for (c of channels; track c.value) { <th>{{ c.label }}</th> }</tr></thead>
+        <thead><tr><th>{{ 'notifications.topic' | transloco }}</th>@for (c of channels; track c.value) { <th>{{ c.labelKey | transloco }}</th> }</tr></thead>
         <tbody>
           @for (t of topics; track t.value) {
             <tr>
-              <td>{{ t.label }}</td>
+              <td>{{ t.labelKey | transloco }}</td>
               @for (c of channels; track c.value) {
                 <td>
                   <label class="mute">
-                    <input type="checkbox" [checked]="isMuted(t, c)" (change)="toggle(t, c, $event)" /> Mute
+                    <input type="checkbox" [checked]="isMuted(t, c)" (change)="toggle(t, c, $event)" /> {{ 'notifications.mute' | transloco }}
                   </label>
                 </td>
               }
@@ -59,6 +60,7 @@ interface Topic { label: string; value: number; name: string; }
 })
 export class NotificationsPage implements OnInit {
   private readonly api = inject(NotificationsApi);
+  private readonly i18n = inject(I18n);
 
   readonly items = signal<Notification[]>([]);
   readonly preferences = signal<NotificationPreferences | null>(null);
@@ -67,12 +69,12 @@ export class NotificationsPage implements OnInit {
 
   // Backend enum values (NotificationType / NotificationChannel) sent as numbers on write.
   readonly topics: Topic[] = [
-    { label: 'Promotions', value: 50, name: 'Promotion' },
-    { label: 'Back in stock', value: 51, name: 'BackInStock' },
+    { labelKey: 'notifications.topics.promotion', value: 50, name: 'Promotion' },
+    { labelKey: 'notifications.topics.backInStock', value: 51, name: 'BackInStock' },
   ];
   readonly channels: Topic[] = [
-    { label: 'In-app', value: 0, name: 'InApp' },
-    { label: 'Email', value: 1, name: 'Email' },
+    { labelKey: 'notifications.channels.inApp', value: 0, name: 'InApp' },
+    { labelKey: 'notifications.channels.email', value: 1, name: 'Email' },
   ];
 
   ngOnInit(): void {
@@ -83,14 +85,14 @@ export class NotificationsPage implements OnInit {
   private load(): void {
     this.api.list(false, 1, 50).subscribe({
       next: (r) => this.items.set(r.items),
-      error: (err) => this.error.set(problemMessage(err)),
+      error: (err) => this.error.set(this.i18n.problem(err)),
     });
   }
 
   markRead(n: Notification): void {
     this.api.markRead(n.id).subscribe({
       next: () => this.items.update((list) => list.map((i) => (i.id === n.id ? { ...i, isRead: true } : i))),
-      error: (err) => this.error.set(problemMessage(err)),
+      error: (err) => this.error.set(this.i18n.problem(err)),
     });
   }
 
@@ -98,7 +100,7 @@ export class NotificationsPage implements OnInit {
     this.busy.set(true);
     this.api.markAllRead().subscribe({
       next: () => { this.items.update((list) => list.map((i) => ({ ...i, isRead: true }))); this.busy.set(false); },
-      error: (err) => { this.error.set(problemMessage(err)); this.busy.set(false); },
+      error: (err) => { this.error.set(this.i18n.problem(err)); this.busy.set(false); },
     });
   }
 
@@ -110,7 +112,7 @@ export class NotificationsPage implements OnInit {
     const muted = (event.target as HTMLInputElement).checked;
     this.api.updatePreference({ type: topic.value, channel: channel.value, muted }).subscribe({
       next: (p) => this.preferences.set(p),
-      error: (err) => { this.error.set(problemMessage(err)); this.api.preferences().subscribe({ next: (p) => this.preferences.set(p) }); },
+      error: (err) => { this.error.set(this.i18n.problem(err)); this.api.preferences().subscribe({ next: (p) => this.preferences.set(p) }); },
     });
   }
 }
