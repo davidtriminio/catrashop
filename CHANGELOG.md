@@ -31,6 +31,8 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
   not taxed → [PR-043](docs/git/prs/PR-043-national-shipping.md)
 - **Mobile:** the API address can be changed from Settings and is remembered on the device (Restablecer returns to the
   built-in one) → [PR-044](docs/git/prs/PR-044-mobile-api-url.md)
+- **Fix (mobile):** "Reintentar" now shows a loading state and an attempt number, and load errors show the server message and
+  the address in use; Riverpod's hidden automatic retries are off → [PR-045](docs/git/prs/PR-045-mobile-load-retry.md)
 
 ## v1.2.0 — Reliability fixes and the redesign
 - **Fix:** the account page no longer fails when the customer profile is created by concurrent requests

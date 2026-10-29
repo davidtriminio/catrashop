@@ -13,6 +13,9 @@ Future<void> main() async {
   await initBackground();
   final apiUrl = await resolveApiUrl();
   runApp(ProviderScope(
+    // A failed load shows its error at once, with the Reintentar button. Riverpod 3 would otherwise keep retrying
+    // behind a loading screen for a long time.
+    retry: (retryCount, error) => null,
     overrides: [initialApiUrlProvider.overrideWithValue(apiUrl)],
     child: const CommerceHubAdminApp(),
   ));

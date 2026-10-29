@@ -57,11 +57,10 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
       appBar: AppBar(title: Text(order?.orderNumber ?? 'Pedido')),
       body: detail.when(
         loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => StateMessage(
-          icon: Icons.cloud_off_outlined,
+        error: (e, _) => detail.isLoading ? const Center(child: CircularProgressIndicator()) : LoadError(
           title: 'No se pudo cargar el pedido',
-          message: e.toString(),
-          action: FilledButton(onPressed: () => ref.invalidate(orderDetailProvider(widget.orderId)), child: const Text('Reintentar')),
+          error: e,
+          onRetry: () => ref.invalidate(orderDetailProvider(widget.orderId)),
         ),
         data: (o) => _Body(order: o),
       ),

@@ -1,6 +1,9 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/api_client.dart';
 import '../../core/format.dart';
+import '../../core/providers.dart';
 import '../../core/theme.dart';
 import 'order_models.dart';
 
@@ -110,6 +113,43 @@ class OrderCardSkeleton extends StatelessWidget {
 }
 
 /// Centered message used for empty and error states.
+/// A failed load, with enough to tell what is going on: the server's own message, which server the app is talking to,
+/// and which retry this is (number and time), so pressing "Reintentar" always visibly does something.
+class LoadError extends ConsumerWidget {
+  const LoadError({super.key, required this.title, required this.error, required this.onRetry});
+  final String title;
+  final Object error;
+  final VoidCallback onRetry;
+
+  static String _clock(DateTime t) =>
+      '${t.hour.toString().padLeft(2, '0')}:${t.minute.toString().padLeft(2, '0')}:${t.second.toString().padLeft(2, '0')}';
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final info = ref.watch(retryInfoProvider);
+    final status = error is ApiException ? (error as ApiException).statusCode : null;
+    final lines = <String>[
+      error.toString(),
+      if (status != null && status >= 500) 'Es un error del servidor, no de la app: revisa que su base de datos tenga las migraciones al día.',
+      'Servidor: ${ref.watch(apiUrlProvider)}',
+      if (info != null) 'Intento ${info.attempt} · ${_clock(info.at)}',
+    ];
+    return StateMessage(
+      icon: Icons.cloud_off_outlined,
+      title: title,
+      message: lines.join('\n'),
+      action: FilledButton.icon(
+        onPressed: () {
+          ref.read(retryInfoProvider.notifier).mark();
+          onRetry();
+        },
+        icon: const Icon(Icons.refresh),
+        label: const Text('Reintentar'),
+      ),
+    );
+  }
+}
+
 class StateMessage extends StatelessWidget {
   const StateMessage({super.key, required this.icon, required this.title, this.message, this.action});
   final IconData icon;
@@ -120,8 +160,9 @@ class StateMessage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // Scrollable so a long message (e.g. a server error with its explanation) never overflows a small area.
     return Center(
-      child: Padding(
+      child: SingleChildScrollView(
         padding: const EdgeInsets.all(Gap.s6),
         child: Column(mainAxisSize: MainAxisSize.min, children: [
           Icon(icon, size: 48, color: theme.colorScheme.onSurfaceVariant),

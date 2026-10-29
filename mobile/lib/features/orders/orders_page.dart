@@ -16,6 +16,14 @@ class OrdersPage extends ConsumerWidget {
     final filter = ref.watch(statusFilterProvider);
     final theme = Theme.of(context);
 
+    Widget skeleton() => ListView.separated(
+          physics: const NeverScrollableScrollPhysics(),
+          padding: const EdgeInsets.fromLTRB(Gap.s4, 0, Gap.s4, Gap.s5),
+          itemCount: 6,
+          separatorBuilder: (_, _) => const SizedBox(height: Gap.s2),
+          itemBuilder: (_, _) => const OrderCardSkeleton(),
+        );
+
     return Scaffold(
       appBar: AppBar(title: const Text('Pedidos')),
       body: Column(children: [
@@ -48,21 +56,16 @@ class OrdersPage extends ConsumerWidget {
           child: RefreshIndicator(
             onRefresh: () => ref.read(ordersProvider.notifier).refresh(),
             child: orders.when(
-              loading: () => ListView.separated(
-                physics: const NeverScrollableScrollPhysics(),
-                padding: const EdgeInsets.fromLTRB(Gap.s4, 0, Gap.s4, Gap.s5),
-                itemCount: 6,
-                separatorBuilder: (_, _) => const SizedBox(height: Gap.s2),
-                itemBuilder: (_, _) => const OrderCardSkeleton(),
-              ),
-              error: (e, _) => ListView(children: [
+              loading: skeleton,
+              // While a retry is under way Riverpod still reports the previous error: show the loading state instead,
+              // otherwise pressing "Reintentar" would change nothing on screen.
+              error: (e, _) => orders.isLoading ? skeleton() : ListView(children: [
                 SizedBox(
-                  height: 360,
-                  child: StateMessage(
-                    icon: Icons.cloud_off_outlined,
+                  height: MediaQuery.sizeOf(context).height * 0.6,
+                  child: LoadError(
                     title: 'No se pudieron cargar los pedidos',
-                    message: e.toString(),
-                    action: FilledButton(onPressed: () => ref.invalidate(ordersProvider), child: const Text('Reintentar')),
+                    error: e,
+                    onRetry: () => ref.invalidate(ordersProvider),
                   ),
                 ),
               ]),
