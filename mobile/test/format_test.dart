@@ -29,9 +29,9 @@ void main() {
     expect(formatMoney(5, ''), '5.00');
   });
 
-  test('formatMoney shows lempiras as L with thousands separators', () {
-    expect(formatMoney(1234.5, 'HNL'), 'L 1,234.50');
-    expect(formatMoney(320, 'hnl'), 'L 320.00');
-    expect(formatMoney(-45, 'HNL'), 'L -45.00');
+  test('formatMoney writes lempiras as LPS. with thousands separators', () {
+    expect(formatMoney(1234.5, 'HNL'), 'LPS. 1,234.50');
+    expect(formatMoney(320, 'hnl'), 'LPS. 320.00');
+    expect(formatMoney(-45, 'HNL'), '-LPS. 45.00');
   });
 }

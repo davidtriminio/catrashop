@@ -16,11 +16,18 @@ work that follows (PR-042 onwards) starts from the right money model.
   instead of any 3-letter code. Carts, orders and payments already take the currency from the variants, so they
   follow.
 - **Web (store and admin):** `STORE_CURRENCY` / `STORE_LOCALE` constants; `MoneyPipe` formats with `es-HN`
-  (`L 1,234.50`, default HNL); the catalog list now uses `MoneyPipe` instead of Angular's `currency` pipe with a USD
+  (`LPS. 1,234.50`, default HNL); the catalog list now uses `MoneyPipe` instead of Angular's `currency` pipe with a USD
   fallback; the admin forms default to HNL and the currency field is read-only.
-- **Mobile:** `formatMoney` shows lempiras as `L 1,234.50`; the new-order notification uses it too.
-- **Seed:** the three demo products are priced in HNL (L 320, L 1,050, L 460).
+- **Mobile:** `formatMoney` shows lempiras as `LPS. 1,234.50`; the new-order notification uses it too.
+- **Seed:** the three demo products are priced in HNL (LPS. 320, LPS. 1,050, LPS. 460).
 - **Docs:** "Store currency" section in `docs/deployment.md`.
+
+## Display format (follow-up)
+The first version printed lempiras with the `L` symbol. The agreed display is `LPS. 1,234.50` (prefix `LPS.`,
+decimal point, thousands comma, negatives as `-LPS. 45.00`) in web, admin and mobile. The stored/API code stays `HNL`;
+`CURRENCY_PREFIX` in `frontend/shared/util/store.ts` and `_symbols` in `mobile/lib/core/format.dart` map the code to
+the prefix. Other currencies keep the browser's own format. Data still stored in USD keeps showing `USD`: convert it
+with `scripts/local/convert-currency.ps1` or re-seed.
 
 ## Not in this PR
 Dates and numbers outside money still use the browser/default locale; the `es-HN` `LOCALE_ID` and Spanish texts
@@ -38,12 +45,13 @@ script; a deployment with only test data just needs re-seeding.
 |---|---|
 | Variants accept only the store currency (case-insensitive), configurable | `CatalogRulesTests` |
 | Fixed-amount coupons need the store currency | `CouponValidationTests` |
-| Money shown as `L 1,234.50`, defaults to HNL, tolerates null | `money.spec.ts` |
-| Mobile formats lempiras as `L` and keeps other codes | `format_test.dart` |
+| Money shown as `LPS. 1,234.50`, defaults to HNL, tolerates null | `money.spec.ts` |
+| Mobile formats lempiras as `LPS.` and keeps other codes | `format_test.dart` |
 
 ## Verification
 - Backend: Catalog (24), Promotions (27) and architecture (66) tests pass; the API builds.
-- Web Vitest 33/33 and admin 6/6; Flutter 24/24 and `flutter analyze` clean.
+- Web Vitest 34/34 and admin 6/6; Flutter 24/24 and `flutter analyze` clean.
+- Display format checked in the browser pane (catalog and product page) against a mock API serving HNL: `LPS. 129.00`.
 - **Correction:** the first merge of this PR broke the storefront build (`MoneyPipe` was not imported in
   `product-list.ts`, NG1010/TS2304). My build check only looked for lowercase "error" and missed it. Fixed in a
   follow-up commit; both `ng build commercehub-web` and `commercehub-admin` now complete.

@@ -8,11 +8,14 @@ final _money = NumberFormat.currency(symbol: '', decimalDigits: 2);
 final _dayMonth = DateFormat('d MMM', 'es');
 final _full = DateFormat('d MMM yyyy, HH:mm', 'es');
 
-/// Currency symbols shown instead of the ISO code. The store sells in lempiras ("L 1,234.50").
-const _symbols = {'HNL': 'L'};
+/// Prefixes shown instead of the ISO code. The store sells in lempiras ("LPS. 1,234.50").
+const _symbols = {'HNL': 'LPS.'};
 
-String formatMoney(double value, String currency) =>
-    '${_symbols[currency.toUpperCase()] ?? currency} ${_money.format(value)}'.trim();
+String formatMoney(double value, String currency) {
+  final prefix = _symbols[currency.toUpperCase()] ?? currency;
+  final sign = value < 0 ? '-' : '';
+  return '$sign$prefix ${_money.format(value.abs())}'.trim();
+}
 
 String formatDateTime(DateTime dt) => _full.format(dt.toLocal());
 
