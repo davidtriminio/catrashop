@@ -193,6 +193,39 @@ class BiometricService {
 
 final biometricProvider = Provider<BiometricService>((ref) => BiometricService());
 
+// --- Retrying a failed load ------------------------------------------------------------------
+
+/// What the last "Reintentar" press was: how many times in a row and when, so a failure that comes back instantly
+/// still looks like a new attempt instead of the same message.
+class RetryInfo {
+  const RetryInfo(this.attempt, this.at);
+  final int attempt;
+  final DateTime at;
+}
+
+class RetryInfoNotifier extends Notifier<RetryInfo?> {
+  @override
+  RetryInfo? build() => null;
+
+  void mark() => state = RetryInfo((state?.attempt ?? 0) + 1, DateTime.now());
+  void clear() => state = null;
+}
+
+final retryInfoProvider = NotifierProvider<RetryInfoNotifier, RetryInfo?>(RetryInfoNotifier.new);
+
+/// After a retry press the loading state must be visible for a moment, even when the server answers (or fails) at once.
+Future<void> _showRetryProgress(Ref ref) async {
+  if (ref.read(retryInfoProvider) != null) await Future<void>.delayed(const Duration(milliseconds: 600));
+}
+
+void _loadSucceeded(Ref ref) {
+  try {
+    ref.read(retryInfoProvider.notifier).clear();
+  } catch (_) {
+    // the provider is being torn down
+  }
+}
+
 // --- Orders ----------------------------------------------------------------------------------
 
 class StatusFilter extends Notifier<String?> {
@@ -217,7 +250,9 @@ class OrdersNotifier extends AsyncNotifier<OrdersState> {
   @override
   Future<OrdersState> build() async {
     final status = ref.watch(statusFilterProvider);
+    await _showRetryProgress(ref);
     final p = await ref.read(ordersRepositoryProvider).list(status: status);
+    _loadSucceeded(ref);
     return OrdersState(p.items, p.page, p.hasNext, totalCount: p.totalCount);
   }
 
@@ -241,9 +276,12 @@ class OrdersNotifier extends AsyncNotifier<OrdersState> {
 
 final ordersProvider = AsyncNotifierProvider<OrdersNotifier, OrdersState>(OrdersNotifier.new);
 
-final orderDetailProvider = FutureProvider.autoDispose.family<OrderDetail, String>(
-  (ref, id) => ref.watch(ordersRepositoryProvider).detail(id),
-);
+final orderDetailProvider = FutureProvider.autoDispose.family<OrderDetail, String>((ref, id) async {
+  await _showRetryProgress(ref);
+  final detail = await ref.watch(ordersRepositoryProvider).detail(id);
+  _loadSucceeded(ref);
+  return detail;
+});
 
 /// Foreground poller: while the app is open and signed in, checks every minute for new orders.
 final newOrderPollerProvider = Provider<void>((ref) {
@@ -291,10 +329,12 @@ class OrderSummaryCounts {
 final summaryProvider = FutureProvider.autoDispose<OrderSummaryCounts>((ref) async {
   final repo = ref.watch(ordersRepositoryProvider);
   final statuses = OrderStatus.filters;
+  await _showRetryProgress(ref);
   final results = await Future.wait([
     repo.count(),
     for (final s in statuses) repo.count(status: s),
   ]);
+  _loadSucceeded(ref);
   return OrderSummaryCounts(
     total: results.first,
     byStatus: {for (var i = 0; i < statuses.length; i++) statuses[i]: results[i + 1]},

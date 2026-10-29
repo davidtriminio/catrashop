@@ -27,14 +27,14 @@ class SummaryPage extends ConsumerWidget {
         },
         child: summary.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (e, _) => ListView(children: [
+          // While a retry is under way Riverpod still reports the previous error: show the spinner instead.
+          error: (e, _) => summary.isLoading ? const Center(child: CircularProgressIndicator()) : ListView(children: [
             SizedBox(
-              height: 400,
-              child: StateMessage(
-                icon: Icons.cloud_off_outlined,
+              height: MediaQuery.sizeOf(context).height * 0.6,
+              child: LoadError(
                 title: 'No se pudo cargar el resumen',
-                message: e.toString(),
-                action: FilledButton(onPressed: () => ref.invalidate(summaryProvider), child: const Text('Reintentar')),
+                error: e,
+                onRetry: () => ref.invalidate(summaryProvider),
               ),
             ),
           ]),
