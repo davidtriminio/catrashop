@@ -1,6 +1,6 @@
 # Catrashop
 
-> **Catrashop** is the product name; **CommerceHub** is the internal code name that the namespaces, projects and repository keep.
+> Formerly named *CommerceHub*: the product, the code (namespaces, projects, packages), the configuration and the docs are all called **Catrashop** now (see [PR-050](docs/git/prs/PR-050-rename-everything.md)).
 
 > A modular-monolith, event-driven **enterprise e-commerce platform** built with .NET 10 + Angular 22, designed as a realistic reference of how production commerce software is structured, secured, tested, and operated.
 
@@ -28,7 +28,7 @@
 
 ## Overview
 
-CommerceHub is a full commerce platform covering the real lifecycle of an online store: identity, catalog and
+Catrashop is a full commerce platform covering the real lifecycle of an online store: identity, catalog and
 inventory, cart and checkout, orders, (simulated) payments, shipping, promotions, notifications, and an AI
 shopping assistant with **strictly bounded** tools. Back-office administration is a separate Angular app calling
 permission-gated endpoints, and security-sensitive actions (login, password changes) are recorded in the
@@ -38,7 +38,7 @@ boundaries that can be extracted into services later *if and when* a real reason
 ## The business problem
 
 Mid-market retailers need a platform that is cheap to operate, fast to evolve, and safe to change — without the
-operational tax of a premature microservice fleet. CommerceHub targets that sweet spot: one deployable unit, clear
+operational tax of a premature microservice fleet. Catrashop targets that sweet spot: one deployable unit, clear
 internal seams, event-driven side effects (email, analytics, fulfillment), and an AI assistant that can help
 customers **without ever being able to leak or mutate data it shouldn't touch**.
 
@@ -47,8 +47,8 @@ customers **without ever being able to leak or mutate data it shouldn't touch**.
 ```mermaid
 flowchart TB
     subgraph Client
-      WEB[commercehub-web<br/>customer SPA]
-      ADM[commercehub-admin<br/>admin SPA]
+      WEB[catrashop-web<br/>customer SPA]
+      ADM[catrashop-admin<br/>admin SPA]
     end
     subgraph API[ASP.NET Core API · one deployable]
       GW[Composition root<br/>JWT auth · permission policies · ProblemDetails<br/>security headers · CORS · rate limit · compression · cache]
@@ -135,15 +135,15 @@ Full reasoning: [ADR-001 — Modular Monolith](docs/adr/001-modular-monolith.md)
 docker compose up -d
 
 # 2. Apply EF Core migrations (each module owns its own; the app does NOT auto-migrate on startup)
-#    e.g. per context:  dotnet ef database update --project backend/src/Modules/Identity/CommerceHub.Modules.Identity
+#    e.g. per context:  dotnet ef database update --project backend/src/Modules/Identity/Catrashop.Modules.Identity
 
 # 3. Run the backend
-dotnet run --project backend/src/Api/CommerceHub.Api
+dotnet run --project backend/src/Api/Catrashop.Api
 
 # 4. Run the customer SPA (http://localhost:4200)
 cd frontend && pnpm install && pnpm start
 #    …and the admin SPA (http://localhost:4300)
-pnpm ng serve commercehub-admin
+pnpm ng serve catrashop-admin
 ```
 
 There is no automated seed script yet; [`docs/demo-data.md`](docs/demo-data.md) walks the full journey through
