@@ -38,6 +38,8 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
 - **Branding:** the icon is now a shopping bag wrapped by an orbit ring (it replaces the H), still generated from the same script
   → [PR-047](docs/git/prs/PR-047-ecommerce-icon.md)
 - **Branding:** the icon is now a shopping cart with a ringed planet (the bag read as a padlock) → [PR-048](docs/git/prs/PR-048-cart-planet-icon.md)
+- **Branding:** the product is now called **Catrashop** (store, admin, mobile app label, customer e-mails); CommerceHub stays as the
+  internal code name → [PR-049](docs/git/prs/PR-049-rename-catrashop.md)
 
 ## v1.2.0 — Reliability fixes and the redesign
 - **Fix:** the account page no longer fails when the customer profile is created by concurrent requests
