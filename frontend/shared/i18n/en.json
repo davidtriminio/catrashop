@@ -39,6 +39,9 @@
     "pending": "Pending",
     "paymentPending": "Payment pending",
     "paid": "Paid",
+    "confirmed": "Confirmed",
+    "underReview": "Under review",
+    "captured": "Collected",
     "paymentFailed": "Payment failed",
     "processing": "Processing",
     "shipped": "Shipped",
@@ -243,6 +246,48 @@
     "cancelFailed": "Could not cancel this order.",
     "shipping": "Shipping",
     "pickupAt": "Pick up at"
+  },
+  "payment": {
+    "title": "Payment method",
+    "loadingMethods": "Looking for payment methods…",
+    "chooseDestination": "Choose the department to see how you can pay.",
+    "none": "No payment methods are available for this delivery.",
+    "method": {
+      "CONTRA_ENTREGA": "Cash on delivery",
+      "TRANSFERENCIA": "Bank transfer",
+      "PAGO_EN_TIENDA": "Pay at the store"
+    },
+    "help": {
+      "CONTRA_ENTREGA": "You pay in cash when you receive your order.",
+      "TRANSFERENCIA": "You transfer to our account and upload the receipt; we verify your payment.",
+      "PAGO_EN_TIENDA": "You pay at the store when you collect your order."
+    },
+    "panel": {
+      "title": "Payment",
+      "method": "Method:",
+      "status": "Payment status:",
+      "start": "Continue with the payment",
+      "startFailed": "The payment could not be started.",
+      "cashPending": "You will pay in cash when you receive your order. Your order is already confirmed.",
+      "storePending": "You will pay at the store when you collect your order. Your order is already confirmed.",
+      "collected": "Payment received. Thank you!",
+      "transferIntro": "Transfer the order total to one of these accounts and upload the receipt.",
+      "account": "{{bank}} · {{type}} · {{number}} · {{holder}}",
+      "bankAccount": "Account you transferred to",
+      "reference": "Transfer reference",
+      "receipt": "Receipt (JPG, PNG or PDF, up to 5 MB)",
+      "send": "Send receipt",
+      "sending": "Sending…",
+      "sent": "We received your receipt.",
+      "sendFailed": "The receipt could not be sent.",
+      "tooLarge": "The file is larger than 5 MB.",
+      "wrongType": "Upload a JPG or PNG image, or a PDF.",
+      "needFile": "Attach the receipt.",
+      "underReview": "We are verifying your receipt. We will let you know when the payment is confirmed.",
+      "rejected": "We could not verify your receipt: {{reason}} You can send another one.",
+      "verified": "Transfer verified. Thank you!",
+      "noAccounts": "No bank accounts are configured yet. Contact us to pay."
+    }
   },
   "tracking": {
     "title": "Track a shipment",

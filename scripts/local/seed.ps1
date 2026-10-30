@@ -6,6 +6,8 @@
   Requires: migrations applied (setup-db.ps1) and the API running (dotnet run --project backend/src/Api/Catrashop.Api).
   Everything goes through the real API, except promoting the admin user (a DB update: there is no endpoint for that).
   Re-running is safe for users/catalog (409s are ignored) but adds 4 more orders each time.
+  The orders show the payment methods: three cash-on-delivery orders (accepted, to be collected on delivery) and one
+  bank transfer whose receipt waits in the admin's verification queue.
   These are LOCAL TEST credentials only; never reuse them anywhere real.
 .EXAMPLE
   ./scripts/local/seed.ps1
@@ -114,12 +116,23 @@ $address = @{ recipientName = 'Cliente Prueba'; line1 = 'Col. Palmira, Calle 5';
 $orderIds = @()
 for ($i = 0; $i -lt 4; $i++) {
   Call POST '/api/v1/cart/items' @{ variantId = $variantIds[$i % $variantIds.Count]; quantity = 1 + ($i % 3) } $cust | Out-Null
-  $order = Call POST '/api/v1/orders/checkout' @{ shippingAddress = $address } $cust
+  # #4 is paid by bank transfer; the others on delivery (HN-FM is in a zone that covers cash on delivery).
+  $method = if ($i -eq 3) { 'TRANSFERENCIA' } else { 'CONTRA_ENTREGA' }
+  $order = Call POST '/api/v1/orders/checkout' @{ shippingAddress = $address; paymentMethod = $method } $cust
   $orderIds += $order.orderId
-  Call POST '/api/v1/payments' @{ orderId = $order.orderId } $cust -Headers @{ 'Idempotency-Key' = [guid]::NewGuid().ToString() } | Out-Null
-  Write-Host "   order $($order.orderNumber) created and paid"
+  $payment = Call POST '/api/v1/payments' @{ orderId = $order.orderId } $cust -Headers @{ 'Idempotency-Key' = [guid]::NewGuid().ToString() }
+  if ($method -eq 'TRANSFERENCIA') {
+    # A 1x1 PNG stands in for the receipt photo.
+    $png = [Convert]::FromBase64String('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg==')
+    $tmp = Join-Path ([IO.Path]::GetTempPath()) 'catrashop-seed-receipt.png'
+    [IO.File]::WriteAllBytes($tmp, $png)
+    $uri = "$ApiUrl/api/v1/payments/$($payment.id)/transfer-proof"
+    Invoke-RestMethod -Method POST -Uri $uri -Headers @{ Authorization = "Bearer $cust" } -Form @{ bankAccountCode = 'BAC-LPS'; reference = 'SEED-0001'; receipt = Get-Item $tmp } | Out-Null
+    Remove-Item $tmp -ErrorAction SilentlyContinue
+  }
+  Write-Host "   order $($order.orderNumber) created ($method)"
 }
-# leave #1 Paid, move #2 -> Processing, #3 -> Shipped, #4 -> Paid (so the app has actions to try)
+# #1 stays Confirmed, #2 -> Processing, #3 -> Shipped, #4 waits for its transfer to be verified (so the apps have actions to try)
 Call POST "/api/v1/orders/admin/$($orderIds[1])/process" $null $admin | Out-Null
 Call POST "/api/v1/orders/admin/$($orderIds[2])/process" $null $admin | Out-Null
 Call POST "/api/v1/orders/admin/$($orderIds[2])/ship" $null $admin | Out-Null

@@ -16,7 +16,8 @@ public enum OrderStatus
     PaymentFailed = 6,    // payment attempt failed
     Cancelled = 7,        // terminal — cancelled before fulfillment
     RefundRequested = 8,  // a refund has been requested
-    Refunded = 9          // terminal — refund completed
+    Refunded = 9,         // terminal — refund completed
+    Confirmed = 10        // accepted, money to be collected later (cash on delivery / pay at the store)
 }
 
 /// <summary>The allowed transitions between order states, and helpers to query them.</summary>
@@ -26,7 +27,8 @@ public static class OrderStateMachine
         new Dictionary<OrderStatus, IReadOnlySet<OrderStatus>>
         {
             [OrderStatus.Pending] = Set(OrderStatus.PaymentPending, OrderStatus.Cancelled),
-            [OrderStatus.PaymentPending] = Set(OrderStatus.Paid, OrderStatus.PaymentFailed, OrderStatus.Cancelled),
+            [OrderStatus.PaymentPending] = Set(OrderStatus.Paid, OrderStatus.Confirmed, OrderStatus.PaymentFailed, OrderStatus.Cancelled),
+            [OrderStatus.Confirmed] = Set(OrderStatus.Processing, OrderStatus.Cancelled),
             [OrderStatus.PaymentFailed] = Set(OrderStatus.PaymentPending, OrderStatus.Cancelled),
             [OrderStatus.Paid] = Set(OrderStatus.Processing, OrderStatus.RefundRequested, OrderStatus.Cancelled),
             [OrderStatus.Processing] = Set(OrderStatus.Shipped, OrderStatus.RefundRequested, OrderStatus.Cancelled),

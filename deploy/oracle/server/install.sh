@@ -6,6 +6,7 @@ HERE="$(cd "$(dirname "$0")" && pwd)"
 
 id catrashop >/dev/null 2>&1 || useradd --system --home /opt/catrashop --shell /usr/sbin/nologin catrashop
 install -d -o catrashop -g catrashop /opt/catrashop /opt/catrashop/releases /var/log/catrashop
+install -d -m 750 -o catrashop -g catrashop /var/lib/catrashop /var/lib/catrashop/receipts
 install -d -m 750 -o root -g catrashop /etc/catrashop
 
 # 1 GB RAM: make sure there is a swap file (uses 1 GB of the disk)

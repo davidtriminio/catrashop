@@ -9,6 +9,10 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
 **local workflow simulations** — no human reviewed the code.
 
 ## [Unreleased]
+- **Payment methods:** the customer chooses how to pay at checkout, and the server only accepts what the delivery
+  option allows: *cash on delivery* (only where the zone covers it), *bank transfer* (receipt + manual verification)
+  and *pay at the store* (pickup). New order state `Confirmed` for orders paid later; admin "Payments" queue to verify
+  receipts and register collections → [PR-051](docs/git/prs/PR-051-payment-methods.md)
 - **Fix:** sessions no longer close on parallel refreshes or transient network/429/5xx errors (web and mobile); the
   background task never spends the refresh token; the API tolerates concurrent refreshes within a short grace window
   → [PR-037](docs/git/prs/PR-037-session-stability.md)

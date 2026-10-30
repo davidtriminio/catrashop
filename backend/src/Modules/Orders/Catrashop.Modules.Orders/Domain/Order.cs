@@ -17,7 +17,7 @@ public sealed class Order : AggregateRoot<Guid>
     private Order() { } // EF
 
     private Order(Guid id, string orderNumber, Guid customerId, Guid cartId, string currency,
-        ShippingAddress shippingAddress, decimal discountTotal, decimal taxTotal, OrderDelivery delivery, DateTimeOffset nowUtc) : base(id)
+        ShippingAddress shippingAddress, decimal discountTotal, decimal taxTotal, OrderDelivery delivery, string? paymentMethod, DateTimeOffset nowUtc) : base(id)
     {
         OrderNumber = orderNumber;
         CustomerId = customerId;
@@ -31,6 +31,7 @@ public sealed class Order : AggregateRoot<Guid>
         PickupStoreId = delivery.PickupStoreId;
         PickupStoreName = delivery.PickupStoreName;
         ShippingTotal = delivery.ShippingTotal;
+        PaymentMethod = paymentMethod;
         Status = OrderStatus.Pending;
         CreatedAtUtc = nowUtc;
         UpdatedAtUtc = nowUtc;
@@ -63,6 +64,12 @@ public sealed class Order : AggregateRoot<Guid>
     /// <summary>The delivery cost charged for the destination zone (0 for a pickup). Not subject to tax.</summary>
     public decimal ShippingTotal { get; private set; }
 
+    /// <summary>
+    /// How the customer chose to pay (a <see cref="Contracts.PaymentMethodCodes"/> code). Null only for orders created
+    /// before payment methods existed.
+    /// </summary>
+    public string? PaymentMethod { get; private set; }
+
     public decimal Subtotal => _items.Sum(i => i.LineTotal);
     public decimal GrandTotal => Subtotal - DiscountTotal + TaxTotal + ShippingTotal;
 
@@ -75,10 +82,10 @@ public sealed class Order : AggregateRoot<Guid>
     public static Result<Order> Create(
         string orderNumber, Guid customerId, Guid cartId, string currency, ShippingAddress shippingAddress,
         IEnumerable<(Guid ProductId, Guid VariantId, string Sku, string ProductName, decimal UnitPrice, int Quantity)> lines,
-        decimal discountTotal, decimal taxTotal, DateTimeOffset nowUtc, OrderDelivery? delivery = null)
+        decimal discountTotal, decimal taxTotal, DateTimeOffset nowUtc, OrderDelivery? delivery = null, string? paymentMethod = null)
     {
         var order = new Order(Guid.NewGuid(), orderNumber, customerId, cartId, currency.ToUpperInvariant(),
-            shippingAddress, discountTotal, taxTotal, delivery ?? OrderDelivery.None, nowUtc);
+            shippingAddress, discountTotal, taxTotal, delivery ?? OrderDelivery.None, paymentMethod, nowUtc);
 
         foreach (var l in lines)
             order._items.Add(new OrderItem(Guid.NewGuid(), order.Id, l.ProductId, l.VariantId, l.Sku, l.ProductName, l.UnitPrice, l.Quantity));
@@ -94,6 +101,15 @@ public sealed class Order : AggregateRoot<Guid>
 
     public Result MarkPaymentPending(DateTimeOffset nowUtc) => Transition(OrderStatus.PaymentPending, "Payment initiated", nowUtc);
     public Result MarkPaid(DateTimeOffset nowUtc) => Transition(OrderStatus.Paid, "Payment captured", nowUtc);
+    /// <summary>
+    /// Accept an order whose money is collected later. Only the "collected later" methods may take this path; a
+    /// transfer must be verified and go through <see cref="MarkPaid"/>.
+    /// </summary>
+    public Result Confirm(DateTimeOffset nowUtc) =>
+        Contracts.PaymentMethodCodes.IsCollectedLater(PaymentMethod)
+            ? Transition(OrderStatus.Confirmed, PaymentMethod == Contracts.PaymentMethodCodes.PayAtStore ? "Confirmed — to be paid at the store" : "Confirmed — to be paid on delivery", nowUtc)
+            : OrderErrors.PaymentNotCollectedLater;
+
     public Result MarkPaymentFailed(string? reason, DateTimeOffset nowUtc) => Transition(OrderStatus.PaymentFailed, reason ?? "Payment failed", nowUtc);
     public Result StartProcessing(DateTimeOffset nowUtc) => Transition(OrderStatus.Processing, "Processing", nowUtc);
     public Result MarkShipped(DateTimeOffset nowUtc) => Transition(OrderStatus.Shipped, "Shipped", nowUtc);

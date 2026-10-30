@@ -2,7 +2,8 @@ import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { OrdersAdminApi } from '@cs/api/orders-admin.api';
-import { OrderDetail } from '@cs/api/models';
+import { OrderDetail, PaymentResponse } from '@cs/api/models';
+import { PaymentsAdminApi } from '@cs/api/payments-admin.api';
 import { StatusBadge } from '@cs/ui/status-badge';
 import { Timeline } from '@cs/ui/timeline';
 import { MoneyPipe } from '@cs/util/money.pipe';
@@ -66,6 +67,22 @@ type Action = 'process' | 'ship' | 'deliver' | 'cancel';
               {{ o.shippingAddress.country }}
             </p>
           </div>
+          @if (o.paymentMethod) {
+            <div class="card">
+              <h2>Payment</h2>
+              <p class="line"><span class="muted">Method</span><strong>{{ methodLabel(o.paymentMethod) }}</strong></p>
+              @if (payment(); as p) {
+                <p class="line"><span class="muted">Status</span><cs-status-badge [status]="p.status" /></p>
+                @if (p.transferReference) { <p class="line"><span class="muted">Transfer</span><span>{{ p.transferBankAccountCode }} · {{ p.transferReference }}</span></p> }
+                @if (p.status === 'UnderReview') { <a class="btn secondary sm" routerLink="/payments">Verify the receipt</a> }
+                @if (p.status === 'Pending' && o.paymentMethod !== 'TRANSFERENCIA') {
+                  @if (o.status === 'Delivered') {
+                    <button class="btn sm" [disabled]="busy()" (click)="collect(p)">Mark money collected</button>
+                  } @else { <p class="muted">The money is collected once the order is delivered.</p> }
+                }
+              } @else { <p class="muted">The customer has not started the payment.</p> }
+            </div>
+          }
           <div class="card">
             <h2>History</h2>
             <cs-timeline [items]="o.history" />
@@ -91,14 +108,17 @@ type Action = 'process' | 'ship' | 'deliver' | 'cancel';
     .line { display: flex; justify-content: space-between; padding: var(--space-1) 0; }
     .line.total { border-top: 1px solid var(--border); margin-top: var(--space-2); padding-top: var(--space-3); font-size: 1.05rem; }
     .addr { margin: 0; line-height: 1.6; }
+    .side .line { justify-content: flex-start; align-items: center; gap: var(--space-3); }
     @media (max-width: 760px) { .grids { grid-template-columns: 1fr; } }
   `],
 })
 export class OrderDetailAdmin implements OnInit {
   private readonly api = inject(OrdersAdminApi);
+  private readonly payments = inject(PaymentsAdminApi);
   private readonly route = inject(ActivatedRoute);
 
   readonly order = signal<OrderDetail | null>(null);
+  readonly payment = signal<PaymentResponse | null>(null);
   readonly error = signal<string | null>(null);
   readonly message = signal<string | null>(null);
   readonly busy = signal(false);
@@ -106,13 +126,33 @@ export class OrderDetailAdmin implements OnInit {
 
   ngOnInit(): void { this.load(); }
   private load(): void {
-    this.api.get(this.id()).subscribe({ next: (o) => this.order.set(o), error: (e) => this.error.set(problemMessage(e, 'Order not found.')) });
+    this.api.get(this.id()).subscribe({
+      next: (o) => { this.order.set(o); this.loadPayment(o); },
+      error: (e) => this.error.set(problemMessage(e, 'Order not found.')),
+    });
+  }
+
+  private loadPayment(o: OrderDetail): void {
+    if (!o.paymentMethod) { this.payment.set(null); return; }
+    this.payments.forOrder(o.id).subscribe({ next: (p) => this.payment.set(p), error: () => this.payment.set(null) });
+  }
+
+  methodLabel(method: string): string {
+    return { CONTRA_ENTREGA: 'Cash on delivery', TRANSFERENCIA: 'Bank transfer', PAGO_EN_TIENDA: 'Pay at the store' }[method] ?? method;
+  }
+
+  collect(p: PaymentResponse): void {
+    this.busy.set(true); this.error.set(null); this.message.set(null);
+    this.payments.collect(p.id).subscribe({
+      next: () => { this.message.set('Payment registered as collected.'); this.busy.set(false); this.load(); },
+      error: (e) => { this.error.set(problemMessage(e)); this.busy.set(false); },
+    });
   }
 
   /** The one fulfilment step the order state machine allows next (null when there is none). */
   next(status: string): { action: Action; label: string } | null {
     switch (status) {
-      case 'Paid': return { action: 'process', label: 'Start processing' };
+      case 'Paid': case 'Confirmed': return { action: 'process', label: 'Start processing' };
       case 'Processing': return { action: 'ship', label: 'Mark shipped' };
       case 'Shipped': return { action: 'deliver', label: 'Mark delivered' };
       default: return null;
@@ -120,7 +160,7 @@ export class OrderDetailAdmin implements OnInit {
   }
 
   canCancel(status: string): boolean {
-    return ['Pending', 'PaymentPending', 'PaymentFailed', 'Paid', 'Processing'].includes(status);
+    return ['Pending', 'PaymentPending', 'PaymentFailed', 'Paid', 'Confirmed', 'Processing'].includes(status);
   }
 
   act(action: Action, o: OrderDetail): void {

@@ -18,9 +18,46 @@ public interface IOrderWorkflow
 
     /// <summary>Move a paid/fulfilling order through RefundRequested → Refunded after a payment refund. Idempotent.</summary>
     Task<Result> RefundAsync(Guid orderId, CancellationToken ct = default);
+
+    /// <summary>
+    /// Accept an order whose money is collected later (cash on delivery, payment in the store): it moves to
+    /// Confirmed and its reserved stock is committed, but it is NOT marked paid. Idempotent.
+    /// </summary>
+    Task<Result> ConfirmWithoutPaymentAsync(Guid orderId, CancellationToken ct = default);
 }
 
-public sealed record PayableOrder(Guid OrderId, Guid CustomerId, string Currency, decimal Amount, bool IsAwaitingPayment, bool IsPaid);
+/// <summary>
+/// What the Payments module needs to charge an order. <paramref name="PaymentMethod"/> is the code the customer chose
+/// at checkout (see <see cref="PaymentMethodCodes"/>), or null for an order created before payment methods existed.
+/// </summary>
+public sealed record PayableOrder(
+    Guid OrderId, Guid CustomerId, string Currency, decimal Amount, bool IsAwaitingPayment, bool IsPaid,
+    string Status = "", string? PaymentMethod = null);
+
+/// <summary>
+/// The payment methods a customer can choose, as codes shared by Orders (which validates the choice against the
+/// delivery mode) and Payments (which runs the matching flow). <c>LINKPAGO</c> is intentionally absent for now.
+/// </summary>
+public static class PaymentMethodCodes
+{
+    public const string CashOnDelivery = "CONTRA_ENTREGA";
+    public const string BankTransfer = "TRANSFERENCIA";
+    public const string PayAtStore = "PAGO_EN_TIENDA";
+
+    public static readonly IReadOnlyList<string> All = [CashOnDelivery, BankTransfer, PayAtStore];
+
+    /// <summary>True for methods where the money is collected after the order is accepted (no receipt, no gateway).</summary>
+    public static bool IsCollectedLater(string? code) => code is CashOnDelivery or PayAtStore;
+
+    /// <summary>
+    /// The methods allowed for a delivery mode. Home delivery: transfer, plus cash on delivery only where the
+    /// destination zone covers it. Store pickup: pay at the store, or transfer. Never depends on the shipping cost.
+    /// </summary>
+    public static IReadOnlyList<string> AllowedFor(bool isPickup, bool cashOnDeliveryCovered) =>
+        isPickup
+            ? [PayAtStore, BankTransfer]
+            : cashOnDeliveryCovered ? [CashOnDelivery, BankTransfer] : [BankTransfer];
+}
 
 /// <summary>
 /// Public, in-process contract the Shipping module calls to read an order's destination and drive its
@@ -75,6 +112,9 @@ public interface IOrderQueries
 
 public sealed record OrderCreatedIntegrationEvent(
     Guid OrderId, string OrderNumber, Guid CustomerId, string Currency, decimal GrandTotal, int ItemCount) : IntegrationEvent;
+
+public sealed record OrderConfirmedIntegrationEvent(
+    Guid OrderId, string OrderNumber, Guid CustomerId, decimal GrandTotal, string Currency, string PaymentMethod) : IntegrationEvent;
 
 public sealed record OrderPaidIntegrationEvent(
     Guid OrderId, string OrderNumber, Guid CustomerId, decimal GrandTotal, string Currency) : IntegrationEvent;

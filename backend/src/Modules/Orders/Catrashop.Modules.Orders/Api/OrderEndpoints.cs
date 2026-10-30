@@ -28,6 +28,11 @@ internal static class OrderEndpoints
         })
         .WithSummary("Check out the current cart into an order (reserves stock, awaits payment).");
 
+        mine.MapGet("/payment-methods", async (
+            string? deliveryMode, string? departmentCode, OrderCheckoutService checkout, CancellationToken ct) =>
+            Results.Ok(await checkout.GetPaymentMethodsAsync(deliveryMode ?? "Delivery", departmentCode, ct)))
+        .WithSummary("The payment methods allowed for a delivery option (mode + destination department).");
+
         mine.MapGet("", async (int? page, int? pageSize, ICurrentUser user, OrderQueryService queries, CancellationToken ct) =>
         {
             if (user.UserId is not { } customerId) return Results.Unauthorized();

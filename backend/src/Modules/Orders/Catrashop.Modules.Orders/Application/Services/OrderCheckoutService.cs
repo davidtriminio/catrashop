@@ -88,12 +88,19 @@ public sealed class OrderCheckoutService
         var destination = await ResolveDestinationAsync(request, cart.Currency, ct);
         if (destination.IsFailure)
             return destination.Error;
-        var (shipping, delivery) = destination.Value;
+        var (shipping, delivery, cashOnDeliveryCovered) = destination.Value;
+
+        // The payment method must be one the delivery option allows; re-checked here, never trusted from the client.
+        var paymentMethod = request.PaymentMethod?.Trim().ToUpperInvariant();
+        if (string.IsNullOrEmpty(paymentMethod))
+            return OrderErrors.PaymentMethodRequired;
+        if (!PaymentMethodCodes.AllowedFor(delivery.Mode == DeliveryMode.Pickup, cashOnDeliveryCovered).Contains(paymentMethod))
+            return OrderErrors.PaymentMethodNotAllowed;
 
         var lines = cart.Lines.Select(l => (l.ProductId, l.VariantId, l.Sku, l.ProductName, l.UnitPrice, l.Quantity));
 
         var orderResult = Order.Create(GenerateOrderNumber(now), customerId, cart.CartId, cart.Currency,
-            shipping, lines, discountTotal, taxTotal, now, delivery);
+            shipping, lines, discountTotal, taxTotal, now, delivery, paymentMethod);
         if (orderResult.IsFailure)
             return orderResult.Error;
         var order = orderResult.Value;
@@ -129,7 +136,17 @@ public sealed class OrderCheckoutService
         return ToResponse(order);
     }
 
-    private async Task<Result<(Domain.ShippingAddress Address, OrderDelivery Delivery)>> ResolveDestinationAsync(
+    /// <summary>The payment methods allowed for a delivery option (the checkout screen offers exactly these).</summary>
+    public async Task<PaymentMethodOptionsResponse> GetPaymentMethodsAsync(string deliveryMode, string? departmentCode, CancellationToken ct = default)
+    {
+        var isPickup = string.Equals(deliveryMode, nameof(DeliveryMode.Pickup), StringComparison.OrdinalIgnoreCase);
+        var covered = false;
+        if (!isPickup && !string.IsNullOrWhiteSpace(departmentCode))
+            covered = (await _shipping.QuoteDeliveryAsync(departmentCode, ct))?.CashOnDeliveryCovered ?? false;
+        return new PaymentMethodOptionsResponse(PaymentMethodCodes.AllowedFor(isPickup, covered));
+    }
+
+    private async Task<Result<(Domain.ShippingAddress Address, OrderDelivery Delivery, bool CashOnDeliveryCovered)>> ResolveDestinationAsync(
         CheckoutRequest request, string currency, CancellationToken ct)
     {
         Enum.TryParse<DeliveryMode>(request.DeliveryMode, ignoreCase: true, out var mode);
@@ -143,7 +160,7 @@ public sealed class OrderCheckoutService
             // The "address" of a pickup order is the store, so the order keeps a record of where it was collected.
             var address = new Domain.ShippingAddress(request.PickupRecipientName!.Trim(), store.Name, store.Line1, store.City,
                 store.DepartmentName, "-", "HN");
-            return (address, new OrderDelivery(DeliveryMode.Pickup, store.DepartmentCode, store.Id, store.Name, 0m));
+            return (address, new OrderDelivery(DeliveryMode.Pickup, store.DepartmentCode, store.Id, store.Name, 0m), false);
         }
 
         var a = request.ShippingAddress!;
@@ -155,11 +172,11 @@ public sealed class OrderCheckoutService
 
         var delivered = new Domain.ShippingAddress(a.RecipientName.Trim(), a.Line1.Trim(), a.Line2?.Trim(), a.City.Trim(),
             quote.DepartmentName, a.PostalCode.Trim(), "HN");
-        return (delivered, new OrderDelivery(DeliveryMode.Delivery, quote.DepartmentCode, null, null, quote.Cost));
+        return (delivered, new OrderDelivery(DeliveryMode.Delivery, quote.DepartmentCode, null, null, quote.Cost), quote.CashOnDeliveryCovered);
     }
 
     private static CheckoutResponse ToResponse(Order order) =>
-        new(order.Id, order.OrderNumber, order.Status.ToString(), order.Currency, order.GrandTotal);
+        new(order.Id, order.OrderNumber, order.Status.ToString(), order.Currency, order.GrandTotal, order.PaymentMethod);
 
     private static string GenerateOrderNumber(DateTimeOffset now) =>
         $"ORD-{now:yyyyMMdd}-{Guid.NewGuid().ToString("N")[..8].ToUpperInvariant()}";

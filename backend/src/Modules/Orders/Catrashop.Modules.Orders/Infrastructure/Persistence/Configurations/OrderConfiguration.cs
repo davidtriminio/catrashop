@@ -27,6 +27,7 @@ public sealed class OrderConfiguration : IEntityTypeConfiguration<Order>
         builder.Property(o => o.DeliveryMode).HasConversion<string>().HasMaxLength(10).HasDefaultValue(DeliveryMode.Delivery);
         builder.Property(o => o.DepartmentCode).HasMaxLength(10);
         builder.Property(o => o.PickupStoreName).HasMaxLength(150);
+        builder.Property(o => o.PaymentMethod).HasMaxLength(20);
 
         // Computed — not stored.
         builder.Ignore(o => o.Subtotal);

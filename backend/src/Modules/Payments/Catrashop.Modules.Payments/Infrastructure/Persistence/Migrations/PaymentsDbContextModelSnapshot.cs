@@ -26,7 +26,6 @@ namespace Catrashop.Modules.Payments.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Catrashop.Infrastructure.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -74,7 +73,6 @@ namespace Catrashop.Modules.Payments.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Catrashop.Modules.Payments.Domain.Payment", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -108,9 +106,18 @@ namespace Catrashop.Modules.Payments.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(200)")
                         .HasColumnName("idempotency_key");
 
+                    b.Property<string>("Method")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("method");
+
                     b.Property<Guid>("OrderId")
                         .HasColumnType("uuid")
                         .HasColumnName("order_id");
+
+                    b.Property<DateTimeOffset?>("ProofSubmittedAtUtc")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("proof_submitted_at_utc");
 
                     b.Property<string>("Provider")
                         .IsRequired()
@@ -123,11 +130,36 @@ namespace Catrashop.Modules.Payments.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(100)")
                         .HasColumnName("provider_reference");
 
+                    b.Property<string>("ReceiptContentType")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("receipt_content_type");
+
+                    b.Property<string>("ReceiptKey")
+                        .HasMaxLength(200)
+                        .HasColumnType("character varying(200)")
+                        .HasColumnName("receipt_key");
+
+                    b.Property<string>("ReviewNote")
+                        .HasMaxLength(500)
+                        .HasColumnType("character varying(500)")
+                        .HasColumnName("review_note");
+
                     b.Property<string>("Status")
                         .IsRequired()
                         .HasMaxLength(20)
                         .HasColumnType("character varying(20)")
                         .HasColumnName("status");
+
+                    b.Property<string>("TransferBankAccountCode")
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("transfer_bank_account_code");
+
+                    b.Property<string>("TransferReference")
+                        .HasMaxLength(100)
+                        .HasColumnType("character varying(100)")
+                        .HasColumnName("transfer_reference");
 
                     b.Property<DateTimeOffset>("UpdatedAtUtc")
                         .HasColumnType("timestamp with time zone")
@@ -145,6 +177,9 @@ namespace Catrashop.Modules.Payments.Infrastructure.Persistence.Migrations
 
                     b.HasIndex("ProviderReference")
                         .HasDatabaseName("ix_payments_provider_reference");
+
+                    b.HasIndex("Status")
+                        .HasDatabaseName("ix_payments_status");
 
                     b.ToTable("payments", "payments");
                 });

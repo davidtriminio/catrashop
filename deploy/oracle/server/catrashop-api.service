@@ -20,7 +20,7 @@ NoNewPrivileges=true
 PrivateTmp=true
 ProtectSystem=strict
 ProtectHome=true
-ReadWritePaths=/var/log/catrashop
+ReadWritePaths=/var/log/catrashop /var/lib/catrashop
 
 [Install]
 WantedBy=multi-user.target

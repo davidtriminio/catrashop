@@ -23,6 +23,13 @@ public sealed class PaymentConfiguration : IEntityTypeConfiguration<Payment>
         builder.HasIndex(p => p.ProviderReference).HasDatabaseName("ix_payments_provider_reference");
         builder.Property(p => p.Status).HasConversion<string>().HasMaxLength(20);
         builder.Property(p => p.FailureReason).HasMaxLength(500);
+        builder.Property(p => p.Method).HasMaxLength(20);
+        builder.Property(p => p.TransferBankAccountCode).HasMaxLength(50);
+        builder.Property(p => p.TransferReference).HasMaxLength(100);
+        builder.Property(p => p.ReceiptKey).HasMaxLength(200);
+        builder.Property(p => p.ReceiptContentType).HasMaxLength(50);
+        builder.Property(p => p.ReviewNote).HasMaxLength(500);
+        builder.HasIndex(p => p.Status).HasDatabaseName("ix_payments_status");
     }
 }
 

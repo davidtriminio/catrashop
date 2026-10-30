@@ -34,6 +34,11 @@ export const routes: Routes = [
     loadComponent: () => import('./features/order-detail-admin').then((m) => m.OrderDetailAdmin),
   },
   {
+    path: 'payments',
+    canActivate: [permissionGuard(PERMISSIONS.ordersManage)],
+    loadComponent: () => import('./features/payments-admin').then((m) => m.PaymentsAdmin),
+  },
+  {
     path: 'promotions',
     canActivate: [permissionGuard(PERMISSIONS.promotions)],
     loadComponent: () => import('./features/promotions-admin').then((m) => m.PromotionsAdmin),

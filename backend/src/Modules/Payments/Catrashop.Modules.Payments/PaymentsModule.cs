@@ -34,6 +34,7 @@ public sealed class PaymentsModule : IModule
         // PaymentsOptions.Provider is a future extension; today the simulated provider is the only one.
         services.AddSingleton<IPaymentProvider, FakePaymentProvider>();
         services.AddSingleton<IWebhookSignatureVerifier, HmacWebhookSignatureVerifier>();
+        services.AddSingleton<IReceiptStore, FileSystemReceiptStore>();
 
         services.AddScoped<PaymentService>();
         services.AddScoped<WebhookService>();

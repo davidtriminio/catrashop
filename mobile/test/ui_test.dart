@@ -124,7 +124,8 @@ void main() {
       theme: AppTheme.light(),
       home: Scaffold(body: Column(children: [for (final s in [...OrderStatus.filters, OrderStatus.pending, OrderStatus.paymentFailed]) StatusChip(status: s)])),
     ));
-    expect(find.byType(StatusChip), findsNWidgets(7));
+    expect(find.byType(StatusChip), findsNWidgets(8));
     expect(find.text('Pagado'), findsOneWidget);
+    expect(find.text('Confirmado'), findsOneWidget);
   });
 }

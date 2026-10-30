@@ -79,7 +79,7 @@ export class OrdersAdmin implements OnInit {
   private readonly api = inject(OrdersAdminApi);
   private page = 1;
   status = '';
-  readonly statuses = ['Paid', 'Processing', 'Shipped', 'Delivered', 'Pending', 'PaymentPending', 'PaymentFailed', 'Cancelled', 'RefundRequested', 'Refunded'];
+  readonly statuses = ['Paid', 'Confirmed', 'Processing', 'Shipped', 'Delivered', 'Pending', 'PaymentPending', 'PaymentFailed', 'Cancelled', 'RefundRequested', 'Refunded'];
 
   readonly result = signal<Paged<OrderSummary> | null>(null);
   readonly loading = signal(false);

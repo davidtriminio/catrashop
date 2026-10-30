@@ -1,9 +1,9 @@
-import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { CustomersApi } from '@cs/api/customers.api';
-import { Address, CheckoutResponse, CouponQuote, PickupStore, ShippingZone } from '@cs/api/models';
+import { Address, CheckoutResponse, CouponQuote, PaymentMethod, PickupStore, ShippingZone } from '@cs/api/models';
 import { OrdersApi } from '@cs/api/orders.api';
 import { PaymentsApi } from '@cs/api/payments.api';
 import { PromotionsApi } from '@cs/api/promotions.api';
@@ -35,7 +35,7 @@ const plain = (text: string | null | undefined) =>
         @if (payError()) { <div class="alert error">{{ payError() }}</div> }
         <div class="row">
           <button class="btn" [disabled]="paying()" (click)="pay(order)">
-            {{ (paying() ? 'checkout.processing' : 'orderDetail.payNow') | transloco }}
+            {{ (paying() ? 'checkout.processing' : 'payment.panel.start') | transloco }}
           </button>
           <a class="btn secondary" [routerLink]="['/orders', order.orderId]">{{ 'checkout.viewOrder' | transloco }}</a>
         </div>
@@ -115,6 +115,22 @@ const plain = (text: string | null | undefined) =>
               <p class="muted">{{ 'checkout.pickupNote' | transloco }}</p>
             }
 
+            <h3>{{ 'payment.title' | transloco }}</h3>
+            @if (mode() === 'Delivery' && !departmentCode()) {
+              <p class="muted">{{ 'payment.chooseDestination' | transloco }}</p>
+            } @else if (methods().length === 0) {
+              <p class="muted">{{ (loadingMethods() ? 'payment.loadingMethods' : 'payment.none') | transloco }}</p>
+            } @else {
+              <div class="methods" role="radiogroup" [attr.aria-label]="'payment.title' | transloco">
+                @for (m of methods(); track m) {
+                  <label class="method" [class.on]="paymentMethod() === m">
+                    <input type="radio" name="payment" [checked]="paymentMethod() === m" (change)="paymentMethod.set(m)" />
+                    <span><strong>{{ 'payment.method.' + m | transloco }}</strong><small class="muted">{{ 'payment.help.' + m | transloco }}</small></span>
+                  </label>
+                }
+              </div>
+            }
+
             @if (error()) { <div class="alert error">{{ error() }}</div> }
             <button class="btn block" type="submit" [disabled]="!canSubmit() || placing()">
               {{ (placing() ? 'checkout.placing' : 'checkout.placeOrder') | transloco }}
@@ -161,6 +177,11 @@ const plain = (text: string | null | undefined) =>
     .mode { display: flex; align-items: center; gap: var(--space-2); padding: var(--space-3) var(--space-4); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); cursor: pointer; font-weight: 600; font-size: 0.92rem; }
     .mode.on { border-color: var(--primary); background: var(--surface-2); }
     .mode input { accent-color: var(--primary); margin: 0; }
+    .methods { display: grid; gap: var(--space-3); margin-bottom: var(--space-4); }
+    .method { display: flex; align-items: flex-start; gap: var(--space-3); padding: var(--space-3) var(--space-4); border: 1px solid var(--border-strong); border-radius: var(--radius-sm); cursor: pointer; }
+    .method.on { border-color: var(--primary); background: var(--surface-2); }
+    .method input { accent-color: var(--primary); margin: 0.2rem 0 0; }
+    .method span { display: flex; flex-direction: column; gap: 2px; }
     h3 { font-size: 0.95rem; margin: var(--space-4) 0 var(--space-3); }
     @media (max-width: 760px) { .checkout { grid-template-columns: 1fr; } }
     @media (max-width: 420px) { .modes { grid-template-columns: 1fr; } }
@@ -181,6 +202,11 @@ export class CheckoutPage implements OnInit {
   readonly zones = signal<ShippingZone[]>([]);
   readonly stores = signal<PickupStore[]>([]);
   readonly mode = signal<DeliveryMode>('Delivery');
+
+  /** The methods the chosen delivery option allows, and the one the customer picked among them. */
+  readonly methods = signal<PaymentMethod[]>([]);
+  readonly paymentMethod = signal<PaymentMethod | null>(null);
+  readonly loadingMethods = signal(false);
 
   readonly couponCode = signal('');
   readonly quote = signal<CouponQuote | null>(null);
@@ -208,7 +234,7 @@ export class CheckoutPage implements OnInit {
   });
 
   /** The form's department changes outside Angular's signals, so mirror it into one the summary can read. */
-  private readonly departmentCode = signal('');
+  protected readonly departmentCode = signal('');
   private readonly storeId = signal('');
 
   readonly departments = computed<DepartmentOption[]>(() =>
@@ -225,7 +251,34 @@ export class CheckoutPage implements OnInit {
 
   /** A method, not a `computed`: form validity is not a signal, so it must be read on every change detection. */
   canSubmit(): boolean {
-    return this.mode() === 'Delivery' ? this.form.valid : this.pickupForm.valid;
+    return (this.mode() === 'Delivery' ? this.form.valid : this.pickupForm.valid) && this.paymentMethod() !== null;
+  }
+
+  constructor() {
+    // The allowed payment methods depend on how and where the order travels (cash on delivery only where the zone covers it).
+    effect(() => {
+      const mode = this.mode();
+      const department = this.departmentCode();
+      untracked(() => this.loadPaymentMethods(mode, department));
+    });
+  }
+
+  private loadPaymentMethods(mode: DeliveryMode, department: string): void {
+    if (mode === 'Delivery' && !department) {
+      this.methods.set([]);
+      this.paymentMethod.set(null);
+      return;
+    }
+    this.loadingMethods.set(true);
+    this.orders.paymentMethods(mode, department || null).subscribe({
+      next: ({ methods }) => {
+        this.methods.set(methods);
+        const current = this.paymentMethod();
+        this.paymentMethod.set(current && methods.includes(current) ? current : (methods[0] ?? null));
+        this.loadingMethods.set(false);
+      },
+      error: () => { this.methods.set([]); this.paymentMethod.set(null); this.loadingMethods.set(false); },
+    });
   }
 
   ngOnInit(): void {
@@ -296,7 +349,8 @@ export class CheckoutPage implements OnInit {
   }
 
   placeOrder(): void {
-    if (!this.canSubmit()) return;
+    const paymentMethod = this.paymentMethod();
+    if (!this.canSubmit() || !paymentMethod) return;
     this.placing.set(true);
     this.error.set(null);
     const couponCode = this.quote() ? this.couponCode() : null;
@@ -304,7 +358,7 @@ export class CheckoutPage implements OnInit {
     const request = this.mode() === 'Pickup'
       ? (() => {
           const p = this.pickupForm.getRawValue();
-          return { shippingAddress: null, couponCode, deliveryMode: 'Pickup' as const, pickupStoreId: p.storeId, pickupRecipientName: p.recipientName.trim() };
+          return { shippingAddress: null, couponCode, deliveryMode: 'Pickup' as const, pickupStoreId: p.storeId, pickupRecipientName: p.recipientName.trim(), paymentMethod };
         })()
       : (() => {
           const v = this.form.getRawValue();
@@ -313,12 +367,13 @@ export class CheckoutPage implements OnInit {
               recipientName: v.recipientName, line1: v.line1, line2: v.line2 || null, city: v.city, region: null,
               postalCode: v.postalCode, country: 'HN', departmentCode: v.departmentCode,
             },
-            couponCode, deliveryMode: 'Delivery' as const,
+            couponCode, deliveryMode: 'Delivery' as const, paymentMethod,
           };
         })();
 
     this.orders.checkout(request).subscribe({
-      next: (order) => { this.placed.set(order); this.cart.refresh(); this.placing.set(false); },
+      // Start the payment right away: cash / store orders are accepted now, a transfer then asks for its receipt on the order page.
+      next: (order) => { this.placed.set(order); this.cart.refresh(); this.placing.set(false); this.pay(order); },
       error: (err) => { this.error.set(this.i18n.problem(err, 'checkout.failed')); this.placing.set(false); },
     });
   }

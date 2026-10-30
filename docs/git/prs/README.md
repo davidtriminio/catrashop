@@ -58,3 +58,4 @@ Index:
 | [PR-048](PR-048-cart-planet-icon.md) | App icon: a shopping cart with a planet | `feature/cart-planet-icon` | `develop` |
 | [PR-049](PR-049-rename-catrashop.md) | The product is now called Catrashop | `feature/rename-catrashop` | `develop` |
 | [PR-050](PR-050-rename-everything.md) | Rename the code, configuration and docs to Catrashop | `feature/rename-internal-catrashop` | `develop` |
+| [PR-051](PR-051-payment-methods.md) | Payment methods: cash on delivery, bank transfer and pay at the store | `feature/payment-methods` | `develop` |
