@@ -33,6 +33,8 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
   built-in one) → [PR-044](docs/git/prs/PR-044-mobile-api-url.md)
 - **Fix (mobile):** "Reintentar" now shows a loading state and an attempt number, and load errors show the server message and
   the address in use; Riverpod's hidden automatic retries are off → [PR-045](docs/git/prs/PR-045-mobile-load-retry.md)
+- **Branding:** new favicons for the store and the admin and a new launcher icon for the mobile app (Android adaptive and
+  themed, iOS), all generated from one script (`branding/make-icons.py`) → [PR-046](docs/git/prs/PR-046-app-icons.md)
 
 ## v1.2.0 — Reliability fixes and the redesign
 - **Fix:** the account page no longer fails when the customer profile is created by concurrent requests
