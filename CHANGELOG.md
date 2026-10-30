@@ -37,6 +37,7 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
   themed, iOS), all generated from one script (`branding/make-icons.py`) → [PR-046](docs/git/prs/PR-046-app-icons.md)
 - **Branding:** the icon is now a shopping bag wrapped by an orbit ring (it replaces the H), still generated from the same script
   → [PR-047](docs/git/prs/PR-047-ecommerce-icon.md)
+- **Branding:** the icon is now a shopping cart with a ringed planet (the bag read as a padlock) → [PR-048](docs/git/prs/PR-048-cart-planet-icon.md)
 
 ## v1.2.0 — Reliability fixes and the redesign
 - **Fix:** the account page no longer fails when the customer profile is created by concurrent requests
