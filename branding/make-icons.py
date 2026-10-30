@@ -3,8 +3,8 @@ Generates every app icon from one drawing: the favicons of the two web apps and 
 
     python branding/make-icons.py            # needs only Pillow:  pip install pillow
 
-The mark is a shopping bag wrapped by an orbit ring, like a planet ("Galactic"), on the brand colours from
-`frontend/shared/theme.scss` / `mobile/lib/core/theme.dart`:
+The mark is a shopping cart with a ringed planet floating above the basket ("Galactic" e-commerce), on the brand colours
+from `frontend/shared/theme.scss` / `mobile/lib/core/theme.dart`:
   - store  : near-black tile, lime mark   -> frontend/public
   - admin  : lime tile, near-black mark   -> frontend/projects/commercehub-admin/public and the mobile app
 To change the look, edit the constants below (or draw_mark / svg) and run the script again; nothing else needs touching.
@@ -27,67 +27,60 @@ VARIANTS = {
 }
 
 # --- the drawing, in unit coordinates (0..1 across the tile) ----------------------------------------------
-TILE_RADIUS = 0.22                    # corner radius of the rounded tile
-BAG = (0.26, 0.42, 0.74, 0.80)        # bag body: x0, y0, x1, y1
-BAG_RADIUS = 0.07
-HANDLE_BOX = (0.375, 0.22, 0.625, 0.56)   # ellipse the handle is the top half of
-HANDLE_W = 0.06
-HANDLE_X = (0.40, 0.60)               # where the handle meets the bag
-RING_CENTER = (0.5, 0.58)
-RING_RX, RING_RY = 0.43, 0.15         # the orbit
-RING_W = 0.042
-RING_HALO = 0.026                     # gap that separates the ring from the bag where it passes in front
-RING_TILT = 22                        # degrees, the ring rises to the right
-STAR = (0.80, 0.25, 0.075)            # sparkle: x, y, radius
-STAR_MIN_SIZE = 48                    # smaller than this the sparkle is just noise, so it is left out
+TILE_RADIUS = 0.22                                                   # corner radius of the rounded tile
+CART_LINE = [(0.15, 0.34), (0.26, 0.34), (0.36, 0.66), (0.78, 0.66)]  # handle, down the side, along the base
+CART_LINE_W = 0.055
+BASKET = [(0.29, 0.42), (0.84, 0.42), (0.76, 0.60), (0.35, 0.60)]
+WHEELS = [(0.43, 0.78), (0.70, 0.78)]
+WHEEL_R = 0.06
+PLANET = (0.60, 0.24, 0.09)           # centre x, y and radius of the ball
+PLANET_RING = (0.17, 0.05, 20)        # ring half-width, half-height, tilt in degrees (rises to the right)
+PLANET_RING_W = 0.026
+PLANET_HALO = 0.014                   # gap that separates the front of the ring from the ball
 SS = 4                                # supersampling
 
 
-def _ring(n, color, half, width, erase=False):
-    """One half of the tilted ring on its own layer: 'back' is the upper arc, 'front' the lower one."""
+def _ring(n, color, half, width):
+    """One half of the planet's tilted ring on its own layer: 'back' is the upper arc, 'front' the lower one."""
+    cx, cy, _ = PLANET
+    rx, ry, tilt = PLANET_RING
     layer = Image.new('RGBA', (n, n), (0, 0, 0, 0))
     d = ImageDraw.Draw(layer)
-    cx, cy = RING_CENTER[0] * n, RING_CENTER[1] * n
-    box = (cx - RING_RX * n, cy - RING_RY * n, cx + RING_RX * n, cy + RING_RY * n)
+    box = ((cx - rx) * n, (cy - ry) * n, (cx + rx) * n, (cy + ry) * n)
     start, end = (180, 360) if half == 'back' else (0, 180)
     d.arc(box, start, end, fill=color, width=max(1, int(width)))
-    return layer.rotate(RING_TILT, resample=Image.BICUBIC, center=(cx, cy))
+    return layer.rotate(tilt, resample=Image.BICUBIC, center=(cx * n, cy * n))
 
 
-def _sparkle(d, n, color):
-    cx, cy, r = STAR[0] * n, STAR[1] * n, STAR[2] * n
-    pts = []
-    for i in range(8):
-        a = math.radians(-90 + i * 45)
-        rr = r if i % 2 == 0 else r * 0.26
-        pts.append((cx + rr * math.cos(a), cy + rr * math.sin(a)))
-    d.polygon(pts, fill=color)
-
-
-def draw_mark(n, fg, bg, star, transparent):
+def draw_mark(n, fg, bg, transparent):
     """The mark on an n x n transparent canvas. With `transparent` the gap around the front of the ring is cut out of
     the mark (for layers that sit over another background); otherwise it is painted in `bg` (for an opaque tile)."""
     im = Image.new('RGBA', (n, n), (0, 0, 0, 0))
     d = ImageDraw.Draw(im)
-    w = RING_W * n
-    im.alpha_composite(_ring(n, fg, 'back', w))
 
-    x0, y0, x1, y1 = (v * n for v in BAG)
-    d.rounded_rectangle((x0, y0, x1, y1), radius=BAG_RADIUS * n, fill=fg)
-    hw = int(HANDLE_W * n)
-    d.arc(tuple(v * n for v in HANDLE_BOX), 180, 360, fill=fg, width=hw)
-    for x in HANDLE_X:
-        d.ellipse((x * n - hw / 2, y0 - hw / 2 + 0.004 * n, x * n + hw / 2, y0 + hw / 2 + 0.004 * n), fill=fg)
+    # the cart
+    w = int(CART_LINE_W * n)
+    pts = [(x * n, y * n) for x, y in CART_LINE]
+    d.line(pts, fill=fg, width=w, joint='curve')
+    for x, y in (pts[0], pts[-1]):
+        d.ellipse((x - w / 2, y - w / 2, x + w / 2, y + w / 2), fill=fg)
+    d.polygon([(x * n, y * n) for x, y in BASKET], fill=fg)
+    for x, y in WHEELS:
+        r = WHEEL_R * n
+        d.ellipse((x * n - r, y * n - r, x * n + r, y * n + r), fill=fg)
 
-    halo = _ring(n, (0, 0, 0, 255) if transparent else bg + (255,), 'front', w + 2 * RING_HALO * n)
+    # the planet: back of the ring, the ball, then the front of the ring with a small gap around it
+    px, py, pr = PLANET
+    rw = PLANET_RING_W * n
+    im.alpha_composite(_ring(n, fg, 'back', rw))
+    d.ellipse(((px - pr) * n, (py - pr) * n, (px + pr) * n, (py + pr) * n), fill=fg)
+    halo = _ring(n, (0, 0, 0, 255) if transparent else bg + (255,), 'front', rw + 2 * PLANET_HALO * n)
     if transparent:   # erase: keep the pixels of `im` only where the halo is empty
         alpha = Image.eval(halo.getchannel('A'), lambda a: 255 - a)
         im.putalpha(Image.composite(im.getchannel('A'), Image.new('L', (n, n), 0), alpha))
     else:
         im.alpha_composite(halo)
-    im.alpha_composite(_ring(n, fg, 'front', w))
-    if star:
-        _sparkle(ImageDraw.Draw(im), n, fg)
+    im.alpha_composite(_ring(n, fg, 'front', rw))
     return im
 
 
@@ -96,11 +89,10 @@ def render(size, variant, mode):
     'foreground' (only the mark, smaller, for Android adaptive icons) or 'mono' (that mark in black, for themed icons)."""
     v = VARIANTS[variant]
     big = size * SS
-    star = size >= STAR_MIN_SIZE
     if mode in ('foreground', 'mono'):
         # Adaptive icons keep ~66% of the canvas safe from masking: the mark sits well inside it.
-        mark = draw_mark(big, v['fg'] if mode == 'foreground' else (0, 0, 0), v['bg'], star, transparent=True)
-        inner = int(big * 0.64)
+        mark = draw_mark(big, v['fg'] if mode == 'foreground' else (0, 0, 0), v['bg'], transparent=True)
+        inner = int(big * 0.70)
         mark = mark.resize((inner, inner), Image.LANCZOS)
         im = Image.new('RGBA', (big, big), (0, 0, 0, 0))
         im.alpha_composite(mark, ((big - inner) // 2, (big - inner) // 2))
@@ -111,7 +103,7 @@ def render(size, variant, mode):
             d.rounded_rectangle((0, 0, big - 1, big - 1), radius=TILE_RADIUS * big, fill=v['bg'])
         else:
             d.rectangle((0, 0, big, big), fill=v['bg'])
-        im.alpha_composite(draw_mark(big, v['fg'], v['bg'], star, transparent=False))
+        im.alpha_composite(draw_mark(big, v['fg'], v['bg'], transparent=False))
     im = im.resize((size, size), Image.LANCZOS)
     return im.convert('RGB') if mode == 'full' else im
 
@@ -122,38 +114,35 @@ def svg(variant, size=64):
     hexc = lambda c: '#%02x%02x%02x' % c
     fg, bg = hexc(v['fg']), hexc(v['bg'])
     s = size
-    cx, cy = RING_CENTER[0] * s, RING_CENTER[1] * s
-    rx, ry = RING_RX * s, RING_RY * s
-    back = 'M%.2f %.2fA%.2f %.2f 0 0 1 %.2f %.2f' % (cx - rx, cy, rx, ry, cx + rx, cy)
-    front = 'M%.2f %.2fA%.2f %.2f 0 0 0 %.2f %.2f' % (cx - rx, cy, rx, ry, cx + rx, cy)
-    x0, y0, x1, y1 = (c * s for c in BAG)
-    hx0, hy0, hx1, hy1 = (c * s for c in HANDLE_BOX)
-    hrx, hry, hcx, hcy = (hx1 - hx0) / 2, (hy1 - hy0) / 2, (hx0 + hx1) / 2, (hy0 + hy1) / 2
-    handle = 'M%.2f %.2fA%.2f %.2f 0 0 1 %.2f %.2f' % (hcx - hrx, hcy, hrx, hry, hcx + hrx, hcy)
-    sx, sy, sr = STAR[0] * s, STAR[1] * s, STAR[2] * s
-    star = ' '.join('%.2f,%.2f' % (sx + (sr if i % 2 == 0 else sr * 0.26) * math.cos(math.radians(-90 + i * 45)),
-                                   sy + (sr if i % 2 == 0 else sr * 0.26) * math.sin(math.radians(-90 + i * 45))) for i in range(8))
-    tilt = 'transform="rotate(%d %.2f %.2f)"' % (-RING_TILT, cx, cy)
+    line = ' '.join('%.2f,%.2f' % (x * s, y * s) for x, y in CART_LINE)
+    basket = ' '.join('%.2f,%.2f' % (x * s, y * s) for x, y in BASKET)
+    wheels = ''.join('<circle cx="%.2f" cy="%.2f" r="%.2f" fill="%s"/>' % (x * s, y * s, WHEEL_R * s, fg) for x, y in WHEELS)
+    px, py, pr = (c * s for c in PLANET)
+    rx, ry = PLANET_RING[0] * s, PLANET_RING[1] * s
+    back = 'M%.2f %.2fA%.2f %.2f 0 0 1 %.2f %.2f' % (px - rx, py, rx, ry, px + rx, py)
+    front = 'M%.2f %.2fA%.2f %.2f 0 0 0 %.2f %.2f' % (px - rx, py, rx, ry, px + rx, py)
+    tilt = 'transform="rotate(%d %.2f %.2f)"' % (-PLANET_RING[2], px, py)
+    rw = PLANET_RING_W * s
     return (
         '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" width="%d" height="%d">'
         '<rect width="%d" height="%d" rx="%.2f" fill="%s"/>'
+        '<polyline points="%s" fill="none" stroke="%s" stroke-width="%.2f" stroke-linecap="round" stroke-linejoin="round"/>'
+        '<polygon points="%s" fill="%s"/>%s'
         '<path d="%s" %s fill="none" stroke="%s" stroke-width="%.2f"/>'
-        '<rect x="%.2f" y="%.2f" width="%.2f" height="%.2f" rx="%.2f" fill="%s"/>'
-        '<path d="%s" fill="none" stroke="%s" stroke-width="%.2f" stroke-linecap="round"/>'
+        '<circle cx="%.2f" cy="%.2f" r="%.2f" fill="%s"/>'
         '<path d="%s" %s fill="none" stroke="%s" stroke-width="%.2f"/>'
-        '<path d="%s" %s fill="none" stroke="%s" stroke-width="%.2f"/>'
-        '<polygon points="%s" fill="%s"/></svg>\n') % (
+        '<path d="%s" %s fill="none" stroke="%s" stroke-width="%.2f"/></svg>\n') % (
         s, s, s, s, s, s, TILE_RADIUS * s, bg,
-        back, tilt, fg, RING_W * s,
-        x0, y0, x1 - x0, y1 - y0, BAG_RADIUS * s, fg,
-        handle, fg, HANDLE_W * s,
-        front, tilt, bg, (RING_W + 2 * RING_HALO) * s,
-        front, tilt, fg, RING_W * s,
-        star, fg)
+        line, fg, CART_LINE_W * s,
+        basket, fg, wheels,
+        back, tilt, fg, rw,
+        px, py, pr, fg,
+        front, tilt, bg, rw + 2 * PLANET_HALO * s,
+        front, tilt, fg, rw)
 
 
 def ico_bytes(variant, sizes=(16, 32, 48)):
-    """A .ico holding one natively drawn PNG per size (so the small ones are crisp and carry no sparkle)."""
+    """A .ico holding one natively drawn PNG per size, so the small ones stay crisp."""
     images = []
     for s in sizes:
         buf = io.BytesIO()
