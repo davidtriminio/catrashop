@@ -35,6 +35,8 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
   the address in use; Riverpod's hidden automatic retries are off → [PR-045](docs/git/prs/PR-045-mobile-load-retry.md)
 - **Branding:** new favicons for the store and the admin and a new launcher icon for the mobile app (Android adaptive and
   themed, iOS), all generated from one script (`branding/make-icons.py`) → [PR-046](docs/git/prs/PR-046-app-icons.md)
+- **Branding:** the icon is now a shopping bag wrapped by an orbit ring (it replaces the H), still generated from the same script
+  → [PR-047](docs/git/prs/PR-047-ecommerce-icon.md)
 
 ## v1.2.0 — Reliability fixes and the redesign
 - **Fix:** the account page no longer fails when the customer profile is created by concurrent requests
