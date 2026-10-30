@@ -9,7 +9,7 @@ import { problemMessage } from '@ch/util/problem';
   imports: [ReactiveFormsModule],
   template: `
     <div class="wrap">
-      <div class="brand">Commerce<span>Hub</span> <small>Admin</small></div>
+      <div class="brand">Catra<span>shop</span> <small>Admin</small></div>
       <div class="card">
         <h1>Sign in</h1>
         <p class="muted">Use a staff account to manage the store.</p>

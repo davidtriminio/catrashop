@@ -17,7 +17,7 @@ public sealed class NotificationTemplateRenderer : INotificationTemplateRenderer
         return type switch
         {
             NotificationType.Welcome => new(
-                "Welcome to CommerceHub",
+                "Welcome to Catrashop",
                 $"Hi {Token("name", "there")}, thanks for creating your account. Happy shopping!"),
 
             NotificationType.PasswordReset => new(
@@ -58,7 +58,7 @@ public sealed class NotificationTemplateRenderer : INotificationTemplateRenderer
 
             NotificationType.Promotion => new(
                 Token("title", "A new offer for you"),
-                Token("message", "Check out the latest deals at CommerceHub.")),
+                Token("message", "Check out the latest deals at Catrashop.")),
 
             _ => new("Notification", Token("message", "You have a new notification."))
         };

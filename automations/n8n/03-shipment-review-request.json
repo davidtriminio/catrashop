@@ -44,7 +44,7 @@
         "toEmail": "={{ $env.REVIEWS_NOTIFY_TO || 'reviews@commercehub.example' }}",
         "subject": "How did we do? Review your recent order",
         "emailFormat": "text",
-        "text": "Your order (tracking {{ $json.trackingNumber }}) was delivered a few days ago.\n\nWe'd love a quick review — it helps other shoppers and helps us improve.\n\n— CommerceHub",
+        "text": "Your order (tracking {{ $json.trackingNumber }}) was delivered a few days ago.\n\nWe'd love a quick review — it helps other shoppers and helps us improve.\n\n— Catrashop",
         "options": {}
       },
       "id": "send-review",

@@ -1,4 +1,6 @@
-# CommerceHub
+# Catrashop
+
+> **Catrashop** is the product name; **CommerceHub** is the internal code name that the namespaces, projects and repository keep.
 
 > A modular-monolith, event-driven **enterprise e-commerce platform** built with .NET 10 + Angular 22, designed as a realistic reference of how production commerce software is structured, secured, tested, and operated.
 

@@ -14,7 +14,7 @@ class CommerceHubAdminApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'CommerceHub Admin',
+      title: 'Catrashop Admin',
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),

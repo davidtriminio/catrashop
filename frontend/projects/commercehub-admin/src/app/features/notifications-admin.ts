@@ -63,7 +63,7 @@ export class NotificationsAdmin {
       recipientId: v.recipientId.trim(),
       type: Number(v.type),
       recipientEmail: v.recipientEmail || null,
-      data: v.message ? { message: v.message, title: 'A message from CommerceHub' } : null,
+      data: v.message ? { message: v.message, title: 'A message from Catrashop' } : null,
     }).subscribe({
       next: () => { this.message.set('Notification dispatched.'); this.busy.set(false); this.form.reset({ type: 50 }); },
       error: (e) => { this.error.set(problemMessage(e)); this.busy.set(false); },

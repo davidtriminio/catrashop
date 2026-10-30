@@ -9,7 +9,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
     <footer class="site-footer">
       <div class="container foot">
         <div class="about">
-          <span class="brand">Commerce<span>Hub</span></span>
+          <span class="brand">Catra<span>shop</span></span>
           <p class="muted">{{ 'footer.about' | transloco }}</p>
         </div>
         <nav class="links" [attr.aria-label]="'footer.label' | transloco">
