@@ -54,3 +54,4 @@ Index:
 | [PR-044](PR-044-mobile-api-url.md) | Mobile: change and remember the API address from Settings | `feature/mobile-api-url` | `develop` |
 | [PR-045](PR-045-mobile-load-retry.md) | Mobile: failed loads explain themselves and Reintentar visibly retries | `fix/mobile-load-retry` | `develop` |
 | [PR-046](PR-046-app-icons.md) | New app icons: web favicons and the mobile launcher icon | `feature/app-icons` | `develop` |
+| [PR-047](PR-047-ecommerce-icon.md) | App icon: a shopping bag in orbit instead of the H | `feature/ecommerce-icon` | `develop` |

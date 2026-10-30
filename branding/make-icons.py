@@ -3,14 +3,18 @@ Generates every app icon from one drawing: the favicons of the two web apps and 
 
     python branding/make-icons.py            # needs only Pillow:  pip install pillow
 
-The mark is a geometric "H" (for Hub) on the brand colours from `frontend/shared/theme.scss` / `mobile/lib/core/theme.dart`:
-  - store  : near-black tile, lime H      -> frontend/public
-  - admin  : lime tile, near-black H      -> frontend/projects/commercehub-admin/public and the mobile app
-To change the look, edit the constants below (or draw_glyph) and run the script again; nothing else needs touching.
+The mark is a shopping bag wrapped by an orbit ring, like a planet ("Galactic"), on the brand colours from
+`frontend/shared/theme.scss` / `mobile/lib/core/theme.dart`:
+  - store  : near-black tile, lime mark   -> frontend/public
+  - admin  : lime tile, near-black mark   -> frontend/projects/commercehub-admin/public and the mobile app
+To change the look, edit the constants below (or draw_mark / svg) and run the script again; nothing else needs touching.
 Everything is drawn at 4x and scaled down, so edges are smooth at every size.
 """
+import io
 import json
+import math
 import os
+import struct
 from PIL import Image, ImageDraw
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -22,40 +26,84 @@ VARIANTS = {
     'admin': {'bg': LIME, 'fg': INK},
 }
 
-# --- the drawing, in unit coordinates ----------------------------------------------------------------
-TILE_RADIUS = 0.22          # corner radius of the rounded tile, as a fraction of its side
-GLYPH_W, GLYPH_H = 0.46, 0.50   # the H as a fraction of the tile
-STEM = 0.30                 # stem thickness, as a fraction of the H's width
-BAR = 0.22                  # crossbar thickness, as a fraction of the H's height
-ROUND = 0.05                # corner rounding of the H's strokes, as a fraction of its width
-SS = 4                      # supersampling
+# --- the drawing, in unit coordinates (0..1 across the tile) ----------------------------------------------
+TILE_RADIUS = 0.22                    # corner radius of the rounded tile
+BAG = (0.26, 0.42, 0.74, 0.80)        # bag body: x0, y0, x1, y1
+BAG_RADIUS = 0.07
+HANDLE_BOX = (0.375, 0.22, 0.625, 0.56)   # ellipse the handle is the top half of
+HANDLE_W = 0.06
+HANDLE_X = (0.40, 0.60)               # where the handle meets the bag
+RING_CENTER = (0.5, 0.58)
+RING_RX, RING_RY = 0.43, 0.15         # the orbit
+RING_W = 0.042
+RING_HALO = 0.026                     # gap that separates the ring from the bag where it passes in front
+RING_TILT = 22                        # degrees, the ring rises to the right
+STAR = (0.80, 0.25, 0.075)            # sparkle: x, y, radius
+STAR_MIN_SIZE = 48                    # smaller than this the sparkle is just noise, so it is left out
+SS = 4                                # supersampling
 
 
-def glyph_rects(cx, cy, w, h):
-    """The three strokes of the H as (x0, y0, x1, y1) rectangles around the centre (cx, cy)."""
-    x0, y0 = cx - w / 2, cy - h / 2
-    stem, bar = w * STEM, h * BAR
-    return [
-        (x0, y0, x0 + stem, y0 + h),                       # left stem
-        (x0 + w - stem, y0, x0 + w, y0 + h),               # right stem
-        (x0 + stem * 0.9, cy - bar / 2, x0 + w - stem * 0.9, cy + bar / 2),  # crossbar
-    ]
+def _ring(n, color, half, width, erase=False):
+    """One half of the tilted ring on its own layer: 'back' is the upper arc, 'front' the lower one."""
+    layer = Image.new('RGBA', (n, n), (0, 0, 0, 0))
+    d = ImageDraw.Draw(layer)
+    cx, cy = RING_CENTER[0] * n, RING_CENTER[1] * n
+    box = (cx - RING_RX * n, cy - RING_RY * n, cx + RING_RX * n, cy + RING_RY * n)
+    start, end = (180, 360) if half == 'back' else (0, 180)
+    d.arc(box, start, end, fill=color, width=max(1, int(width)))
+    return layer.rotate(RING_TILT, resample=Image.BICUBIC, center=(cx, cy))
 
 
-def draw_glyph(draw, size, color, scale=1.0):
-    for r in glyph_rects(size / 2, size / 2, GLYPH_W * size * scale, GLYPH_H * size * scale):
-        draw.rounded_rectangle(r, radius=GLYPH_W * size * scale * ROUND, fill=color)
+def _sparkle(d, n, color):
+    cx, cy, r = STAR[0] * n, STAR[1] * n, STAR[2] * n
+    pts = []
+    for i in range(8):
+        a = math.radians(-90 + i * 45)
+        rr = r if i % 2 == 0 else r * 0.26
+        pts.append((cx + rr * math.cos(a), cy + rr * math.sin(a)))
+    d.polygon(pts, fill=color)
+
+
+def draw_mark(n, fg, bg, star, transparent):
+    """The mark on an n x n transparent canvas. With `transparent` the gap around the front of the ring is cut out of
+    the mark (for layers that sit over another background); otherwise it is painted in `bg` (for an opaque tile)."""
+    im = Image.new('RGBA', (n, n), (0, 0, 0, 0))
+    d = ImageDraw.Draw(im)
+    w = RING_W * n
+    im.alpha_composite(_ring(n, fg, 'back', w))
+
+    x0, y0, x1, y1 = (v * n for v in BAG)
+    d.rounded_rectangle((x0, y0, x1, y1), radius=BAG_RADIUS * n, fill=fg)
+    hw = int(HANDLE_W * n)
+    d.arc(tuple(v * n for v in HANDLE_BOX), 180, 360, fill=fg, width=hw)
+    for x in HANDLE_X:
+        d.ellipse((x * n - hw / 2, y0 - hw / 2 + 0.004 * n, x * n + hw / 2, y0 + hw / 2 + 0.004 * n), fill=fg)
+
+    halo = _ring(n, (0, 0, 0, 255) if transparent else bg + (255,), 'front', w + 2 * RING_HALO * n)
+    if transparent:   # erase: keep the pixels of `im` only where the halo is empty
+        alpha = Image.eval(halo.getchannel('A'), lambda a: 255 - a)
+        im.putalpha(Image.composite(im.getchannel('A'), Image.new('L', (n, n), 0), alpha))
+    else:
+        im.alpha_composite(halo)
+    im.alpha_composite(_ring(n, fg, 'front', w))
+    if star:
+        _sparkle(ImageDraw.Draw(im), n, fg)
+    return im
 
 
 def render(size, variant, mode):
     """mode: 'rounded' (tile with transparent corners), 'full' (opaque square, the OS rounds it),
-    'foreground' (only the H, small, for Android adaptive icons) or 'mono' (that H in black, for themed icons)."""
+    'foreground' (only the mark, smaller, for Android adaptive icons) or 'mono' (that mark in black, for themed icons)."""
     v = VARIANTS[variant]
     big = size * SS
+    star = size >= STAR_MIN_SIZE
     if mode in ('foreground', 'mono'):
+        # Adaptive icons keep ~66% of the canvas safe from masking: the mark sits well inside it.
+        mark = draw_mark(big, v['fg'] if mode == 'foreground' else (0, 0, 0), v['bg'], star, transparent=True)
+        inner = int(big * 0.64)
+        mark = mark.resize((inner, inner), Image.LANCZOS)
         im = Image.new('RGBA', (big, big), (0, 0, 0, 0))
-        # Adaptive icons keep ~66% of the canvas safe from masking: the H sits well inside it.
-        draw_glyph(ImageDraw.Draw(im), big, v['fg'] if mode == 'foreground' else (0, 0, 0), scale=0.72)
+        im.alpha_composite(mark, ((big - inner) // 2, (big - inner) // 2))
     else:
         im = Image.new('RGBA', (big, big), (0, 0, 0, 0))
         d = ImageDraw.Draw(im)
@@ -63,21 +111,61 @@ def render(size, variant, mode):
             d.rounded_rectangle((0, 0, big - 1, big - 1), radius=TILE_RADIUS * big, fill=v['bg'])
         else:
             d.rectangle((0, 0, big, big), fill=v['bg'])
-        draw_glyph(d, big, v['fg'])
+        im.alpha_composite(draw_mark(big, v['fg'], v['bg'], star, transparent=False))
     im = im.resize((size, size), Image.LANCZOS)
     return im.convert('RGB') if mode == 'full' else im
 
 
 def svg(variant, size=64):
+    """The same drawing as a vector (used as favicon.svg)."""
     v = VARIANTS[variant]
-    fill = lambda c: '#%02x%02x%02x' % c
-    rects = ''.join(
-        '<rect x="%.2f" y="%.2f" width="%.2f" height="%.2f" rx="%.2f" fill="%s"/>' % (
-            x0, y0, x1 - x0, y1 - y0, GLYPH_W * size * ROUND, fill(v['fg']))
-        for x0, y0, x1, y1 in glyph_rects(size / 2, size / 2, GLYPH_W * size, GLYPH_H * size))
-    return ('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" width="%d" height="%d">'
-            '<rect width="%d" height="%d" rx="%.2f" fill="%s"/>%s</svg>\n') % (
-        size, size, size, size, size, size, TILE_RADIUS * size, fill(v['bg']), rects)
+    hexc = lambda c: '#%02x%02x%02x' % c
+    fg, bg = hexc(v['fg']), hexc(v['bg'])
+    s = size
+    cx, cy = RING_CENTER[0] * s, RING_CENTER[1] * s
+    rx, ry = RING_RX * s, RING_RY * s
+    back = 'M%.2f %.2fA%.2f %.2f 0 0 1 %.2f %.2f' % (cx - rx, cy, rx, ry, cx + rx, cy)
+    front = 'M%.2f %.2fA%.2f %.2f 0 0 0 %.2f %.2f' % (cx - rx, cy, rx, ry, cx + rx, cy)
+    x0, y0, x1, y1 = (c * s for c in BAG)
+    hx0, hy0, hx1, hy1 = (c * s for c in HANDLE_BOX)
+    hrx, hry, hcx, hcy = (hx1 - hx0) / 2, (hy1 - hy0) / 2, (hx0 + hx1) / 2, (hy0 + hy1) / 2
+    handle = 'M%.2f %.2fA%.2f %.2f 0 0 1 %.2f %.2f' % (hcx - hrx, hcy, hrx, hry, hcx + hrx, hcy)
+    sx, sy, sr = STAR[0] * s, STAR[1] * s, STAR[2] * s
+    star = ' '.join('%.2f,%.2f' % (sx + (sr if i % 2 == 0 else sr * 0.26) * math.cos(math.radians(-90 + i * 45)),
+                                   sy + (sr if i % 2 == 0 else sr * 0.26) * math.sin(math.radians(-90 + i * 45))) for i in range(8))
+    tilt = 'transform="rotate(%d %.2f %.2f)"' % (-RING_TILT, cx, cy)
+    return (
+        '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 %d %d" width="%d" height="%d">'
+        '<rect width="%d" height="%d" rx="%.2f" fill="%s"/>'
+        '<path d="%s" %s fill="none" stroke="%s" stroke-width="%.2f"/>'
+        '<rect x="%.2f" y="%.2f" width="%.2f" height="%.2f" rx="%.2f" fill="%s"/>'
+        '<path d="%s" fill="none" stroke="%s" stroke-width="%.2f" stroke-linecap="round"/>'
+        '<path d="%s" %s fill="none" stroke="%s" stroke-width="%.2f"/>'
+        '<path d="%s" %s fill="none" stroke="%s" stroke-width="%.2f"/>'
+        '<polygon points="%s" fill="%s"/></svg>\n') % (
+        s, s, s, s, s, s, TILE_RADIUS * s, bg,
+        back, tilt, fg, RING_W * s,
+        x0, y0, x1 - x0, y1 - y0, BAG_RADIUS * s, fg,
+        handle, fg, HANDLE_W * s,
+        front, tilt, bg, (RING_W + 2 * RING_HALO) * s,
+        front, tilt, fg, RING_W * s,
+        star, fg)
+
+
+def ico_bytes(variant, sizes=(16, 32, 48)):
+    """A .ico holding one natively drawn PNG per size (so the small ones are crisp and carry no sparkle)."""
+    images = []
+    for s in sizes:
+        buf = io.BytesIO()
+        render(s, variant, 'rounded').save(buf, format='PNG')
+        images.append((s, buf.getvalue()))
+    out = struct.pack('<HHH', 0, 1, len(images))
+    offset = 6 + 16 * len(images)
+    body = b''
+    for s, data in images:
+        out += struct.pack('<BBBBHHII', s, s, 0, 0, 1, 32, len(data), offset + len(body))
+        body += data
+    return out + body
 
 
 def save(im, *path):
@@ -87,21 +175,21 @@ def save(im, *path):
     print('  wrote', os.path.relpath(full, ROOT))
 
 
-def write(text, *path):
+def write(text, *path, binary=False):
     full = os.path.join(ROOT, *path)
     os.makedirs(os.path.dirname(full), exist_ok=True)
-    with open(full, 'w', encoding='utf-8', newline='\n') as f:
-        f.write(text)
+    if binary:
+        with open(full, 'wb') as f:
+            f.write(text)
+    else:
+        with open(full, 'w', encoding='utf-8', newline='\n') as f:
+            f.write(text)
     print('  wrote', os.path.relpath(full, ROOT))
 
 
 def web(variant, public):
     print(f'web ({variant}) -> {"/".join(public)}')
-    ico = render(256, variant, 'rounded')
-    full = os.path.join(ROOT, *public, 'favicon.ico')
-    os.makedirs(os.path.dirname(full), exist_ok=True)
-    ico.save(full, format='ICO', sizes=[(16, 16), (32, 32), (48, 48)])
-    print('  wrote', os.path.relpath(full, ROOT))
+    write(ico_bytes(variant), *public, 'favicon.ico', binary=True)
     write(svg(variant), *public, 'favicon.svg')
     save(render(180, variant, 'full'), *public, 'apple-touch-icon.png')
 
