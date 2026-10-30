@@ -51,11 +51,11 @@ public sealed class ShipmentService
         var order = await _orders.GetFulfillmentAsync(request.OrderId, ct);
         if (order is null)
             return ShippingErrors.OrderNotFound;
-        if (order.Status is not ("Paid" or "Processing"))
+        if (order.Status is not ("Paid" or "Confirmed" or "Processing"))
             return ShippingErrors.OrderNotShippable;
 
-        // A paid order enters processing when its shipment is created.
-        if (order.Status == "Paid")
+        // A paid or confirmed order enters processing when its shipment is created.
+        if (order.Status is "Paid" or "Confirmed")
         {
             var processing = await _orders.StartProcessingAsync(request.OrderId, ct);
             if (processing.IsFailure)

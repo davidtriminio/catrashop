@@ -1,4 +1,5 @@
 using Catrashop.Modules.Orders.Application.Contracts;
+using Catrashop.Modules.Orders.Contracts;
 using FluentValidation;
 
 namespace Catrashop.Modules.Orders.Application.Validation;
@@ -10,6 +11,11 @@ public sealed class CheckoutRequestValidator : AbstractValidator<CheckoutRequest
         RuleFor(x => x.DeliveryMode)
             .Must(m => Enum.TryParse<Domain.DeliveryMode>(m, ignoreCase: true, out _))
             .WithMessage("The delivery mode must be 'Delivery' or 'Pickup'.");
+
+        RuleFor(x => x.PaymentMethod)
+            .NotEmpty().WithMessage("Choose a payment method.")
+            .Must(m => m is null || PaymentMethodCodes.All.Contains(m.Trim().ToUpperInvariant()))
+            .WithMessage("Unknown payment method.");
 
         When(IsDelivery, () =>
         {

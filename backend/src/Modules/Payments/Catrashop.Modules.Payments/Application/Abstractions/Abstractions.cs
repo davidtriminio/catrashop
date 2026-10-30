@@ -34,6 +34,14 @@ public interface IPaymentProvider
     Task<PaymentProviderResult> RefundAsync(string providerReference, decimal amount, CancellationToken ct = default);
 }
 
+/// <summary>Keeps transfer receipts on the server's disk, outside the repository. Keys are generated, never client paths.</summary>
+public interface IReceiptStore
+{
+    Task<string> SaveAsync(Guid paymentId, byte[] content, string extension, CancellationToken ct = default);
+    Task<Stream?> OpenAsync(string key, CancellationToken ct = default);
+    Task DeleteAsync(string key, CancellationToken ct = default);
+}
+
 /// <summary>Verifies the HMAC signature on an inbound provider webhook (Section 50).</summary>
 public interface IWebhookSignatureVerifier
 {
@@ -47,6 +55,8 @@ public interface IPaymentRepository
     Task<Payment?> GetByIdAsync(Guid id, CancellationToken ct = default);
     Task<Payment?> GetByIdempotencyKeyAsync(string key, CancellationToken ct = default);
     Task<Payment?> GetByProviderReferenceAsync(string providerReference, CancellationToken ct = default);
+    Task<Payment?> GetLatestForOrderAsync(Guid orderId, CancellationToken ct = default);
+    Task<IReadOnlyList<Payment>> ListAsync(PaymentStatus? status, string? method, int take, CancellationToken ct = default);
 
     Task<bool> WebhookEventExistsAsync(string eventId, CancellationToken ct = default);
     void AddWebhookEvent(ProcessedWebhookEvent webhookEvent);

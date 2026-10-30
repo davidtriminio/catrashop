@@ -10,10 +10,11 @@ import { Timeline } from '@cs/ui/timeline';
 import { I18n } from '@cs/i18n/i18n';
 import { LocalDatePipe } from '@cs/util/local-date.pipe';
 import { MoneyPipe } from '@cs/util/money.pipe';
+import { PaymentPanel } from './payment-panel';
 
 @Component({
   selector: 'app-order-detail',
-  imports: [LocalDatePipe, RouterLink, MoneyPipe, StatusBadge, Timeline, TranslocoPipe],
+  imports: [LocalDatePipe, RouterLink, MoneyPipe, PaymentPanel, StatusBadge, Timeline, TranslocoPipe],
   template: `
     @if (loading()) { <div class="card"><div class="skeleton" style="height:1.4rem;width:40%"></div></div> }
     @if (error()) { <div class="alert error">{{ error() }}</div> }
@@ -71,6 +72,8 @@ import { MoneyPipe } from '@cs/util/money.pipe';
             </p>
           </div>
 
+          <app-payment-panel [order]="o" (changed)="reload()" />
+
           @if (tracking(); as t) {
             <div class="card">
               <h2>{{ 'orderDetail.shipment' | transloco }}</h2>
@@ -124,18 +127,20 @@ export class OrderDetailPage implements OnInit {
   readonly actionMessage = signal<string | null>(null);
   readonly busy = signal(false);
 
+  /** "Pay now" is only for orders from before payment methods existed; the payment panel handles the rest. */
   readonly canPay = computed(() => {
-    const s = this.order()?.status;
-    return s === 'Pending' || s === 'PaymentPending' || s === 'PaymentFailed';
+    const o = this.order();
+    const s = o?.status;
+    return !o?.paymentMethod && (s === 'Pending' || s === 'PaymentPending' || s === 'PaymentFailed');
   });
   readonly canCancel = computed(() => {
     const s = this.order()?.status;
-    return s === 'Pending' || s === 'PaymentPending' || s === 'PaymentFailed' || s === 'Paid';
+    return s === 'Pending' || s === 'PaymentPending' || s === 'PaymentFailed' || s === 'Paid' || s === 'Confirmed';
   });
 
   ngOnInit(): void { this.reload(); }
 
-  private reload(): void {
+  protected reload(): void {
     const id = this.route.snapshot.paramMap.get('id')!;
     this.loading.set(true);
     this.api.getMine(id).subscribe({

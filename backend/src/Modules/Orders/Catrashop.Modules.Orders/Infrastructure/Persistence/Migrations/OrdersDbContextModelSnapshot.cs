@@ -118,6 +118,11 @@ namespace Catrashop.Modules.Orders.Infrastructure.Persistence.Migrations
                         .HasColumnType("character varying(30)")
                         .HasColumnName("order_number");
 
+                    b.Property<string>("PaymentMethod")
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)")
+                        .HasColumnName("payment_method");
+
                     b.Property<Guid?>("PickupStoreId")
                         .HasColumnType("uuid")
                         .HasColumnName("pickup_store_id");

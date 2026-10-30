@@ -12,11 +12,15 @@ public sealed record ShippingAddressRequest(
 /// </summary>
 public sealed record CheckoutRequest(
     ShippingAddressRequest? ShippingAddress, string? CouponCode = null, string DeliveryMode = "Delivery",
-    Guid? PickupStoreId = null, string? PickupRecipientName = null);
+    Guid? PickupStoreId = null, string? PickupRecipientName = null, string? PaymentMethod = null);
+
+/// <summary>The payment methods the customer may choose for a delivery option; the server re-checks the choice at checkout.</summary>
+public sealed record PaymentMethodOptionsResponse(IReadOnlyList<string> Methods);
 
 public sealed record CancelOrderRequest(string? Reason);
 
-public sealed record CheckoutResponse(Guid OrderId, string OrderNumber, string Status, string Currency, decimal GrandTotal);
+public sealed record CheckoutResponse(
+    Guid OrderId, string OrderNumber, string Status, string Currency, decimal GrandTotal, string? PaymentMethod = null);
 
 // --- Responses ----------------------------------------------------------------------------------
 
@@ -45,4 +49,5 @@ public sealed record OrderDetailResponse(
     ShippingAddressRequest ShippingAddress,
     IReadOnlyList<OrderItemResponse> Items,
     IReadOnlyList<OrderStatusHistoryResponse> History,
-    DateTimeOffset CreatedAtUtc);
+    DateTimeOffset CreatedAtUtc,
+    string? PaymentMethod = null);

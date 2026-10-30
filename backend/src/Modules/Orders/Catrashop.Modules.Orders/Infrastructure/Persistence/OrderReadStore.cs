@@ -103,6 +103,7 @@ public sealed class OrderReadStore : IOrderReadStore
                 .OrderBy(h => h.OccurredAtUtc)
                 .Select(h => new OrderStatusHistoryResponse(h.Status.ToString(), h.Note, h.OccurredAtUtc))
                 .ToArray(),
-            order.CreatedAtUtc);
+            order.CreatedAtUtc,
+            order.PaymentMethod);
     }
 }

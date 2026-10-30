@@ -39,6 +39,9 @@
     "pending": "Pendiente",
     "paymentPending": "Pago pendiente",
     "paid": "Pagado",
+    "confirmed": "Confirmado",
+    "underReview": "En revisión",
+    "captured": "Cobrado",
     "paymentFailed": "Pago fallido",
     "processing": "En preparación",
     "shipped": "Enviado",
@@ -243,6 +246,48 @@
     "cancelFailed": "No se pudo cancelar este pedido.",
     "shipping": "Envío",
     "pickupAt": "Recoger en"
+  },
+  "payment": {
+    "title": "Método de pago",
+    "loadingMethods": "Buscando métodos de pago…",
+    "chooseDestination": "Elige el departamento para ver cómo puedes pagar.",
+    "none": "No hay métodos de pago disponibles para esta entrega.",
+    "method": {
+      "CONTRA_ENTREGA": "Contra entrega",
+      "TRANSFERENCIA": "Transferencia bancaria",
+      "PAGO_EN_TIENDA": "Pago en tienda"
+    },
+    "help": {
+      "CONTRA_ENTREGA": "Pagas en efectivo cuando recibes tu pedido.",
+      "TRANSFERENCIA": "Transfieres a nuestra cuenta y subes el comprobante; verificamos tu pago.",
+      "PAGO_EN_TIENDA": "Pagas en la tienda cuando recoges tu pedido."
+    },
+    "panel": {
+      "title": "Pago",
+      "method": "Método:",
+      "status": "Estado del pago:",
+      "start": "Continuar con el pago",
+      "startFailed": "No se pudo iniciar el pago.",
+      "cashPending": "Pagarás en efectivo al recibir tu pedido. Tu pedido ya está confirmado.",
+      "storePending": "Pagarás en la tienda al recoger tu pedido. Tu pedido ya está confirmado.",
+      "collected": "Pago recibido. ¡Gracias!",
+      "transferIntro": "Haz la transferencia por el total del pedido a una de estas cuentas y sube el comprobante.",
+      "account": "{{bank}} · {{type}} · {{number}} · {{holder}}",
+      "bankAccount": "Cuenta a la que transferiste",
+      "reference": "Referencia de la transferencia",
+      "receipt": "Comprobante (JPG, PNG o PDF, hasta 5 MB)",
+      "send": "Enviar comprobante",
+      "sending": "Enviando…",
+      "sent": "Recibimos tu comprobante.",
+      "sendFailed": "No se pudo enviar el comprobante.",
+      "tooLarge": "El archivo supera los 5 MB.",
+      "wrongType": "Sube una imagen JPG o PNG, o un PDF.",
+      "needFile": "Adjunta el comprobante.",
+      "underReview": "Estamos verificando tu comprobante. Te avisaremos cuando el pago esté confirmado.",
+      "rejected": "No pudimos verificar tu comprobante: {{reason}} Puedes enviar otro.",
+      "verified": "Transferencia verificada. ¡Gracias!",
+      "noAccounts": "Aún no hay cuentas bancarias configuradas. Contáctanos para pagar."
+    }
   },
   "tracking": {
     "title": "Rastrear un envío",

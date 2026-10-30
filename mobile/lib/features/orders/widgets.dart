@@ -31,7 +31,7 @@ class StatusChip extends StatelessWidget {
 }
 
 IconData statusIcon(String status) => switch (status) {
-      OrderStatus.paid => Icons.inventory_2_outlined,
+      OrderStatus.paid || OrderStatus.confirmed => Icons.inventory_2_outlined,
       OrderStatus.processing => Icons.autorenew,
       OrderStatus.shipped => Icons.local_shipping_outlined,
       OrderStatus.delivered => Icons.check_circle_outline,

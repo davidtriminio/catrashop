@@ -5,7 +5,7 @@ type Tone = 'accent' | 'warn' | 'info' | 'ok' | 'bad' | 'neutral';
 
 /**
  * Order / payment / shipment status as a badge. One mapping for both apps so a state always looks the same:
- * lime = paid and waiting for fulfilment, amber = being prepared, indigo = on its way, green = done, red = failed.
+ * lime = paid or confirmed and waiting for fulfilment, amber = being prepared or under review, indigo = on its way, green = done, red = failed.
  */
 @Component({
   selector: 'cs-status-badge',
@@ -30,10 +30,10 @@ export class StatusBadge {
 
 export function toneFor(status: string): Tone {
   switch (status) {
-    case 'Paid': return 'accent';
-    case 'Processing': case 'LabelCreated': case 'PickedUp': return 'warn';
+    case 'Paid': case 'Confirmed': return 'accent';
+    case 'Processing': case 'LabelCreated': case 'PickedUp': case 'UnderReview': return 'warn';
     case 'Shipped': case 'InTransit': case 'OutForDelivery': return 'info';
-    case 'Delivered': return 'ok';
+    case 'Delivered': case 'Captured': return 'ok';
     case 'PaymentFailed': case 'Cancelled': case 'Failed': case 'Returned': return 'bad';
     default: return 'neutral'; // Pending, PaymentPending, RefundRequested, Refunded, unknown
   }

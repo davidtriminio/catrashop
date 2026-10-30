@@ -1,5 +1,6 @@
 using Catrashop.Modules.Orders.Application.Contracts;
 using Catrashop.Modules.Orders.Application.Validation;
+using Catrashop.Modules.Orders.Contracts;
 using Catrashop.Modules.Orders.Domain;
 using Xunit;
 
@@ -175,29 +176,31 @@ public class OrderTests
 public class CheckoutRequestValidationTests
 {
     private static readonly CheckoutRequestValidator Validator = new();
+    private const string Transfer = PaymentMethodCodes.BankTransfer;
+    private const string PayAtStore = PaymentMethodCodes.PayAtStore;
 
     private static ShippingAddressRequest Address(string country = "HN", string? department = "HN-FM") =>
         new("Jane Doe", "Col. Palmira, Calle 5", null, "Tegucigalpa", null, "11101", country, department);
 
     [Fact]
     public void A_delivery_to_a_department_of_honduras_is_valid() =>
-        Assert.True(Validator.Validate(new CheckoutRequest(Address())).IsValid);
+        Assert.True(Validator.Validate(new CheckoutRequest(Address(), PaymentMethod: Transfer)).IsValid);
 
     [Fact]
     public void A_delivery_needs_an_address_a_department_and_the_country_honduras()
     {
-        Assert.False(Validator.Validate(new CheckoutRequest(null)).IsValid);
-        Assert.False(Validator.Validate(new CheckoutRequest(Address(department: null))).IsValid);
-        Assert.False(Validator.Validate(new CheckoutRequest(Address(country: "US"))).IsValid);
+        Assert.False(Validator.Validate(new CheckoutRequest(null, PaymentMethod: Transfer)).IsValid);
+        Assert.False(Validator.Validate(new CheckoutRequest(Address(department: null), PaymentMethod: Transfer)).IsValid);
+        Assert.False(Validator.Validate(new CheckoutRequest(Address(country: "US"), PaymentMethod: Transfer)).IsValid);
     }
 
     [Fact]
     public void A_pickup_needs_a_store_and_the_name_of_who_collects_but_no_address()
     {
         var store = Guid.NewGuid();
-        Assert.True(Validator.Validate(new CheckoutRequest(null, null, "Pickup", store, "Jane Doe")).IsValid);
-        Assert.False(Validator.Validate(new CheckoutRequest(null, null, "Pickup", null, "Jane Doe")).IsValid);
-        Assert.False(Validator.Validate(new CheckoutRequest(null, null, "Pickup", store, " ")).IsValid);
+        Assert.True(Validator.Validate(new CheckoutRequest(null, null, "Pickup", store, "Jane Doe", PaymentMethod: PayAtStore)).IsValid);
+        Assert.False(Validator.Validate(new CheckoutRequest(null, null, "Pickup", null, "Jane Doe", PaymentMethod: PayAtStore)).IsValid);
+        Assert.False(Validator.Validate(new CheckoutRequest(null, null, "Pickup", store, " ", PaymentMethod: PayAtStore)).IsValid);
     }
 
     [Theory]
@@ -207,7 +210,84 @@ public class CheckoutRequestValidationTests
     [InlineData("", false)]
     public void The_delivery_mode_must_be_known(string mode, bool valid)
     {
-        var request = new CheckoutRequest(Address(), null, mode, Guid.NewGuid(), "Jane Doe");
+        var request = new CheckoutRequest(Address(), null, mode, Guid.NewGuid(), "Jane Doe", Transfer);
+        Assert.Equal(valid, Validator.Validate(request).IsValid);
+    }
+
+    [Theory]
+    [InlineData(null, false)]
+    [InlineData("", false)]
+    [InlineData("LINKPAGO", false)]
+    [InlineData("EFECTIVO", false)]
+    [InlineData("CONTRA_ENTREGA", true)]
+    [InlineData("transferencia", true)]
+    [InlineData("PAGO_EN_TIENDA", true)]
+    public void The_payment_method_is_required_and_must_be_one_we_offer(string? method, bool valid)
+    {
+        var request = new CheckoutRequest(Address(), PaymentMethod: method);
         Assert.Equal(valid, Validator.Validate(request).IsValid);
     }
 }
+
+public class PaymentMethodRulesTests
+{
+    private static readonly DateTimeOffset Now = new(2026, 10, 30, 12, 0, 0, TimeSpan.Zero);
+
+    [Theory]
+    [InlineData(false, true, "CONTRA_ENTREGA,TRANSFERENCIA")]
+    [InlineData(false, false, "TRANSFERENCIA")]
+    [InlineData(true, false, "PAGO_EN_TIENDA,TRANSFERENCIA")]
+    [InlineData(true, true, "PAGO_EN_TIENDA,TRANSFERENCIA")]
+    public void The_delivery_option_decides_which_methods_are_offered(bool pickup, bool cashCovered, string expected) =>
+        Assert.Equal(expected, string.Join(",", PaymentMethodCodes.AllowedFor(pickup, cashCovered)));
+
+    [Fact]
+    public void Link_payments_are_not_offered_for_now() =>
+        Assert.DoesNotContain("LINKPAGO", PaymentMethodCodes.All);
+
+    private static Order OrderPaidWith(string method)
+    {
+        var lines = new[] { (Guid.NewGuid(), Guid.NewGuid(), "SKU-1", "Widget", 100m, 1) };
+        var address = new ShippingAddress("Jane Doe", "Calle 1", null, "Tegucigalpa", "Francisco Morazan", "11101", "HN");
+        var order = Order.Create("ORD-51", Guid.NewGuid(), Guid.NewGuid(), "HNL", address, lines, 0m, 0m, Now, paymentMethod: method).Value;
+        Assert.True(order.MarkPaymentPending(Now).IsSuccess);
+        return order;
+    }
+
+    [Theory]
+    [InlineData("CONTRA_ENTREGA")]
+    [InlineData("PAGO_EN_TIENDA")]
+    public void A_collected_later_order_is_confirmed_without_being_marked_paid(string method)
+    {
+        var order = OrderPaidWith(method);
+
+        Assert.True(order.Confirm(Now).IsSuccess);
+
+        Assert.Equal(OrderStatus.Confirmed, order.Status);
+        Assert.False(order.HoldsReservation); // stock is committed, not merely reserved
+        Assert.True(order.StartProcessing(Now).IsSuccess); // and it can be prepared and shipped
+    }
+
+    [Fact]
+    public void A_transfer_order_cannot_be_confirmed_without_a_verified_payment()
+    {
+        var order = OrderPaidWith("TRANSFERENCIA");
+
+        var result = order.Confirm(Now);
+
+        Assert.True(result.IsFailure);
+        Assert.Equal(OrderStatus.PaymentPending, order.Status);
+        Assert.True(order.MarkPaid(Now).IsSuccess); // the only way in is a captured payment
+    }
+
+    [Theory]
+    [InlineData(OrderStatus.Pending, OrderStatus.Confirmed, false)]
+    [InlineData(OrderStatus.PaymentPending, OrderStatus.Confirmed, true)]
+    [InlineData(OrderStatus.Confirmed, OrderStatus.Processing, true)]
+    [InlineData(OrderStatus.Confirmed, OrderStatus.Cancelled, true)]
+    [InlineData(OrderStatus.Confirmed, OrderStatus.Shipped, false)]
+    [InlineData(OrderStatus.Confirmed, OrderStatus.Paid, false)]
+    public void Confirmed_sits_between_payment_pending_and_processing(OrderStatus from, OrderStatus to, bool allowed) =>
+        Assert.Equal(allowed, OrderStateMachine.CanTransition(from, to));
+}
+

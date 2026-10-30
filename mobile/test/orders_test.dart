@@ -127,4 +127,9 @@ void main() {
       expect(decodeJwtPayload('not-a-jwt'), isEmpty);
     });
   });
+
+  test('a confirmed (pay on delivery) order can be processed or cancelled', () {
+    expect(OrderAction.nextFor(OrderStatus.confirmed), OrderAction.process);
+    expect(OrderAction.canCancel(OrderStatus.confirmed), isTrue);
+  });
 }

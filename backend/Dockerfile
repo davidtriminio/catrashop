@@ -11,6 +11,8 @@ WORKDIR /app
 ENV ASPNETCORE_URLS=http://+:8080 \
     ASPNETCORE_ENVIRONMENT=Production
 COPY --from=build /app/publish .
+# Transfer receipts live here; created and owned by the app user so a named volume mounted on it is writable.
+RUN mkdir -p /var/lib/catrashop/receipts && chown -R $APP_UID /var/lib/catrashop
 USER $APP_UID
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "Catrashop.Api.dll"]

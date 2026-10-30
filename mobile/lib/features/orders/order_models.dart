@@ -5,6 +5,7 @@ class OrderStatus {
   static const pending = 'Pending';
   static const paymentPending = 'PaymentPending';
   static const paid = 'Paid';
+  static const confirmed = 'Confirmed';
   static const processing = 'Processing';
   static const shipped = 'Shipped';
   static const delivered = 'Delivered';
@@ -14,12 +15,13 @@ class OrderStatus {
   static const refunded = 'Refunded';
 
   /// Filters offered in the list (the ones an operator acts on first).
-  static const filters = [paid, processing, shipped, delivered, cancelled];
+  static const filters = [paid, confirmed, processing, shipped, delivered, cancelled];
 
   static String label(String s) => switch (s) {
         pending => 'Pendiente',
         paymentPending => 'Pago pendiente',
         paid => 'Pagado',
+        confirmed => 'Confirmado',
         processing => 'En proceso',
         shipped => 'Enviado',
         delivered => 'Entregado',
@@ -33,7 +35,7 @@ class OrderStatus {
   /// Soft background/foreground pair for a status chip (same pairs as the web badges, all AA contrast).
   /// Lime marks "Paid": the queue an operator needs to act on.
   static StatusTone tone(String s) => switch (s) {
-        paid => const StatusTone(Color(0xFFC8F169), Color(0xFF1C2600)),
+        paid || confirmed => const StatusTone(Color(0xFFC8F169), Color(0xFF1C2600)),
         processing => const StatusTone(Color(0xFFFEF3C7), Color(0xFF78350F)),
         shipped => const StatusTone(Color(0xFFE0E7FF), Color(0xFF312E81)),
         delivered => const StatusTone(Color(0xFFDCFCE7), Color(0xFF14532D)),
@@ -61,18 +63,19 @@ enum OrderAction {
   final IconData icon;
 
   static OrderAction? nextFor(String status) => switch (status) {
-        OrderStatus.paid => process,
+        OrderStatus.paid || OrderStatus.confirmed => process,
         OrderStatus.processing => ship,
         OrderStatus.shipped => deliver,
         _ => null,
       };
 
-  /// Cancel is allowed before shipping (Pending, PaymentPending, PaymentFailed, Paid, Processing).
+  /// Cancel is allowed before shipping (Pending, PaymentPending, PaymentFailed, Paid, Confirmed, Processing).
   static bool canCancel(String status) => const {
         OrderStatus.pending,
         OrderStatus.paymentPending,
         OrderStatus.paymentFailed,
         OrderStatus.paid,
+        OrderStatus.confirmed,
         OrderStatus.processing,
       }.contains(status);
 }

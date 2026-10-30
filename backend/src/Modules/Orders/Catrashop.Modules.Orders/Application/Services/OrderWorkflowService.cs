@@ -45,7 +45,30 @@ public sealed class OrderWorkflowService : IOrderWorkflow
 
         var awaiting = order.Status is OrderStatus.Pending or OrderStatus.PaymentPending or OrderStatus.PaymentFailed;
         var paid = order.Status is OrderStatus.Paid or OrderStatus.Processing or OrderStatus.Shipped or OrderStatus.Delivered;
-        return new PayableOrder(order.Id, order.CustomerId, order.Currency, order.GrandTotal, awaiting, paid);
+        return new PayableOrder(order.Id, order.CustomerId, order.Currency, order.GrandTotal, awaiting, paid,
+            order.Status.ToString(), order.PaymentMethod);
+    }
+
+    public async Task<Result> ConfirmWithoutPaymentAsync(Guid orderId, CancellationToken ct = default)
+    {
+        var order = await _orders.GetByIdAsync(orderId, ct);
+        if (order is null)
+            return OrderErrors.NotFound;
+
+        if (order.Status is OrderStatus.Confirmed or OrderStatus.Paid or OrderStatus.Processing or OrderStatus.Shipped or OrderStatus.Delivered)
+            return Result.Success(); // already accepted — idempotent
+
+        var result = order.Confirm(_clock.GetUtcNow());
+        if (result.IsFailure)
+            return result;
+
+        // The goods are spoken for even though the money is not in yet: the reserved stock is now sold.
+        await _inventory.CommitAsync(order.CartId, ct);
+
+        _events.Enqueue(new OrderConfirmedIntegrationEvent(order.Id, order.OrderNumber, order.CustomerId,
+            order.GrandTotal, order.Currency, order.PaymentMethod!), order.Id);
+        await _unitOfWork.SaveChangesAsync(ct);
+        return Result.Success();
     }
 
     public async Task<Result> RefundAsync(Guid orderId, CancellationToken ct = default)
@@ -82,8 +105,10 @@ public sealed class OrderWorkflowService : IOrderWorkflow
         if (order is null)
             return OrderErrors.NotFound;
 
-        if (order.Status is OrderStatus.Paid or OrderStatus.Processing or OrderStatus.Shipped or OrderStatus.Delivered)
-            return Result.Success(); // already captured — idempotent
+        // Already captured — idempotent. A Confirmed order (cash on delivery / pay at the store) has its stock
+        // committed already; collecting its money later changes nothing on the order itself.
+        if (order.Status is OrderStatus.Paid or OrderStatus.Confirmed or OrderStatus.Processing or OrderStatus.Shipped or OrderStatus.Delivered)
+            return Result.Success();
 
         var result = order.MarkPaid(_clock.GetUtcNow());
         if (result.IsFailure)

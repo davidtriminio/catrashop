@@ -62,12 +62,20 @@ services:
       Identity__Jwt__Audience: ${JWT_AUDIENCE:?}
       Identity__Jwt__SigningKey: ${JWT_SIGNING_KEY:?}
       Payments__WebhookSecret: ${PAYMENTS_WEBHOOK_SECRET:?}
+      Payments__ReceiptsPath: /var/lib/catrashop/receipts
+      Payments__BankAccounts__0__Code: ${BANK_ACCOUNT_CODE:-}
+      Payments__BankAccounts__0__Bank: ${BANK_ACCOUNT_BANK:-}
+      Payments__BankAccounts__0__Holder: ${BANK_ACCOUNT_HOLDER:-}
+      Payments__BankAccounts__0__AccountNumber: ${BANK_ACCOUNT_NUMBER:-}
+      Payments__BankAccounts__0__AccountType: ${BANK_ACCOUNT_TYPE:-}
       RabbitMq__HostName: rabbitmq
       RabbitMq__UserName: ${RABBITMQ_USER:?}
       RabbitMq__Password: ${RABBITMQ_PASSWORD:?}
       Security__Cors__AllowedOrigins__0: https://${DOMAIN:?}
       Security__Cors__AllowedOrigins__1: https://admin.${DOMAIN}
       AllowedHosts: ${DOMAIN};admin.${DOMAIN}
+    volumes:
+      - receipts-data:/var/lib/catrashop/receipts
     depends_on:
       postgres: { condition: service_healthy }
       rabbitmq: { condition: service_healthy }
@@ -95,6 +103,7 @@ services:
     depends_on: [web]
 
 volumes:
+  receipts-data:
   postgres-data:
   rabbitmq-data:
   caddy-data:

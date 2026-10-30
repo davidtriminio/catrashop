@@ -10,6 +10,9 @@ describe('status badge', () => {
 
   it('maps every order state to a tone', () => {
     expect(toneFor('Paid')).toBe('accent');
+    expect(toneFor('Confirmed')).toBe('accent');
+    expect(toneFor('UnderReview')).toBe('warn');
+    expect(toneFor('Captured')).toBe('ok');
     expect(toneFor('Processing')).toBe('warn');
     expect(toneFor('Shipped')).toBe('info');
     expect(toneFor('Delivered')).toBe('ok');

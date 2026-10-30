@@ -99,8 +99,14 @@ export interface CheckoutRequest {
   deliveryMode: DeliveryMode;
   pickupStoreId?: string | null;
   pickupRecipientName?: string | null;
+  paymentMethod: PaymentMethod;
 }
-export interface CheckoutResponse { orderId: string; orderNumber: string; status: string; currency: string; grandTotal: number; }
+/** How the customer pays. The codes are the server's; LINKPAGO is not offered yet. */
+export type PaymentMethod = 'CONTRA_ENTREGA' | 'TRANSFERENCIA' | 'PAGO_EN_TIENDA';
+export interface PaymentMethodOptions { methods: PaymentMethod[]; }
+export interface CheckoutResponse {
+  orderId: string; orderNumber: string; status: string; currency: string; grandTotal: number; paymentMethod: PaymentMethod | null;
+}
 export interface OrderSummary {
   id: string; orderNumber: string; status: string; currency: string; grandTotal: number; itemCount: number; createdAtUtc: string;
 }
@@ -114,6 +120,8 @@ export interface OrderDetail {
   subtotal: number; discountTotal: number; taxTotal: number; shippingTotal: number; grandTotal: number;
   deliveryMode: DeliveryMode; pickupStoreId: string | null; pickupStoreName: string | null;
   shippingAddress: ShippingAddress; items: OrderItem[]; history: OrderStatusHistoryEntry[]; createdAtUtc: string;
+  /** Null only for orders placed before payment methods existed. */
+  paymentMethod: PaymentMethod | null;
 }
 export interface CancelOrderRequest { reason?: string | null; }
 
@@ -122,7 +130,14 @@ export interface InitiatePaymentRequest { orderId: string; }
 export interface PaymentResponse {
   id: string; orderId: string; status: string; amount: number; currency: string;
   providerReference: string | null; failureReason: string | null;
+  method: PaymentMethod | null;
+  transferBankAccountCode: string | null; transferReference: string | null;
+  hasReceipt: boolean; proofSubmittedAtUtc: string | null;
+  /** Why an operator sent the receipt back; the customer can attach another one. */
+  reviewNote: string | null;
+  createdAtUtc: string | null;
 }
+export interface BankAccount { code: string; bank: string; holder: string; accountNumber: string; accountType: string; }
 
 // --- Shipping -----------------------------------------------------------------------------------
 export interface ShippingMethod { id: string; code: string; name: string; cost: number; currency: string; estimatedDays: number; isActive: boolean; }

@@ -7,7 +7,8 @@ public enum PaymentStatus
     Authorized = 1,
     Captured = 2,
     Failed = 3,
-    Refunded = 4
+    Refunded = 4,
+    UnderReview = 5   // a transfer receipt was submitted and waits for an operator to verify it
 }
 
 public static class PaymentStateMachine
@@ -15,7 +16,8 @@ public static class PaymentStateMachine
     private static readonly IReadOnlyDictionary<PaymentStatus, IReadOnlySet<PaymentStatus>> Allowed =
         new Dictionary<PaymentStatus, IReadOnlySet<PaymentStatus>>
         {
-            [PaymentStatus.Pending] = Set(PaymentStatus.Authorized, PaymentStatus.Captured, PaymentStatus.Failed),
+            [PaymentStatus.Pending] = Set(PaymentStatus.Authorized, PaymentStatus.Captured, PaymentStatus.Failed, PaymentStatus.UnderReview),
+            [PaymentStatus.UnderReview] = Set(PaymentStatus.Captured, PaymentStatus.Pending, PaymentStatus.Failed),
             [PaymentStatus.Authorized] = Set(PaymentStatus.Captured, PaymentStatus.Failed),
             [PaymentStatus.Captured] = Set(PaymentStatus.Refunded),
             [PaymentStatus.Failed] = Set(),

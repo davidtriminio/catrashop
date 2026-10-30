@@ -9,6 +9,7 @@ interface Kpi { status: string; label: string; hint: string; tone: string; }
 
 const KPIS: Kpi[] = [
   { status: 'Paid', label: 'To process', hint: 'Paid, waiting for you', tone: 'accent' },
+  { status: 'Confirmed', label: 'To process (on delivery)', hint: 'Confirmed, paid on delivery or in store', tone: 'accent' },
   { status: 'Processing', label: 'Processing', hint: 'Being prepared', tone: 'warn' },
   { status: 'Shipped', label: 'Shipped', hint: 'On their way', tone: 'info' },
   { status: 'Delivered', label: 'Delivered', hint: 'Completed', tone: 'ok' },
