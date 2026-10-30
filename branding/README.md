@@ -4,11 +4,12 @@ One drawing, `make-icons.py`, produces every icon the project ships. Nothing els
 
 | App | Look | Files written |
 |---|---|---|
-| Store (`frontend`) | near-black tile, lime **H** | `frontend/public/` `favicon.ico`, `favicon.svg`, `apple-touch-icon.png` |
-| Admin (`frontend/projects/commercehub-admin`) | lime tile, near-black **H** | the same three files in its `public/` |
-| Mobile app (it *is* the admin app) | lime tile, near-black **H** | Android: `mipmap-*/ic_launcher.png` (Android 7 and older), `ic_launcher_foreground.png` + `ic_launcher_monochrome.png`, `mipmap-anydpi-v26/ic_launcher.xml` (adaptive icon), `values/ic_launcher_background.xml`; iOS: every size in `AppIcon.appiconset` |
+| Store (`frontend`) | near-black tile, lime mark | `frontend/public/` `favicon.ico`, `favicon.svg`, `apple-touch-icon.png` |
+| Admin (`frontend/projects/commercehub-admin`) | lime tile, near-black mark | the same three files in its `public/` |
+| Mobile app (it *is* the admin app) | lime tile, near-black mark | Android: `mipmap-*/ic_launcher.png` (Android 7 and older), `ic_launcher_foreground.png` + `ic_launcher_monochrome.png`, `mipmap-anydpi-v26/ic_launcher.xml` (adaptive icon), `values/ic_launcher_background.xml`; iOS: every size in `AppIcon.appiconset` |
 
-`store.png/.svg` and `admin.png/.svg` in this folder are previews of the two variants. The colours are the brand tokens
+The mark is a **shopping bag wrapped by an orbit ring**, like a planet (it nods to the "Galactic" demo brand), with a small
+sparkle that only appears at 48 px and above. `store.png/.svg` and `admin.png/.svg` in this folder are previews of the two variants. The colours are the brand tokens
 (`--primary #0b0b0c`, `--accent #c8f169`).
 
 ## Regenerate
@@ -16,12 +17,11 @@ One drawing, `make-icons.py`, produces every icon the project ships. Nothing els
 pip install pillow
 python branding/make-icons.py
 ```
-Needs only Python and Pillow. To change the design edit the constants at the top of the script (colours, size and
-thickness of the H, tile rounding) or `draw_glyph`, and run it again.
+Needs only Python and Pillow. To change the design edit the constants at the top of the script (colours, bag and ring geometry, tile
+rounding) or `draw_mark`/`svg`, and run it again.
 
 ## Using a different logo
-The H is a placeholder mark drawn to match the wordmark ("Commerce" + lime "Hub"). To use a designed logo, replace
-`draw_glyph` (and `svg`) with your artwork — or paste your own PNG in `render()` — and keep the rest: the script already
+The mark is a placeholder drawn in code. To use a designed logo, replace `draw_mark` (and `svg`) with your artwork — or paste your own PNG in `render()` — and keep the rest: the script already
 knows every size, the Android adaptive-icon safe zone (the mark stays inside the central 66%) and iOS's requirement that
 icons have no transparency.
 
