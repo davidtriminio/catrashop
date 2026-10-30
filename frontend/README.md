@@ -1,4 +1,4 @@
-# CommerceHub — Frontend
+# Catrashop — Frontend
 
 An Angular 22 workspace with **two applications** and a **shared library**, all standalone, **zoneless**, and
 signal-driven. See [ADR-018](../docs/adr/018-frontend-architecture.md) and

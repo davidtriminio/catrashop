@@ -10,7 +10,7 @@ import { ADMIN_NAV } from './admin-permissions';
     @if (auth.isAuthenticated()) {
       <div class="shell">
         <aside class="sidebar">
-          <div class="brand">CommerceHub<span>Admin</span></div>
+          <div class="brand">Catrashop<span>Admin</span></div>
           <nav>
             @for (item of visibleNav(); track item.path) {
               <a [routerLink]="item.path" routerLinkActive="active">{{ item.label }}</a>

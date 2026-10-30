@@ -183,7 +183,7 @@ class BiometricService {
     if (kDebugMode && const bool.fromEnvironment('SKIP_BIOMETRIC')) return BiometricResult.success;
     try {
       if (!await _auth.isDeviceSupported()) return BiometricResult.unsupported;
-      final ok = await _auth.authenticate(localizedReason: 'Desbloquea CommerceHub Admin');
+      final ok = await _auth.authenticate(localizedReason: 'Desbloquea Catrashop Admin');
       return ok ? BiometricResult.success : BiometricResult.failed;
     } catch (_) {
       return BiometricResult.failed;

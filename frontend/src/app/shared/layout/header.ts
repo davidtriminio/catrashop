@@ -11,7 +11,7 @@ import { CartStore } from '../../core/cart/cart.store';
   template: `
     <header class="site-header">
       <div class="container bar">
-        <a routerLink="/" class="brand">Commerce<span>Hub</span></a>
+        <a routerLink="/" class="brand">Catra<span>shop</span></a>
 
         <nav class="nav" [attr.aria-label]="'nav.main' | transloco">
           <a routerLink="/products" routerLinkActive="active">{{ 'nav.shop' | transloco }}</a>

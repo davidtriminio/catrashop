@@ -29,9 +29,9 @@
       "parameters": {
         "fromEmail": "hello@commercehub.example",
         "toEmail": "={{ $json.email }}",
-        "subject": "Welcome to CommerceHub, {{ $json.firstName }}!",
+        "subject": "Welcome to Catrashop, {{ $json.firstName }}!",
         "emailFormat": "text",
-        "text": "Hi {{ $json.firstName }},\n\nThanks for creating your CommerceHub account. Your storefront is ready — happy shopping!\n\n— The CommerceHub team",
+        "text": "Hi {{ $json.firstName }},\n\nThanks for creating your Catrashop account. Your storefront is ready — happy shopping!\n\n— The Catrashop team",
         "options": {}
       },
       "id": "send-welcome",

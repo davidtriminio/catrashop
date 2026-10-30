@@ -1,4 +1,4 @@
-# CommerceHub Admin (Flutter)
+# Catrashop Admin (Flutter)
 
 Android + iOS app for **order management only**: sign in as an admin, browse/filter orders, open one, and move it
 through the fulfilment states (process → ship → deliver) or cancel it. See
