@@ -8,8 +8,8 @@ One drawing, `make-icons.py`, produces every icon the project ships. Nothing els
 | Admin (`frontend/projects/commercehub-admin`) | lime tile, near-black mark | the same three files in its `public/` |
 | Mobile app (it *is* the admin app) | lime tile, near-black mark | Android: `mipmap-*/ic_launcher.png` (Android 7 and older), `ic_launcher_foreground.png` + `ic_launcher_monochrome.png`, `mipmap-anydpi-v26/ic_launcher.xml` (adaptive icon), `values/ic_launcher_background.xml`; iOS: every size in `AppIcon.appiconset` |
 
-The mark is a **shopping bag wrapped by an orbit ring**, like a planet (it nods to the "Galactic" demo brand), with a small
-sparkle that only appears at 48 px and above. `store.png/.svg` and `admin.png/.svg` in this folder are previews of the two variants. The colours are the brand tokens
+The mark is a **shopping cart with a ringed planet above the basket**: the cart says "online store" at a glance and the planet
+nods to the "Galactic" demo brand. `store.png/.svg` and `admin.png/.svg` in this folder are previews of the two variants. The colours are the brand tokens
 (`--primary #0b0b0c`, `--accent #c8f169`).
 
 ## Regenerate
@@ -17,7 +17,7 @@ sparkle that only appears at 48 px and above. `store.png/.svg` and `admin.png/.s
 pip install pillow
 python branding/make-icons.py
 ```
-Needs only Python and Pillow. To change the design edit the constants at the top of the script (colours, bag and ring geometry, tile
+Needs only Python and Pillow. To change the design edit the constants at the top of the script (colours, cart and planet geometry, tile
 rounding) or `draw_mark`/`svg`, and run it again.
 
 ## Using a different logo
