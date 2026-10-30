@@ -4,7 +4,7 @@ import { AuthApi } from '../api/auth.api';
 import { isSessionRejected } from './session-errors';
 import { AuthTokens, LoginRequest, RegisterRequest, UserProfile } from '../api/models';
 
-const STORAGE_KEY = 'ch_auth_tokens';
+const STORAGE_KEY = 'cs_auth_tokens';
 
 /** App-wide authentication state: tokens (persisted), the current profile, and derived permission checks. */
 @Injectable({ providedIn: 'root' })

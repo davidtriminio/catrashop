@@ -15,11 +15,11 @@ under Docker later).
 ## Changes
 
 ### Backend
-- **`CommerceHub.ArchitectureTests` (NetArchTest) — 66 checks (11 modules × 6 rules).** Module isolation
+- **`Catrashop.ArchitectureTests` (NetArchTest) — 66 checks (11 modules × 6 rules).** Module isolation
   (no reach into another module's Domain/Application/Infrastructure/Api — only `Contracts`/events); no
   module depends on the API host; inward layering (Domain free of outer layers and of EF Core/Npgsql;
   Application free of the Npgsql driver); integration-event handlers only in the composition root.
-- **`CommerceHub.IntegrationTests` (`WebApplicationFactory<Program>`) — 8 tests + 2 gated.** Boots the real
+- **`Catrashop.IntegrationTests` (`WebApplicationFactory<Program>`) — 8 tests + 2 gated.** Boots the real
   host with no live infra (placeholder connection string; lazy EF). Covers health/readiness, the module
   banner (all 11), 404s, and the auth pipeline order on a real protected endpoint: **401 / 403 / 400**
   resolved before any DB call. A DB-backed Identity E2E (register→/me, unregistered login→401) is committed
@@ -46,9 +46,9 @@ under Docker later).
   green.
 
 ## Testing / verification
-- Backend `dotnet test CommerceHub.slnx` → **183 passed, 2 skipped, 0 failed** (109 unit + 66 architecture
+- Backend `dotnet test Catrashop.slnx` → **183 passed, 2 skipped, 0 failed** (109 unit + 66 architecture
   + 8 integration; 2 Identity E2E skip — no Postgres).
-- Frontend `ng test commercehub-web` → **17 passed**; `ng test commercehub-admin` → **6 passed**;
+- Frontend `ng test catrashop-web` → **17 passed**; `ng test catrashop-admin` → **6 passed**;
   `playwright test` → **3 passed** (real headless Chromium, live dev server).
 - ⚠️ **Deferred (no Docker):** the 2 gated Identity E2E facts; a full checkout→pay→ship journey (API + DB).
 

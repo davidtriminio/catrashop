@@ -11,7 +11,7 @@ export interface TimelineItem {
 
 /** Vertical timeline, newest first, with the latest step emphasised. */
 @Component({
-  selector: 'ch-timeline',
+  selector: 'cs-timeline',
   imports: [LocalDatePipe, StatusBadge, TranslocoPipe],
   template: `
     <ol class="timeline">
@@ -19,7 +19,7 @@ export interface TimelineItem {
         <li [class.current]="first">
           <span class="dot" aria-hidden="true"></span>
           <div class="body">
-            <ch-status-badge [status]="e.status" />
+            <cs-status-badge [status]="e.status" />
             <time class="muted">{{ e.occurredAtUtc | localDate: 'datetime' }}</time>
             @if (e.note) { <p class="note muted">{{ e.note }}</p> }
           </div>

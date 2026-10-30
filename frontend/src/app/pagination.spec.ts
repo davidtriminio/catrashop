@@ -1,4 +1,4 @@
-import { buildPages } from '@ch/util/pagination';
+import { buildPages } from '@cs/util/pagination';
 
 describe('buildPages', () => {
   it('returns nothing without pages and a single page for one', () => {

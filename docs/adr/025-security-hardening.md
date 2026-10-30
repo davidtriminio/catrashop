@@ -14,10 +14,10 @@ infrastructure to start, and the in-memory integration host (which runs as `Deve
 ## Decision
 
 ### One composition-root module, config-driven with safe defaults
-`CommerceHub.Api.Security.SecurityHardeningExtensions` owns the wiring, bound to a single `Security`
+`Catrashop.Api.Security.SecurityHardeningExtensions` owns the wiring, bound to a single `Security`
 configuration section (`SecurityOptions`). Each control has a safe default, so the app runs locally with no
 configuration and production tightens each knob. Two entry points mirror the observability module:
-`builder.AddCommerceHubSecurity()` (services + fail-fast guard) and `app.UseCommerceHubSecurity()` (pipeline).
+`builder.AddCatrashopSecurity()` (services + fail-fast guard) and `app.UseCatrashopSecurity()` (pipeline).
 
 ### Response hardening headers
 `SecurityHeadersMiddleware` sets `X-Content-Type-Options: nosniff`, `X-Frame-Options: DENY`,
@@ -28,7 +28,7 @@ suited to a JSON API. The `Server` banner is suppressed at the Kestrel level (`A
 middleware runs first so the headers also cover error pages and rate-limit rejections.
 
 ### CORS restricted to configured origins
-A single named policy (`commercehub`) trusts only the exact origins in `Security:Cors:AllowedOrigins`
+A single named policy (`catrashop`) trusts only the exact origins in `Security:Cors:AllowedOrigins`
 (dev: the customer SPA `http://localhost:4200` and admin SPA `http://localhost:4300`), with a fixed method and
 header allow-list and credentials enabled. Wildcards are never honoured. An empty list emits no CORS headers
 at all — the correct posture when the SPA is served same-origin or behind a reverse proxy.

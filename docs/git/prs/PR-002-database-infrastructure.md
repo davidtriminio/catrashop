@@ -11,7 +11,7 @@ Phase 2: establish the shared persistence layer (EF Core 10 + PostgreSQL) and th
 local infrastructure stack, so modules can plug in a schema-isolated DbContext with event publishing built in.
 
 ## Changes
-- `CommerceHub.Infrastructure` project (EF Core 10, Npgsql 10, EFCore.NamingConventions).
+- `Catrashop.Infrastructure` project (EF Core 10, Npgsql 10, EFCore.NamingConventions).
 - `ModuleDbContext` base: schema-per-module, snake_case, auto-applies entity configs + the outbox.
 - Transactional **Outbox**: `OutboxMessage` (jsonb payload, retry/error/processed tracking, correlation id) +
   EF config with an unprocessed-rows index.

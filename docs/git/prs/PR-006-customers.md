@@ -17,7 +17,7 @@ Phase 6: customer profiles, address book, preferences, and wishlist — each cus
 - **Infrastructure:** `CustomersDbContext` (customers schema), owned-collection configs (unique
   `(customer, product)` wishlist index), repository, design-time factory, **initial migration** (4 tables).
 - **API:** `me`-scoped endpoints (profile, preferences, addresses incl. set-default, wishlist), all authenticated.
-- **Tests:** `CommerceHub.Modules.Customers.Tests` — **8 domain unit tests**.
+- **Tests:** `Catrashop.Modules.Customers.Tests` — **8 domain unit tests**.
 
 ## Technical decisions
 - **Customer id = user id (1:1 with Identity).** A caller can only ever load their own aggregate, so IDOR is

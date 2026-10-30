@@ -19,7 +19,7 @@ plus the Catalog pricing needed to feed it, and a public contract for checkout.
   repository, `CartDbContext` (cart schema) with a **partial unique index** (`status = 'Active'`) enforcing one
   active cart per customer, design-time factory, **initial migration** (3 tables).
 - **API:** me-scoped cart endpoints (authenticated).
-- **Tests:** `CommerceHub.Modules.Cart.Tests` — **8 domain unit tests**.
+- **Tests:** `Catrashop.Modules.Cart.Tests` — **8 domain unit tests**.
 - **Fix:** committed the `Api.csproj` module `<ProjectReference>`s omitted in phases 4-6 (see below).
 - ADR-012 (pricing placement & cart price capture).
 

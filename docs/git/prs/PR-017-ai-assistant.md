@@ -17,7 +17,7 @@ architecture, not by trusting the model (Section 17).
   `PromptInjectionGuard`; `SystemPrompt`; `AgentOptions`; `POST /api/v1/ai/chat` (authenticated).
 - **Minimal public read contracts for the tools:** `IProductCatalogQuery.SearchProductsAsync` (Catalog) and
   `IOrderQueries.GetForCustomerByNumberAsync` (Orders, ownership-scoped).
-- **Tests:** `CommerceHub.Modules.AI.Tests` — **11 unit tests**.
+- **Tests:** `Catrashop.Modules.AI.Tests` — **11 unit tests**.
 - ADR-022.
 
 ## Technical decisions (security)

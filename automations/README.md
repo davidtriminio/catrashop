@@ -1,7 +1,7 @@
-# CommerceHub automations (n8n)
+# Catrashop automations (n8n)
 
 These are **event-driven** automations. They subscribe to the same RabbitMQ topic exchange the backend publishes
-to (`commercehub.events`, ADR-020), so **no backend change is needed** — the exchange is the integration seam.
+to (`catrashop.events`, ADR-020), so **no backend change is needed** — the exchange is the integration seam.
 Each workflow has its own durable queue bound to the integration-event routing key it reacts to; a topic exchange
 fans a copy to every bound queue, so n8n receives events independently of the in-process consumer.
 
@@ -21,12 +21,12 @@ fans a copy to every bound queue, so n8n receives events independently of the in
 
 1. **Start the stack** (`docker compose up -d`) — brings up RabbitMQ (`:5672` / mgmt `:15672`) and n8n (`:5678`).
 2. **Create the topology.** In the RabbitMQ management UI → *Overview → Import definitions*, import
-   [`rabbitmq/definitions.json`](rabbitmq/definitions.json). It declares the `commercehub.events` exchange (same
+   [`rabbitmq/definitions.json`](rabbitmq/definitions.json). It declares the `catrashop.events` exchange (same
    shape the backend declares, so it merges) and the four `n8n.*` queues with their bindings. *(Or create the
    queues + bindings by hand / via `rabbitmqadmin`.)*
 3. **Add n8n credentials** (n8n → Credentials):
-   - **RabbitMQ** named `CommerceHub RabbitMQ` → host `rabbitmq`, port `5672`, user/pass from `.env`.
-   - **SMTP** named `CommerceHub SMTP` → your mail provider (e.g. Mailhog/Mailpit for local testing).
+   - **RabbitMQ** named `Catrashop RabbitMQ` → host `rabbitmq`, port `5672`, user/pass from `.env`.
+   - **SMTP** named `Catrashop SMTP` → your mail provider (e.g. Mailhog/Mailpit for local testing).
 4. **Import the workflows** (n8n → *Import from File*), one per file. After import, open each workflow and
    re-select its credentials (the exported IDs are placeholders), then **Activate**.
 5. For the ops alert, set `OPS_WEBHOOK_URL` in n8n's environment (e.g. a Slack incoming-webhook URL).

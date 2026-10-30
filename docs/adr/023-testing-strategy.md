@@ -16,19 +16,19 @@ yet the DB-backed and browser-backed checks must be real and ready to run once t
 
 ## Decision
 
-### Backend — architecture tests (`CommerceHub.ArchitectureTests`, NetArchTest)
+### Backend — architecture tests (`Catrashop.ArchitectureTests`, NetArchTest)
 Encode the rules that define the modular monolith so a violation fails the build, not a code review:
 - **Module isolation:** no module assembly may depend on another module's `Domain`, `Application`,
   `Infrastructure`, or `Api` namespaces — cross-module access goes only through published `Contracts`
   (in-process) or integration events. `Contracts` is deliberately excluded from the forbidden set.
-- **No module depends on the API composition root** (`CommerceHub.Api`).
+- **No module depends on the API composition root** (`Catrashop.Api`).
 - **Inward layering:** `Domain` depends on no outer layer and on no persistence framework (EF Core /
   Npgsql); `Application` never takes a direct dependency on the Npgsql driver.
 - **Handlers live in the composition root:** no business module implements `IIntegrationEventHandler<>` —
-  handlers stay in `CommerceHub.Api.Integration` so modules never couple to one another. (66 checks:
+  handlers stay in `Catrashop.Api.Integration` so modules never couple to one another. (66 checks:
   11 modules × 6 rules, driven by `[Theory]` data.)
 
-### Backend — integration tests (`CommerceHub.IntegrationTests`, `WebApplicationFactory<Program>`)
+### Backend — integration tests (`Catrashop.IntegrationTests`, `WebApplicationFactory<Program>`)
 Boot the **real** API host in-memory over the full middleware pipeline. The host is configured **without
 live infrastructure**: a placeholder PostgreSQL connection string satisfies each module's registration
 (EF Core connects lazily, so the app still starts — the same resilience that lets the app boot with the

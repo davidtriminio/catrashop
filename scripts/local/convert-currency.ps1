@@ -13,11 +13,11 @@
   script stops if no variant is left in -From (it would otherwise multiply them a second time).
   Amounts already copied into outbox messages and notification texts are history and are NOT rewritten.
   Use -DryRun first: it runs everything inside a transaction and rolls it back.
-  Back up the database before running it for real:  pg_dump -h localhost -U postgres -Fc commercehub > backup.dump
+  Back up the database before running it for real:  pg_dump -h localhost -U postgres -Fc catrashop > backup.dump
 .EXAMPLE
   ./scripts/local/convert-currency.ps1 -DryRun
   ./scripts/local/convert-currency.ps1 -Rate 25.5
-  ./scripts/local/convert-currency.ps1 -From USD -Rate 25.5 -Yes -ConnectionString 'Host=localhost;Port=5432;Database=commercehub;Username=postgres;Password=...'
+  ./scripts/local/convert-currency.ps1 -From USD -Rate 25.5 -Yes -ConnectionString 'Host=localhost;Port=5432;Database=catrashop;Username=postgres;Password=...'
 #>
 param(
   [string]$From = 'USD',
@@ -36,7 +36,7 @@ $From = $From.ToUpperInvariant(); $To = $To.ToUpperInvariant()
 if ($From -eq $To) { throw 'From and To are the same currency; nothing to do.' }
 $rateText = $Rate.ToString([System.Globalization.CultureInfo]::InvariantCulture)
 
-$pg = ConvertFrom-NpgsqlConnectionString (Get-CommerceHubConnectionString $ConnectionString)
+$pg = ConvertFrom-NpgsqlConnectionString (Get-CatrashopConnectionString $ConnectionString)
 $env:PGPASSWORD = $pg.Password
 $psql = Get-Psql
 function Run([string]$Sql) {

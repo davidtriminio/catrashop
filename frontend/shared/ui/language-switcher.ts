@@ -4,7 +4,7 @@ import { I18n, LANGS, Lang } from '../i18n/i18n';
 
 /** Small ES | EN toggle. The choice is saved, so the next visit opens in the same language. */
 @Component({
-  selector: 'ch-language-switcher',
+  selector: 'cs-language-switcher',
   imports: [TranslocoPipe],
   template: `
     <div class="lang" role="group" [attr.aria-label]="'language.label' | transloco">

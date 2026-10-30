@@ -1,7 +1,7 @@
 import 'dart:convert';
 
-import 'package:commercehub_admin/core/token_store.dart';
-import 'package:commercehub_admin/features/orders/order_models.dart';
+import 'package:catrashop_admin/core/token_store.dart';
+import 'package:catrashop_admin/features/orders/order_models.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 String _jwt(Map<String, dynamic> claims) {

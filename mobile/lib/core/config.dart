@@ -1,4 +1,4 @@
-/// Base URL of the CommerceHub API. Override per build:
+/// Base URL of the Catrashop API. Override per build:
 /// `flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5227`
 const String apiBaseUrl = String.fromEnvironment(
   'API_BASE_URL',

@@ -24,7 +24,7 @@ export default defineConfig({
     { name: 'chromium', use: { ...devices['Desktop Chrome'] } },
   ],
   webServer: {
-    command: `pnpm exec ng serve commercehub-web --port ${PORT}`,
+    command: `pnpm exec ng serve catrashop-web --port ${PORT}`,
     url: `http://localhost:${PORT}`,
     reuseExistingServer: !process.env.CI,
     timeout: 180_000,

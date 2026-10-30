@@ -12,10 +12,10 @@ shown. Order, payment and shipment statuses were each rendered differently (or n
 
 ## Changes
 - **Shared UI** (`frontend/shared/ui`):
-  - `ch-status-badge` — one status→tone mapping used everywhere: lime = paid and waiting, amber = processing,
+  - `cs-status-badge` — one status→tone mapping used everywhere: lime = paid and waiting, amber = processing,
     indigo = shipped / in transit, green = delivered, red = failed or cancelled, grey = the rest. Labels are
     humanised ("Payment pending"). Replaces the storefront-only `OrderStatusBadge`.
-  - `ch-timeline` — vertical timeline, newest first, latest step highlighted; used for order history and shipments.
+  - `cs-timeline` — vertical timeline, newest first, latest step highlighted; used for order history and shipments.
   - `shared/util/pagination.ts` — the pager helper moved out of the catalog so the orders pages and the admin use it.
 - **Orders list:** rows instead of a wide table (order number and date, status badge, total, chevron), skeleton while
   loading, empty state, numbered pager; collapses into a two-line row on phones.

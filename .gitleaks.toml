@@ -1,11 +1,11 @@
-# Gitleaks configuration for CommerceHub.
+# Gitleaks configuration for Catrashop.
 #
 # Extends the built-in ruleset and allowlists the repository's *intentional* development-only
 # placeholders. None of these are real credentials: they are the sample values the app uses to run
 # offline, and Phase 20's SecretGuard already refuses to boot with any of them outside Development.
 # The allowlist keeps the secret scan focused on genuine leaks instead of failing on documented dummies.
 
-title = "CommerceHub Gitleaks config"
+title = "Catrashop Gitleaks config"
 
 [extend]
 useDefault = true
@@ -16,7 +16,7 @@ description = "Development-only placeholders and sample config (never real secre
 # Files that exist to demonstrate configuration and deliberately carry dummy values.
 paths = [
   '''\.env\.example$''',
-  '''backend/src/Api/CommerceHub\.Api/appsettings\.Development\.json$''',
+  '''backend/src/Api/Catrashop\.Api/appsettings\.Development\.json$''',
   '''backend/tests/.*''',
   '''automations/rabbitmq/definitions\.json$''',
   '''docker-compose\.yml$''',
@@ -29,5 +29,5 @@ regexes = [
   '''integration-tests-signing-key-0123456789''',
   '''replace_with_a_long_random_dev_only_key_min_32_chars''',
   '''change_me_locally''',
-  '''(POSTGRES_PASSWORD|RABBITMQ_DEFAULT_PASS|RABBITMQ_PASSWORD|Password)[:=]\s*\$?\{?[A-Za-z_]*:?-?commercehub\}?''',
+  '''(POSTGRES_PASSWORD|RABBITMQ_DEFAULT_PASS|RABBITMQ_PASSWORD|Password)[:=]\s*\$?\{?[A-Za-z_]*:?-?catrashop\}?''',
 ]

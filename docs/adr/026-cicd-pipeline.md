@@ -25,8 +25,8 @@ dependency is still caught.
   `dotnet restore` → `build --configuration Release` (warnings are already errors) → `test`. The Postgres-gated
   E2E skips without a database; everything else runs. TRX results are uploaded as an artifact.
 - **Frontend job:** `pnpm/action-setup` (11.24.0) + `actions/setup-node` (Node 24, pnpm cache),
-  `pnpm install --frozen-lockfile`, production builds of **both** apps (`commercehub-web`,
-  `commercehub-admin`), Vitest for each, then Playwright (`install --with-deps chromium` + `pnpm run e2e`). The
+  `pnpm install --frozen-lockfile`, production builds of **both** apps (`catrashop-web`,
+  `catrashop-admin`), Vitest for each, then Playwright (`install --with-deps chromium` + `pnpm run e2e`). The
   existing Playwright config already boots its own `ng serve`, so no service orchestration is needed.
 
 ### Security pipeline
@@ -40,7 +40,7 @@ dependency is still caught.
 - **pnpm audit** (`--prod --audit-level high`) for the frontend.
 - **Gitleaks** secret scan over full history, governed by a repo-root `.gitleaks.toml` that extends the default
   rules and **allowlists the intentional development placeholders** (the sample `.env.example`, the dev
-  `appsettings.Development.json`, the test signing keys, the compose `commercehub` defaults). Phase 20's
+  `appsettings.Development.json`, the test signing keys, the compose `catrashop` defaults). Phase 20's
   `SecretGuard` already blocks those values at boot outside Development, so allowlisting them here keeps the
   scan focused on genuine leaks rather than failing on documented dummies.
 
@@ -62,7 +62,7 @@ is published.
 ## Consequences
 - New files: `.github/workflows/ci.yml`, `.github/workflows/security.yml`, `.github/dependabot.yml`,
   `.gitleaks.toml`, and `backend/global.json` (SDK pin — also makes local builds reproducible).
-- Verified locally (the CI-equivalent commands): `dotnet build/test CommerceHub.slnx -c Release` →
+- Verified locally (the CI-equivalent commands): `dotnet build/test Catrashop.slnx -c Release` →
   **195 pass / 2 skip / 0 fail**; `dotnet list package --vulnerable --include-transitive` → none; all workflow
   YAML and the Gitleaks TOML parse cleanly; the SDK pin resolves (`10.0.401` via `latestFeature`).
 - Deferred to GitHub: the first live workflow run, CodeQL results in the Security tab, Dependabot PRs, and the

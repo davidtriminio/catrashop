@@ -22,7 +22,7 @@ Phase 11: coupons with discount rules and usage limits, and a real discount wire
   discount reducing the taxable base; cancel and refund now call `ReleaseAsync`. Orders references the Promotions
   contract (one-way, acyclic).
 - **API:** customer `POST /promotions/quote` (preview); admin coupon CRUD/activate under `promotions.manage`.
-- **Tests:** `CommerceHub.Modules.Promotions.Tests` — **17 unit tests**.
+- **Tests:** `Catrashop.Modules.Promotions.Tests` — **17 unit tests**.
 - ADR-016 (promotions & checkout discounts).
 
 ## Technical decisions

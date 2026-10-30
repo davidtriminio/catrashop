@@ -9,8 +9,8 @@ import 'config.dart';
 import 'format.dart';
 import 'token_store.dart';
 
-const _taskName = 'commercehub.orderCheck';
-const _taskId = 'dev.davidtriminio.commercehub.orderCheck';
+const _taskName = 'catrashop.orderCheck';
+const _taskId = 'dev.davidtriminio.catrashop.orderCheck';
 
 final _plugin = FlutterLocalNotificationsPlugin();
 bool _pluginReady = false;

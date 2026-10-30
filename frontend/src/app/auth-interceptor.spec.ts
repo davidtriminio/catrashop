@@ -1,10 +1,10 @@
 import { HttpClient, provideHttpClient, withInterceptors } from '@angular/common/http';
 import { HttpTestingController, provideHttpClientTesting } from '@angular/common/http/testing';
 import { TestBed } from '@angular/core/testing';
-import { AuthStore } from '@ch/auth/auth.store';
-import { authInterceptor } from '@ch/auth/auth.interceptor';
-import { AuthApi } from '@ch/api/auth.api';
-import { AuthTokens } from '@ch/api/models';
+import { AuthStore } from '@cs/auth/auth.store';
+import { authInterceptor } from '@cs/auth/auth.interceptor';
+import { AuthApi } from '@cs/api/auth.api';
+import { AuthTokens } from '@cs/api/models';
 import { Subject, of, throwError } from 'rxjs';
 import { HttpErrorResponse } from '@angular/common/http';
 
@@ -16,7 +16,7 @@ const fresh: AuthTokens = { ...stale, accessToken: 'new', refreshToken: 'r1' };
 
 function setup(refresh: () => unknown) {
   localStorage.clear();
-  localStorage.setItem('ch_auth_tokens', JSON.stringify(stale));
+  localStorage.setItem('cs_auth_tokens', JSON.stringify(stale));
   const api = { refresh: counted(refresh), me: () => of({ permissions: [] }), logout: () => of(void 0) };
   TestBed.configureTestingModule({
     providers: [
@@ -82,6 +82,6 @@ describe('authInterceptor refresh', () => {
     expect(store.accessToken()).toBe('old');
     store.logout();
     expect(store.isAuthenticated()).toBe(false);
-    expect(localStorage.getItem('ch_auth_tokens')).toBeNull();
+    expect(localStorage.getItem('cs_auth_tokens')).toBeNull();
   });
 });

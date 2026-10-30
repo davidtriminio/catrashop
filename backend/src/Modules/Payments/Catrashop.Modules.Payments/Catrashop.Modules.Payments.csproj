@@ -1,0 +1,19 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Framework, nullability, implicit usings inherited from Directory.Build.props -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\Catrashop.Infrastructure\Catrashop.Infrastructure.csproj" />
+    <!-- Payments drives orders via the Orders public IOrderWorkflow contract. -->
+    <ProjectReference Include="..\..\Orders\Catrashop.Modules.Orders\Catrashop.Modules.Orders.csproj" />
+  </ItemGroup>
+</Project>

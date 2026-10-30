@@ -13,7 +13,7 @@ fully functional and resilient with **no infrastructure present**.
 
 ## Changes
 - **Security module** (`Security/SecurityHardeningExtensions.cs`) wired at the composition root via
-  `builder.AddCommerceHubSecurity()` / `app.UseCommerceHubSecurity()`, bound to a single `Security` config
+  `builder.AddCatrashopSecurity()` / `app.UseCatrashopSecurity()`, bound to a single `Security` config
   section (`SecurityOptions`) with safe defaults.
 - **Response headers** (`SecurityHeadersMiddleware`): `X-Content-Type-Options`, `X-Frame-Options`,
   `Referrer-Policy`, `X-Permitted-Cross-Domain-Policies`, `Cross-Origin-Opener/Resource-Policy`, and a
@@ -39,7 +39,7 @@ fully functional and resilient with **no infrastructure present**.
 - **No new dependencies** — CORS and `Microsoft.AspNetCore.RateLimiting` ship in the ASP.NET Core framework.
 
 ## Testing / verification
-- Backend `dotnet test CommerceHub.slnx` → **195 passed, 2 skipped, 0 failed** (was 186; +9):
+- Backend `dotnet test Catrashop.slnx` → **195 passed, 2 skipped, 0 failed** (was 186; +9):
   - 4 × headers/CORS (headers present, no `Server`, allowed-origin preflight permitted, unknown-origin denied),
   - 1 × rate-limit burst on `/login` → at least one 429 with `Retry-After` + `problem+json`,
   - 4 × secret guard (Development tolerates placeholders; Production rejects placeholder and missing secrets,

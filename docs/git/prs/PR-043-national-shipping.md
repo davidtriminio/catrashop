@@ -53,8 +53,8 @@ customer pays.
 
 ## Verification
 - Backend `dotnet test -c Release`: all unit and architecture tests pass (Shipping 33, Orders 23, architecture 68); the
-  4 Postgres integration tests were skipped as usual (they need the fixed `commercehub` database).
-- Against a temporary PostgreSQL database (`commercehub_verify`, migrations applied by `setup-db.ps1`, seeded) and a
+  4 Postgres integration tests were skipped as usual (they need the fixed `catrashop` database).
+- Against a temporary PostgreSQL database (`catrashop_verify`, migrations applied by `setup-db.ps1`, seeded) and a
   real API on port 5299, 30 HTTP scenarios passed: zones cover all 18 departments; delivery to a department costs its
   zone's amount and the total/list/payment amount include it; shipping is untaxed; a lower-case code works; a
   `shippingTotal` in the body is ignored; unknown department, missing department, country US, no address and unknown

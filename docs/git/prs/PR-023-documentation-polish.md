@@ -16,7 +16,7 @@ architectural decision, it corrects and completes the record of decisions alread
 An accuracy pass against the source found the README claiming things the code does not do:
 - **Non-existent modules** in the architecture diagram — `Reviews`, `Administration`, and `Audit` are not
   backend modules (there are 11: Identity, Catalog, Inventory, Customers, Cart, Promotions, Orders, Payments,
-  Shipping, Notifications, AI). Administration is the `commercehub-admin` SPA; auditing is a log inside Identity.
+  Shipping, Notifications, AI). Administration is the `catrashop-admin` SPA; auditing is a log inside Identity.
 - **Wrong stack entries** — *Serilog* (the app uses `Microsoft.Extensions.Logging` + OpenTelemetry) and
   *Testcontainers* (it uses `WebApplicationFactory` + a Postgres-gated E2E). Neither package is referenced.
 - **Redis listed as the cache/rate-limiter** — it is provisioned in compose but no backend code references it;
@@ -24,7 +24,7 @@ An accuracy pass against the source found the README claiming things the code do
 - **Dead links** — `docs/architecture`, `docs/demo-data.md`, and `CHANGELOG.md` were all linked but missing.
 - **A false runtime claim** — "applies migrations on startup"; the app does not auto-migrate.
 - **Stale prerequisites / paths** — Node 20 (CI uses 24) and `dotnet run --project backend/src/Api` (the
-  project is `backend/src/Api/CommerceHub.Api`).
+  project is `backend/src/Api/Catrashop.Api`).
 
 ## Changes
 - **`README.md`** — corrected architecture diagram (11 real modules, admin as a SPA, Redis marked
@@ -42,12 +42,12 @@ An accuracy pass against the source found the README claiming things the code do
 - **`docs/demo-data.md`** (new) — an honest end-to-end walkthrough over real routes (no seed script yet; that is
   called out, not implied).
 - **`frontend/README.md`** — replaced the default Angular CLI boilerplate with a real workspace README (two apps,
-  the `@ch/*` shared library, ports, commands).
+  the `@cs/*` shared library, ports, commands).
 
 ## Verification
 Documentation only — no source changed, so the suites are unaffected (backend **200 pass / 2 skip / 0 fail**,
 frontend Vitest **23** as of Phase 22). Every factual claim was checked against the code before writing: module
 list, absence of Serilog/Testcontainers/Redis usage, the order state table, checkout ordering, route prefixes
-(`/api/v1/...`), the admin dev port (4300), and the `@ch/*` alias. All internal doc links resolve to existing
+(`/api/v1/...`), the admin dev port (4300), and the `@cs/*` alias. All internal doc links resolve to existing
 files.
 

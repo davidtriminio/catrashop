@@ -53,7 +53,7 @@ password reset, role + permission authorization, and a security audit trail.
 ## Review cycle
 **🟡 REQUEST CHANGES (simulated)** — Initial `ICurrentUser` lived in `Identity.Application.Abstractions`; other
 modules needing the current user would then depend on the whole Identity assembly. Move it to BuildingBlocks.
-**🛠 Corrective commit** — `ICurrentUser` promoted to `CommerceHub.BuildingBlocks.Security`; endpoints updated.
+**🛠 Corrective commit** — `ICurrentUser` promoted to `Catrashop.BuildingBlocks.Security`; endpoints updated.
 **🟢 APPROVE (simulated)** — Boundaries clean, auth model solid, verification honest about the deferred DB paths.
 
 ## Merge result

@@ -14,7 +14,7 @@ the exchange is the integration seam.
 - **`automations/n8n/`** — four importable workflow exports: welcome email (`CustomerRegistered`), order receipt
   (`OrderPaid`), review request (`ShipmentDelivered`, 3-day wait), low-stock ops alert (`LowInventoryDetected` →
   ops webhook). Each is *RabbitMQ trigger → Code (normalize) → action*.
-- **`automations/rabbitmq/definitions.json`** — importable topology: the `commercehub.events` topic exchange
+- **`automations/rabbitmq/definitions.json`** — importable topology: the `catrashop.events` topic exchange
   (merges with the backend's runtime declaration) and four durable `n8n.*` queues bound by routing key
   (= event CLR full names).
 - **`automations/README.md`** — setup (compose, import definitions, credentials, import + activate workflows) and

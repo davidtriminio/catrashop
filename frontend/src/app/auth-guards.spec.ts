@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { Router, UrlTree } from '@angular/router';
-import { authGuard } from '@ch/auth/auth.guard';
-import { permissionGuard } from '@ch/auth/permission.guard';
-import { AuthStore } from '@ch/auth/auth.store';
+import { authGuard } from '@cs/auth/auth.guard';
+import { permissionGuard } from '@cs/auth/permission.guard';
+import { AuthStore } from '@cs/auth/auth.store';
 
 /** A fake Router that records createUrlTree calls without pulling in the full router. */
 class FakeRouter {

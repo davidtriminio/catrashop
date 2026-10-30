@@ -11,12 +11,12 @@ Phase 14: the staff administration console, and the shared frontend library that
 one API/auth layer (Section 14; realizes the extraction planned in ADR-018).
 
 ## Changes
-- **Shared library** `frontend/shared/` (path alias `@ch/*`): DTO models, per-context API services (customer +
+- **Shared library** `frontend/shared/` (path alias `@cs/*`): DTO models, per-context API services (customer +
   new admin services: catalog/inventory/orders/promotions/shipping/notifications), auth store/interceptor/guards
-  (+ `permissionGuard`), and utilities (money pipe, problem helper). The customer app was refactored onto `@ch/*`.
+  (+ `permissionGuard`), and utilities (money pipe, problem helper). The customer app was refactored onto `@cs/*`.
 - **Shared design system** `shared/theme.scss` used by both apps via a `shared` SCSS include path; admin overrides
   a teal accent + wider layout.
-- **New app** `commercehub-admin` (own dev proxy on port 4300, env replacement): sidebar shell filtered by
+- **New app** `catrashop-admin` (own dev proxy on port 4300, env replacement): sidebar shell filtered by
   permission, `/forbidden` page.
 - **Admin screens:** dashboard; catalog (create categories/brands/products, publish/archive); inventory (track
   SKU, receive/adjust/threshold, levels); orders (search by status, process/ship/deliver/cancel); promotions
@@ -24,7 +24,7 @@ one API/auth layer (Section 14; realizes the extraction planned in ADR-018).
 - ADR-019 (admin app & shared library).
 
 ## Technical decisions
-- **Two apps, one workspace, one shared library** (path-mapped source, not ng-packagr — same `@ch/*` surface,
+- **Two apps, one workspace, one shared library** (path-mapped source, not ng-packagr — same `@cs/*` surface,
   single-step build). One source of truth for API access and auth.
 - **Permission-gated routes + sidebar**, with the **backend as the real authority** (guard is UX; API returns
   403). Guard lets routes through while the profile is still loading on refresh.
@@ -34,10 +34,10 @@ one API/auth layer (Section 14; realizes the extraction planned in ADR-018).
   Docker.
 
 ## Testing / verification
-- `ng build commercehub-web` and `ng build commercehub-admin` → **0 errors** (admin 288 kB raw / 81 kB transfer);
-  the customer app builds unchanged after the `@ch/*` refactor.
-- `ng test commercehub-web` + `ng test commercehub-admin` (vitest) → **2 + 2 passed**.
-- **Running-app smoke test:** admin SPA boots (zoneless/DI/router/shared `@ch/*`); `/dashboard` unauthenticated →
+- `ng build catrashop-web` and `ng build catrashop-admin` → **0 errors** (admin 288 kB raw / 81 kB transfer);
+  the customer app builds unchanged after the `@cs/*` refactor.
+- `ng test catrashop-web` + `ng test catrashop-admin` (vitest) → **2 + 2 passed**.
+- **Running-app smoke test:** admin SPA boots (zoneless/DI/router/shared `@cs/*`); `/dashboard` unauthenticated →
   admin sign-in; console clean.
 - ⚠️ **Deferred (no Postgres):** the live management flows against a running API + database.
 

@@ -1,6 +1,6 @@
 # Changelog
 
-All notable changes to CommerceHub. The format is based on
+All notable changes to Catrashop. The format is based on
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/); this repository is built **incrementally, one phase at
 a time** (see [`docs/roadmap.md`](docs/roadmap.md)), so releases are tracked as phases. Every phase left the
 system compiling; infrastructure-dependent runtime verification is deferred to Docker.
@@ -38,8 +38,11 @@ Each entry links the Architecture Decision Record and the simulated Pull Request
 - **Branding:** the icon is now a shopping bag wrapped by an orbit ring (it replaces the H), still generated from the same script
   → [PR-047](docs/git/prs/PR-047-ecommerce-icon.md)
 - **Branding:** the icon is now a shopping cart with a ringed planet (the bag read as a padlock) → [PR-048](docs/git/prs/PR-048-cart-planet-icon.md)
-- **Branding:** the product is now called **Catrashop** (store, admin, mobile app label, customer e-mails); CommerceHub stays as the
-  internal code name → [PR-049](docs/git/prs/PR-049-rename-catrashop.md)
+- **Branding:** the product is now called **Catrashop** (store, admin, mobile app label, customer e-mails)
+  → [PR-049](docs/git/prs/PR-049-rename-catrashop.md)
+- **Rename (breaking for local setups):** the former name *CommerceHub* is gone from the code too: solution, projects and namespaces
+  (`Catrashop.*`), Angular projects (`catrashop-web`, `catrashop-admin`) and the `@cs/*` alias, the Flutter package and the Android/iOS
+  application ids, configuration keys, scripts, deployment files and docs → [PR-050](docs/git/prs/PR-050-rename-everything.md)
 
 ## v1.2.0 — Reliability fixes and the redesign
 - **Fix:** the account page no longer fails when the customer profile is created by concurrent requests
@@ -112,7 +115,7 @@ Bounded agent loop over an allow-list of read-only tools, RAG over a seeded know
 → [ADR-022](docs/adr/022-ai-assistant.md) · [PR-017](docs/git/prs/PR-017-ai-assistant.md)
 
 ## Phase 16 — n8n automations
-Four event-driven workflows over the `commercehub.events` exchange (welcome email, order receipt, review
+Four event-driven workflows over the `catrashop.events` exchange (welcome email, order receipt, review
 request, low-stock alert) as importable JSON. No backend change.
 → [ADR-021](docs/adr/021-n8n-automations.md) · [PR-016](docs/git/prs/PR-016-n8n-automations.md)
 
@@ -122,8 +125,8 @@ resilient hosted services.
 → [ADR-020](docs/adr/020-messaging-rabbitmq-outbox.md) · [PR-015](docs/git/prs/PR-015-messaging.md)
 
 ## Phase 14 — Administration console
-Second Angular app (`commercehub-admin`) with permission-gated routes; shared code extracted to `frontend/shared`
-(`@ch/*`) and consumed by both apps.
+Second Angular app (`catrashop-admin`) with permission-gated routes; shared code extracted to `frontend/shared`
+(`@cs/*`) and consumed by both apps.
 → [ADR-019](docs/adr/019-admin-app-shared-library.md) · [PR-014](docs/git/prs/PR-014-frontend-admin.md)
 
 ## Phase 13 — Customer storefront

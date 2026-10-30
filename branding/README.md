@@ -5,7 +5,7 @@ One drawing, `make-icons.py`, produces every icon the project ships. Nothing els
 | App | Look | Files written |
 |---|---|---|
 | Store (`frontend`) | near-black tile, lime mark | `frontend/public/` `favicon.ico`, `favicon.svg`, `apple-touch-icon.png` |
-| Admin (`frontend/projects/commercehub-admin`) | lime tile, near-black mark | the same three files in its `public/` |
+| Admin (`frontend/projects/catrashop-admin`) | lime tile, near-black mark | the same three files in its `public/` |
 | Mobile app (it *is* the admin app) | lime tile, near-black mark | Android: `mipmap-*/ic_launcher.png` (Android 7 and older), `ic_launcher_foreground.png` + `ic_launcher_monochrome.png`, `mipmap-anydpi-v26/ic_launcher.xml` (adaptive icon), `values/ic_launcher_background.xml`; iOS: every size in `AppIcon.appiconset` |
 
 The mark is a **shopping cart with a ringed planet above the basket**: the cart says "online store" at a glance and the planet

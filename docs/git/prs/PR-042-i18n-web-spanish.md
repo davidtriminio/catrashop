@@ -18,7 +18,7 @@ English kept as the fallback and room for more languages.
   the default language and English the fallback.
 - `provideI18n()` (shared) registers Transloco, `LOCALE_ID` (`es-HN`) and an app initializer that loads the stored or
   default language **before the first render** and sets `<html lang>`.
-- `I18n` service: active language as a signal, `use(lang)` (persisted in `localStorage` key `ch_lang`), `t()`,
+- `I18n` service: active language as a signal, `use(lang)` (persisted in `localStorage` key `cs_lang`), `t()`,
   `tOr()` and `problem()` (the server's own message when it sent one, otherwise a translated fallback).
 - `LocalDatePipe` (`localDate`) and `PluralPipe` (`plural`) replace Angular's `DatePipe` and the hand-written
   `n === 1 ? 'item' : 'items'`; both follow the active language. `LanguageSwitcher` (ES | EN) sits in the store header.

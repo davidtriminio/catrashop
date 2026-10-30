@@ -3,7 +3,7 @@
   Builds a small release bundle for the Oracle VM: framework-dependent linux-x64 API + idempotent SQL migrations.
 .DESCRIPTION
   Run on your dev machine (needs the .NET 10 SDK and `dotnet tool install -g dotnet-ef`).
-  Output: deploy/oracle/dist/commercehub-release.tar.gz (~15-25 MB). Nothing is built on the server.
+  Output: deploy/oracle/dist/catrashop-release.tar.gz (~15-25 MB). Nothing is built on the server.
 .EXAMPLE
   ./build-release.ps1
   ./build-release.ps1 -Upload -Server ubuntu@api.davidtriminio.dev -Key ~/.ssh/oracle.key
@@ -16,7 +16,7 @@ param(
 $ErrorActionPreference = 'Stop'
 $root    = Resolve-Path (Join-Path $PSScriptRoot '../..')
 $backend = Join-Path $root 'backend'
-$api     = Join-Path $backend 'src/Api/CommerceHub.Api/CommerceHub.Api.csproj'
+$api     = Join-Path $backend 'src/Api/Catrashop.Api/Catrashop.Api.csproj'
 $dist    = Join-Path $PSScriptRoot 'dist'
 $stage   = Join-Path $dist 'stage'
 
@@ -38,19 +38,19 @@ foreach ($m in $modules) {
   $i++
   $out = Join-Path $stage ('sql/{0:00}-{1}.sql' -f $i, $m.ToLower())
   dotnet ef migrations script --idempotent --no-build --configuration Release `
-    --project "$backend/src/Modules/$m/CommerceHub.Modules.$m/CommerceHub.Modules.$m.csproj" `
+    --project "$backend/src/Modules/$m/Catrashop.Modules.$m/Catrashop.Modules.$m.csproj" `
     --startup-project $api --context "${m}DbContext" --output $out | Out-Null
   if ($LASTEXITCODE) { throw "migration script failed for $m" }
 }
 
 Copy-Item "$PSScriptRoot/server/*" "$stage/server" -Recurse
-$tar = Join-Path $dist 'commercehub-release.tar.gz'
+$tar = Join-Path $dist 'catrashop-release.tar.gz'
 tar -czf $tar -C $stage .
 Write-Host ('Release ready: {0} ({1:N1} MB)' -f $tar, ((Get-Item $tar).Length / 1MB))
 
 if ($Upload) {
   if (-not $Server) { throw '-Server user@host is required with -Upload' }
   $sshArgs = @(); if ($Key) { $sshArgs = @('-i', $Key) }
-  scp @sshArgs $tar "${Server}:/tmp/commercehub-release.tar.gz"
-  Write-Host 'Uploaded. On the server run:  sudo /opt/commercehub/update.sh /tmp/commercehub-release.tar.gz'
+  scp @sshArgs $tar "${Server}:/tmp/catrashop-release.tar.gz"
+  Write-Host 'Uploaded. On the server run:  sudo /opt/catrashop/update.sh /tmp/catrashop-release.tar.gz'
 }

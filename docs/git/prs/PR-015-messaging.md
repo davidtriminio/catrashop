@@ -21,7 +21,7 @@ the integration events deferred since each module was built (Section 15).
   ShipmentCreated/ShipmentDelivered` → notifications; `LowInventoryDetected`/`CouponRedeemed` → logging/analytics;
   `IntegrationSetup` wires processors, handlers, and the type registry; `Program` calls it; RabbitMq config +
   dev-only password (env-overridable) in appsettings.Development.json.
-- **Tests:** `CommerceHub.Infrastructure.Tests` — **6 unit tests** (registry + dispatcher).
+- **Tests:** `Catrashop.Infrastructure.Tests` — **6 unit tests** (registry + dispatcher).
 - ADR-020.
 
 ## Technical decisions

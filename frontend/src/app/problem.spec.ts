@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { problemMessage } from '@ch/util/problem';
+import { problemMessage } from '@cs/util/problem';
 
 describe('problemMessage', () => {
   it('prefers the first validation error when present', () => {

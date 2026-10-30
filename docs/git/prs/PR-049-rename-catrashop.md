@@ -6,6 +6,8 @@
 - **Type:** `feat`
 - **Status:** ✅ Merged
 
+> **Superseded in part by [PR-050](PR-050-rename-everything.md):** the "Deliberately not changed" section below describes the state after this PR; the internal names were renamed right after.
+
 ## Problem
 The owner found "CommerceHub" odd ("Hub") and wants a name that tells a recruiter, at a glance, that this is an
 online store and that has a local flavour. After two rounds of options (some tied to the space theme of the icon,

@@ -2,9 +2,9 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { AuthStore } from '@ch/auth/auth.store';
+import { AuthStore } from '@cs/auth/auth.store';
 import { CartStore } from '../../core/cart/cart.store';
-import { I18n } from '@ch/i18n/i18n';
+import { I18n } from '@cs/i18n/i18n';
 
 @Component({
   selector: 'app-register',

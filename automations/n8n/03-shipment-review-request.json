@@ -1,5 +1,5 @@
 {
-  "name": "CommerceHub — Review request",
+  "name": "Catrashop — Review request",
   "nodes": [
     {
       "parameters": {
@@ -12,7 +12,7 @@
       "typeVersion": 1,
       "position": [220, 300],
       "credentials": {
-        "rabbitmq": { "id": "REPLACE_WITH_RABBITMQ_CREDENTIAL_ID", "name": "CommerceHub RabbitMQ" }
+        "rabbitmq": { "id": "REPLACE_WITH_RABBITMQ_CREDENTIAL_ID", "name": "Catrashop RabbitMQ" }
       }
     },
     {
@@ -36,12 +36,12 @@
       "type": "n8n-nodes-base.wait",
       "typeVersion": 1,
       "position": [660, 300],
-      "webhookId": "commercehub-review-wait"
+      "webhookId": "catrashop-review-wait"
     },
     {
       "parameters": {
-        "fromEmail": "reviews@commercehub.example",
-        "toEmail": "={{ $env.REVIEWS_NOTIFY_TO || 'reviews@commercehub.example' }}",
+        "fromEmail": "reviews@catrashop.example",
+        "toEmail": "={{ $env.REVIEWS_NOTIFY_TO || 'reviews@catrashop.example' }}",
         "subject": "How did we do? Review your recent order",
         "emailFormat": "text",
         "text": "Your order (tracking {{ $json.trackingNumber }}) was delivered a few days ago.\n\nWe'd love a quick review — it helps other shoppers and helps us improve.\n\n— Catrashop",
@@ -53,7 +53,7 @@
       "typeVersion": 2,
       "position": [880, 300],
       "credentials": {
-        "smtp": { "id": "REPLACE_WITH_SMTP_CREDENTIAL_ID", "name": "CommerceHub SMTP" }
+        "smtp": { "id": "REPLACE_WITH_SMTP_CREDENTIAL_ID", "name": "Catrashop SMTP" }
       }
     }
   ],
@@ -65,5 +65,5 @@
   "active": false,
   "settings": { "executionOrder": "v1" },
   "pinData": {},
-  "tags": [{ "name": "commercehub" }]
+  "tags": [{ "name": "catrashop" }]
 }

@@ -1,5 +1,5 @@
 {
-  "name": "CommerceHub — Low-stock ops alert",
+  "name": "Catrashop — Low-stock ops alert",
   "nodes": [
     {
       "parameters": {
@@ -12,7 +12,7 @@
       "typeVersion": 1,
       "position": [260, 300],
       "credentials": {
-        "rabbitmq": { "id": "REPLACE_WITH_RABBITMQ_CREDENTIAL_ID", "name": "CommerceHub RabbitMQ" }
+        "rabbitmq": { "id": "REPLACE_WITH_RABBITMQ_CREDENTIAL_ID", "name": "Catrashop RabbitMQ" }
       }
     },
     {
@@ -48,5 +48,5 @@
   "active": false,
   "settings": { "executionOrder": "v1" },
   "pinData": {},
-  "tags": [{ "name": "commercehub" }]
+  "tags": [{ "name": "catrashop" }]
 }

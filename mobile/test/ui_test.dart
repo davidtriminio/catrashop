@@ -1,11 +1,11 @@
-import 'package:commercehub_admin/core/format.dart';
-import 'package:commercehub_admin/core/providers.dart';
-import 'package:commercehub_admin/core/theme.dart';
-import 'package:commercehub_admin/features/orders/order_detail_page.dart';
-import 'package:commercehub_admin/features/orders/order_models.dart';
-import 'package:commercehub_admin/features/orders/orders_page.dart';
-import 'package:commercehub_admin/features/orders/widgets.dart';
-import 'package:commercehub_admin/shell/home_shell.dart';
+import 'package:catrashop_admin/core/format.dart';
+import 'package:catrashop_admin/core/providers.dart';
+import 'package:catrashop_admin/core/theme.dart';
+import 'package:catrashop_admin/features/orders/order_detail_page.dart';
+import 'package:catrashop_admin/features/orders/order_models.dart';
+import 'package:catrashop_admin/features/orders/orders_page.dart';
+import 'package:catrashop_admin/features/orders/widgets.dart';
+import 'package:catrashop_admin/shell/home_shell.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -21,7 +21,7 @@ Future<FakeOrdersRepository> pump(WidgetTester tester, Widget home, {FakeOrdersR
     overrides: [
       ordersRepositoryProvider.overrideWithValue(fake),
       newOrderPollerProvider.overrideWith((ref) {}),
-      profileProvider.overrideWith((ref) async => const ProfileInfo(email: 'admin@commercehub.local', roles: {'Administrator'})),
+      profileProvider.overrideWith((ref) async => const ProfileInfo(email: 'admin@catrashop.local', roles: {'Administrator'})),
     ],
     child: MaterialApp(theme: AppTheme.light(), home: home),
   ));

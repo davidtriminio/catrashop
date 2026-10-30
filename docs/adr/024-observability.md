@@ -12,15 +12,15 @@ principle used since Phase 15.
 ## Decision
 
 ### One telemetry source, subscribed at the composition root
-`CommerceHub.BuildingBlocks.Observability.CommerceHubTelemetry` owns a single `ActivitySource` and `Meter`
-(both named `CommerceHub`). Any layer emits spans/metrics on these without referencing the host; the API
+`Catrashop.BuildingBlocks.Observability.CatrashopTelemetry` owns a single `ActivitySource` and `Meter`
+(both named `Catrashop`). Any layer emits spans/metrics on these without referencing the host; the API
 subscribes OpenTelemetry to them by name. This keeps instrumentation decoupled from exporter wiring and does
 not create a new cross-module dependency (BuildingBlocks is shared by all).
 
 ### OpenTelemetry for traces and metrics
 Configured in the API (`Observability/ObservabilityExtensions.cs`):
-- **Tracing:** ASP.NET Core + HttpClient instrumentation, plus the `CommerceHub` and `Npgsql` sources.
-- **Metrics:** ASP.NET Core + HttpClient + .NET runtime instrumentation, plus the `CommerceHub` and `Npgsql`
+- **Tracing:** ASP.NET Core + HttpClient instrumentation, plus the `Catrashop` and `Npgsql` sources.
+- **Metrics:** ASP.NET Core + HttpClient + .NET runtime instrumentation, plus the `Catrashop` and `Npgsql`
   meters.
 - **Exporters are opt-in and config-driven** (`ObservabilityOptions`): the in-process **Prometheus** scrape
   endpoint (`/metrics`) is on by default (no external dependency); **OTLP** is enabled only when
@@ -28,7 +28,7 @@ Configured in the API (`Observability/ObservabilityExtensions.cs`):
   pipeline still records — it simply has nowhere to push, so the app is fully functional offline.
 
 ### A first custom metric + span (proof the domain wiring works)
-The outbox processor emits `commercehub.messaging.outbox.published` / `...failed` counters (tagged by event
+The outbox processor emits `catrashop.messaging.outbox.published` / `...failed` counters (tagged by event
 type) and an `outbox.drain` span. This exercises the shared source end to end and appears on `/metrics`,
 rather than shipping only third-party instrumentation.
 

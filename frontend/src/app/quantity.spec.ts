@@ -1,4 +1,4 @@
-import { MAX_LINE_QUANTITY, clampQuantity } from '@ch/util/quantity';
+import { MAX_LINE_QUANTITY, clampQuantity } from '@cs/util/quantity';
 
 describe('clampQuantity', () => {
   it('keeps quantities within 1..max', () => {

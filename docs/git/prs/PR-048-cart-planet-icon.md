@@ -23,7 +23,7 @@ a padlock, which is the opposite of "shop". The owner also wants a recruiter who
 
 ## Things to know
 - It is still a mark drawn in code, not a designed logo. Swapping in artwork only means replacing `draw_mark`/`svg`.
-- The visible name ("CommerceHub") is **not** changed by this PR; the owner is still choosing one.
+- The visible name ("Catrashop") is **not** changed by this PR; the owner is still choosing one.
 - Browsers cache favicons and some launchers keep the old icon: hard-reload / private window, reinstall the app.
 
 ## Verification

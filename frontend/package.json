@@ -1,5 +1,5 @@
 {
-  "name": "commercehub-web",
+  "name": "catrashop-web",
   "version": "0.0.0",
   "scripts": {
     "ng": "ng",
@@ -7,8 +7,8 @@
     "build": "ng build",
     "watch": "ng build --watch --configuration development",
     "test": "ng test",
-    "test:web": "ng test commercehub-web --watch=false",
-    "test:admin": "ng test commercehub-admin --watch=false",
+    "test:web": "ng test catrashop-web --watch=false",
+    "test:admin": "ng test catrashop-admin --watch=false",
     "e2e": "playwright test"
   },
   "private": true,

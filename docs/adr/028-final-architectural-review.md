@@ -16,11 +16,11 @@ All guards were re-run fresh on this branch (not taken from memory):
 | Guard | Result |
 |---|---|
 | Backend build, `-c Release` (warnings are errors) | **0 warnings / 0 errors** |
-| Backend test suite (`dotnet test CommerceHub.slnx -c Release`) | **200 passed / 2 skipped / 0 failed** |
+| Backend test suite (`dotnet test Catrashop.slnx -c Release`) | **200 passed / 2 skipped / 0 failed** |
 | Architecture tests (NetArchTest, 11 modules × 6 rules) | **66 / 66** |
 | NuGet vulnerability scan (`--vulnerable --include-transitive`, all projects) | **none** |
 | SDK pin resolves (`backend/global.json`) | **10.0.401** (latestFeature over 10.0.400) |
-| Frontend production builds (`commercehub-web`, `commercehub-admin`) | **both clean** |
+| Frontend production builds (`catrashop-web`, `catrashop-admin`) | **both clean** |
 | Frontend unit tests (Vitest) | **23** (17 web + 6 admin) |
 | Frontend e2e (Playwright, headless Chromium) | **3 passed** |
 

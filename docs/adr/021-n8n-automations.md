@@ -5,7 +5,7 @@
 
 ## Context
 Section 16 calls for n8n workflow automations (welcome email, review request, ops alerts, etc.). Phase 15 already
-publishes every integration event to a durable RabbitMQ topic exchange (`commercehub.events`, ADR-020). The
+publishes every integration event to a durable RabbitMQ topic exchange (`catrashop.events`, ADR-020). The
 question is how n8n should integrate without coupling it to the backend's internals.
 
 ## Decision

@@ -1,9 +1,9 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { NotificationsApi } from '@ch/api/notifications.api';
-import { Notification, NotificationPreferences } from '@ch/api/models';
-import { I18n } from '@ch/i18n/i18n';
-import { LocalDatePipe } from '@ch/util/local-date.pipe';
+import { NotificationsApi } from '@cs/api/notifications.api';
+import { Notification, NotificationPreferences } from '@cs/api/models';
+import { I18n } from '@cs/i18n/i18n';
+import { LocalDatePipe } from '@cs/util/local-date.pipe';
 
 interface Topic { labelKey: string; value: number; name: string; }
 

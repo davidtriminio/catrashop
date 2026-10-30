@@ -1,5 +1,5 @@
-name: commercehub_admin
-description: "CommerceHub order management for admins"
+name: catrashop_admin
+description: "Catrashop order management for admins"
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev

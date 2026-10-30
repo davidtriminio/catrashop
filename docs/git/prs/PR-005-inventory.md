@@ -22,7 +22,7 @@ and idempotent reservation/release/commit operations for the checkout flow — w
 - **Public contract:** `IInventoryOperations` + integration events (`InventoryReserved`, `InventoryReleased`,
   `LowInventoryDetected`).
 - **API:** admin endpoints under `inventory.manage`.
-- **Tests:** new `CommerceHub.Modules.Inventory.Tests` — **12 domain unit tests**.
+- **Tests:** new `Catrashop.Modules.Inventory.Tests` — **12 domain unit tests**.
 - ADR-011 (inventory model / reservations / idempotency).
 
 ## Technical decisions

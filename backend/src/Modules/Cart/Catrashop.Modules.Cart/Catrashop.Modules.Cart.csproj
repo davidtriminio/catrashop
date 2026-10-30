@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Framework, nullability, implicit usings inherited from Directory.Build.props -->
+  <ItemGroup>
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\..\..\BuildingBlocks\Catrashop.Infrastructure\Catrashop.Infrastructure.csproj" />
+    <!-- Cart depends only on Catalog's public Contracts (price query), not its internals. -->
+    <ProjectReference Include="..\..\Catalog\Catrashop.Modules.Catalog\Catrashop.Modules.Catalog.csproj" />
+    <ProjectReference Include="..\..\Inventory\Catrashop.Modules.Inventory\Catrashop.Modules.Inventory.csproj" />
+  </ItemGroup>
+</Project>

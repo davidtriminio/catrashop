@@ -1,8 +1,8 @@
-# CommerceHub production stack. Run on the server:
+# Catrashop production stack. Run on the server:
 #   docker compose -f deploy/docker/docker-compose.prod.yml --env-file deploy/docker/.env.prod up -d --build
 # Secrets come ONLY from .env.prod (chmod 600, never committed). Only Caddy publishes ports.
 
-name: commercehub-prod
+name: catrashop-prod
 
 x-restart: &restart
   restart: unless-stopped
@@ -43,7 +43,7 @@ services:
       dockerfile: backend/Dockerfile
       target: migrator
     environment:
-      COMMERCEHUB_CONNECTION: "Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
+      CATRASHOP_CONNECTION: "Host=postgres;Port=5432;Database=${POSTGRES_DB};Username=${POSTGRES_USER};Password=${POSTGRES_PASSWORD}"
     depends_on:
       postgres:
         condition: service_healthy
