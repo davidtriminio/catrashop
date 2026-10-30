@@ -11,11 +11,11 @@ Phase 19: make the platform operable — structured logs, distributed traces, me
 wired to be production-useful yet fully functional and resilient with **no infrastructure present**.
 
 ## Changes
-- **Shared telemetry source** (`CommerceHubTelemetry` in BuildingBlocks): one `ActivitySource` + `Meter`
-  named `CommerceHub`, subscribed by the API — instrumentation stays decoupled from exporters, no new
+- **Shared telemetry source** (`CatrashopTelemetry` in BuildingBlocks): one `ActivitySource` + `Meter`
+  named `Catrashop`, subscribed by the API — instrumentation stays decoupled from exporters, no new
   cross-module dependency.
-- **OpenTelemetry** in the API: tracing (ASP.NET Core, HttpClient, `CommerceHub`, `Npgsql`) and metrics
-  (ASP.NET Core, HttpClient, .NET runtime, `CommerceHub`, `Npgsql`). Exporters opt-in via `ObservabilityOptions`:
+- **OpenTelemetry** in the API: tracing (ASP.NET Core, HttpClient, `Catrashop`, `Npgsql`) and metrics
+  (ASP.NET Core, HttpClient, .NET runtime, `Catrashop`, `Npgsql`). Exporters opt-in via `ObservabilityOptions`:
   in-process **Prometheus** `/metrics` on by default, **OTLP** when an endpoint is configured, **console** for
   dev. First domain instrumentation: outbox `published`/`failed` counters + an `outbox.drain` span.
 - **Structured logging + correlation:** API owns its providers (scopes + trace/span ids always on; JSON console
@@ -37,7 +37,7 @@ wired to be production-useful yet fully functional and resilient with **no infra
 - **Prometheus + OTLP both:** a zero-dependency offline scrape and the real collector path.
 
 ## Testing / verification
-- Backend `dotnet test CommerceHub.slnx` → **186 passed, 2 skipped, 0 failed** (was 183; +3 integration:
+- Backend `dotnet test Catrashop.slnx` → **186 passed, 2 skipped, 0 failed** (was 183; +3 integration:
   correlation header generated + echoed, readiness 503 with per-check JSON, `/metrics` exposition format). The
   prior always-200 readiness test now asserts infra-reflective 503.
 - Verified live (API on host, Docker down): `/health/live` → **200** `{"status":"Healthy","checks":[]}`;

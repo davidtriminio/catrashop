@@ -1,4 +1,4 @@
-# CommerceHub — Architecture
+# Catrashop — Architecture
 
 This document reflects the system **as built** through Phase 22. Every diagram is grounded in the current code;
 where something is provisioned but not yet wired (e.g. Redis), it says so explicitly.
@@ -19,8 +19,8 @@ where something is provisioned but not yet wired (e.g. Redis), it says so explic
 ```mermaid
 flowchart TB
     subgraph Clients
-      WEB[commercehub-web<br/>customer SPA · Angular 22]
-      ADM[commercehub-admin<br/>admin SPA · Angular 22]
+      WEB[catrashop-web<br/>customer SPA · Angular 22]
+      ADM[catrashop-admin<br/>admin SPA · Angular 22]
     end
 
     subgraph Host[ASP.NET Core API · one deployable]
@@ -69,7 +69,7 @@ internals — only the small public **`Contracts`** surface and integration even
 | **Notifications** | In-app inbox + email, per-customer preferences, idempotent dispatch | `INotificationDispatcher` |
 | **AI** | Bounded shopping assistant (tools + RAG + guardrails) | `POST /ai/chat` |
 
-Administration is **not** a backend module — it is the `commercehub-admin` SPA calling permission-gated
+Administration is **not** a backend module — it is the `catrashop-admin` SPA calling permission-gated
 endpoints exposed by the modules above. "Auditing" is the security audit log inside **Identity**
 (login / password events), not a separate module.
 
@@ -180,7 +180,7 @@ flowchart LR
     subgraph Txn[Single DB transaction]
       AGG[Aggregate change] --> OB[(outbox_messages<br/>same schema)]
     end
-    OB -->|per-module OutboxProcessor| EX{{commercehub.events<br/>topic exchange}}
+    OB -->|per-module OutboxProcessor| EX{{catrashop.events<br/>topic exchange}}
     EX -->|routing key = event full name| Q[(durable consumer queue)]
     Q -->|manual ack| DISP[Dispatcher → handlers<br/>in composition root]
     EX --> N8N[n8n workflows]

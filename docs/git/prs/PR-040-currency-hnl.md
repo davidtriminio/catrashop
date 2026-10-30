@@ -54,7 +54,7 @@ script; a deployment with only test data just needs re-seeding.
 - Display format checked in the browser pane (catalog and product page) against a mock API serving HNL: `LPS. 129.00`.
 - **Correction:** the first merge of this PR broke the storefront build (`MoneyPipe` was not imported in
   `product-list.ts`, NG1010/TS2304). My build check only looked for lowercase "error" and missed it. Fixed in a
-  follow-up commit; both `ng build commercehub-web` and `commercehub-admin` now complete.
+  follow-up commit; both `ng build catrashop-web` and `catrashop-admin` now complete.
 - **`convert-currency.ps1` against PostgreSQL** (temporary database seeded with USD data, an order with a fixed
   coupon and a shipment): `-DryRun` rolled back and left every table identical; the real run at rate 25.5 converted
   variants, carts, orders and items, payments, coupons (fixed value, minimum and cap), redemptions, shipping methods

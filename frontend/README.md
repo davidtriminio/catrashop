@@ -8,9 +8,9 @@ signal-driven. See [ADR-018](../docs/adr/018-frontend-architecture.md) and
 
 | Path | What it is | Dev port |
 |---|---|---|
-| `src/` | **commercehub-web** — the customer storefront (workspace default project) | 4200 |
-| `projects/commercehub-admin/` | **commercehub-admin** — the back-office console | 4300 |
-| `shared/` | Code shared by both apps, imported via the `@ch/*` path alias | — |
+| `src/` | **catrashop-web** — the customer storefront (workspace default project) | 4200 |
+| `projects/catrashop-admin/` | **catrashop-admin** — the back-office console | 4300 |
+| `shared/` | Code shared by both apps, imported via the `@cs/*` path alias | — |
 
 The shared library holds the typed API models and services, the JWT auth store + interceptor (with rotating
 refresh) and route guards, and small utilities — so neither app duplicates the API contract or the auth logic.
@@ -25,11 +25,11 @@ Node **24+** and **pnpm 11+**. Install once with `pnpm install`.
 ```bash
 # Serve
 pnpm start                      # customer app  → http://localhost:4200
-pnpm ng serve commercehub-admin # admin app     → http://localhost:4300
+pnpm ng serve catrashop-admin # admin app     → http://localhost:4300
 
 # Production builds (output in dist/)
 pnpm build                      # customer app
-pnpm ng build commercehub-admin # admin app
+pnpm ng build catrashop-admin # admin app
 
 # Unit tests (Vitest)
 pnpm test                       # customer app (watch)

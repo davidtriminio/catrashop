@@ -1,14 +1,14 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { OrdersApi } from '@ch/api/orders.api';
-import { OrderSummary, Paged } from '@ch/api/models';
-import { StatusBadge } from '@ch/ui/status-badge';
-import { I18n } from '@ch/i18n/i18n';
-import { LocalDatePipe } from '@ch/util/local-date.pipe';
-import { MoneyPipe } from '@ch/util/money.pipe';
-import { PluralPipe } from '@ch/util/plural.pipe';
-import { buildPages } from '@ch/util/pagination';
+import { OrdersApi } from '@cs/api/orders.api';
+import { OrderSummary, Paged } from '@cs/api/models';
+import { StatusBadge } from '@cs/ui/status-badge';
+import { I18n } from '@cs/i18n/i18n';
+import { LocalDatePipe } from '@cs/util/local-date.pipe';
+import { MoneyPipe } from '@cs/util/money.pipe';
+import { PluralPipe } from '@cs/util/plural.pipe';
+import { buildPages } from '@cs/util/pagination';
 
 @Component({
   selector: 'app-order-list',
@@ -41,7 +41,7 @@ import { buildPages } from '@ch/util/pagination';
                 <strong>{{ o.orderNumber }}</strong>
                 <span class="muted">{{ o.createdAtUtc | localDate: 'date' }} · {{ 'cart.items' | plural: o.itemCount }}</span>
               </div>
-              <ch-status-badge [status]="o.status" />
+              <cs-status-badge [status]="o.status" />
               <strong class="total">{{ o.grandTotal | money: o.currency }}</strong>
               <span class="chev" aria-hidden="true">›</span>
             </a>
@@ -78,7 +78,7 @@ import { buildPages } from '@ch/util/pagination';
     .empty h2 { color: var(--text); }
     @media (max-width: 560px) {
       .order { grid-template-columns: minmax(0, 1fr) auto 1rem; row-gap: var(--space-2); }
-      .order ch-status-badge { grid-column: 1; grid-row: 2; justify-self: start; }
+      .order cs-status-badge { grid-column: 1; grid-row: 2; justify-self: start; }
       .order .total { grid-column: 2; grid-row: 1; min-width: 0; }
       .order .chev { grid-column: 3; grid-row: 1 / span 2; }
     }

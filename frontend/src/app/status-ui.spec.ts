@@ -1,6 +1,6 @@
 import { TestBed } from '@angular/core/testing';
-import { I18n, provideI18n } from '@ch/i18n/i18n';
-import { StatusBadge, toneFor } from '@ch/ui/status-badge';
+import { I18n, provideI18n } from '@cs/i18n/i18n';
+import { StatusBadge, toneFor } from '@cs/ui/status-badge';
 
 describe('status badge', () => {
   beforeEach(() => {

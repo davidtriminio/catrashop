@@ -2,11 +2,11 @@
 
 - **Status:** Accepted
 - **Date:** 2026-03-05
-- **Deciders:** Architecture (CommerceHub)
+- **Deciders:** Architecture (Catrashop)
 
 ## Context
 
-CommerceHub must cover a broad commerce domain (identity, catalog, inventory, cart, orders, payments, shipping,
+Catrashop must cover a broad commerce domain (identity, catalog, inventory, cart, orders, payments, shipping,
 promotions, reviews, notifications, AI, administration, audit). We need clear internal boundaries, high
 testability, and the ability to evolve quickly, while keeping operational complexity low enough for a small team to
 run and debug on a single machine.

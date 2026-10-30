@@ -23,7 +23,7 @@ provider webhooks safely (Sections 7, 9, 50).
   `OrderWorkflowService`.
 - **API:** customer pay/get, admin refund (`orders.manage`), and an anonymous **signature-verified** webhook
   endpoint.
-- **Tests:** `CommerceHub.Modules.Payments.Tests` — **10 unit tests**.
+- **Tests:** `Catrashop.Modules.Payments.Tests` — **10 unit tests**.
 - ADR-014 (provider abstraction / idempotency / webhooks).
 
 ## Technical decisions

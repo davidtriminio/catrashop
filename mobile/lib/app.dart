@@ -8,8 +8,8 @@ import 'features/auth/lock_screen.dart';
 import 'features/auth/login_page.dart';
 import 'shell/home_shell.dart';
 
-class CommerceHubAdminApp extends StatelessWidget {
-  const CommerceHubAdminApp({super.key});
+class CatrashopAdminApp extends StatelessWidget {
+  const CatrashopAdminApp({super.key});
 
   @override
   Widget build(BuildContext context) {

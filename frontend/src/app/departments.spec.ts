@@ -1,4 +1,4 @@
-import { HONDURAS_DEPARTMENTS } from '@ch/util/departments';
+import { HONDURAS_DEPARTMENTS } from '@cs/util/departments';
 
 describe('Honduras departments', () => {
   it('lists the 18 departments with unique ISO 3166-2 codes and names', () => {

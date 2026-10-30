@@ -72,12 +72,12 @@ jobs:
           global-json-file: backend/global.json
 
       - name: Restore
-        run: dotnet restore CommerceHub.slnx
+        run: dotnet restore Catrashop.slnx
 
       - name: Fail on vulnerable packages (including transitive)
         run: |
           echo "Scanning for known-vulnerable packages…"
-          report=$(dotnet list CommerceHub.slnx package --vulnerable --include-transitive 2>&1)
+          report=$(dotnet list Catrashop.slnx package --vulnerable --include-transitive 2>&1)
           echo "$report"
           if echo "$report" | grep -qiE '\b(Critical|High|Moderate|Low)\b'; then
             echo "::error::Vulnerable NuGet packages detected."
@@ -86,7 +86,7 @@ jobs:
           echo "No vulnerable packages found."
 
       - name: Report deprecated packages (non-blocking)
-        run: dotnet list CommerceHub.slnx package --deprecated --include-transitive || true
+        run: dotnet list Catrashop.slnx package --deprecated --include-transitive || true
 
   npm-audit:
     name: pnpm audit

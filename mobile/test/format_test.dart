@@ -1,4 +1,4 @@
-import 'package:commercehub_admin/core/format.dart';
+import 'package:catrashop_admin/core/format.dart';
 import 'package:flutter_test/flutter_test.dart';
 
 void main() {

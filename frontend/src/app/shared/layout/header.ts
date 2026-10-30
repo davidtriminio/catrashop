@@ -1,8 +1,8 @@
 import { Component, inject } from '@angular/core';
 import { Router, RouterLink, RouterLinkActive } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { AuthStore } from '@ch/auth/auth.store';
-import { LanguageSwitcher } from '@ch/ui/language-switcher';
+import { AuthStore } from '@cs/auth/auth.store';
+import { LanguageSwitcher } from '@cs/ui/language-switcher';
 import { CartStore } from '../../core/cart/cart.store';
 
 @Component({
@@ -23,7 +23,7 @@ import { CartStore } from '../../core/cart/cart.store';
         </nav>
 
         <div class="actions">
-          <ch-language-switcher />
+          <cs-language-switcher />
           <a routerLink="/cart" class="cart" routerLinkActive="active" [attr.aria-label]="'nav.cart' | transloco">
             <svg viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
               <path d="M5 8h14l-1.2 11a1 1 0 0 1-1 .9H7.2a1 1 0 0 1-1-.9L5 8Z" /><path d="M9 8V7a3 3 0 0 1 6 0v1" />

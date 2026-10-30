@@ -24,7 +24,7 @@ export const FALLBACK_LANG: Lang = 'en';
 /** Locale used to format dates for each language. */
 export const LOCALES: Readonly<Record<Lang, string>> = { es: 'es-HN', en: 'en-US' };
 
-const STORAGE_KEY = 'ch_lang';
+const STORAGE_KEY = 'cs_lang';
 
 const translations: Record<Lang, () => Promise<{ default: Record<string, unknown> }>> = {
   es: () => import('./es.json'),

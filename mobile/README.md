@@ -35,13 +35,13 @@ Emulator without a screen lock? Debug builds can skip the biometric gate (compil
 ## Release builds
 **Android** — create a keystore once and keep it out of git:
 ```bash
-keytool -genkey -v -keystore commercehub-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias commercehub
+keytool -genkey -v -keystore catrashop-release.jks -keyalg RSA -keysize 2048 -validity 10000 -alias catrashop
 ```
 Create `android/key.properties` (git-ignored):
 ```
-storeFile=C:/path/to/commercehub-release.jks
+storeFile=C:/path/to/catrashop-release.jks
 storePassword=...
-keyAlias=commercehub
+keyAlias=catrashop
 keyPassword=...
 ```
 Then `flutter build apk --release` (sideload) or `flutter build appbundle --release` (Play Store). Without

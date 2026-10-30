@@ -1,5 +1,5 @@
 {
-  "name": "CommerceHub — Welcome email",
+  "name": "Catrashop — Welcome email",
   "nodes": [
     {
       "parameters": {
@@ -12,7 +12,7 @@
       "typeVersion": 1,
       "position": [260, 300],
       "credentials": {
-        "rabbitmq": { "id": "REPLACE_WITH_RABBITMQ_CREDENTIAL_ID", "name": "CommerceHub RabbitMQ" }
+        "rabbitmq": { "id": "REPLACE_WITH_RABBITMQ_CREDENTIAL_ID", "name": "Catrashop RabbitMQ" }
       }
     },
     {
@@ -27,7 +27,7 @@
     },
     {
       "parameters": {
-        "fromEmail": "hello@commercehub.example",
+        "fromEmail": "hello@catrashop.example",
         "toEmail": "={{ $json.email }}",
         "subject": "Welcome to Catrashop, {{ $json.firstName }}!",
         "emailFormat": "text",
@@ -40,7 +40,7 @@
       "typeVersion": 2,
       "position": [740, 300],
       "credentials": {
-        "smtp": { "id": "REPLACE_WITH_SMTP_CREDENTIAL_ID", "name": "CommerceHub SMTP" }
+        "smtp": { "id": "REPLACE_WITH_SMTP_CREDENTIAL_ID", "name": "Catrashop SMTP" }
       }
     }
   ],
@@ -51,5 +51,5 @@
   "active": false,
   "settings": { "executionOrder": "v1" },
   "pinData": {},
-  "tags": [{ "name": "commercehub" }]
+  "tags": [{ "name": "catrashop" }]
 }

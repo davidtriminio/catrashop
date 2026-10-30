@@ -8,7 +8,7 @@ type Tone = 'accent' | 'warn' | 'info' | 'ok' | 'bad' | 'neutral';
  * lime = paid and waiting for fulfilment, amber = being prepared, indigo = on its way, green = done, red = failed.
  */
 @Component({
-  selector: 'ch-status-badge',
+  selector: 'cs-status-badge',
   template: `<span class="badge" [class]="tone() === 'neutral' ? '' : tone()">{{ label() }}</span>`,
 })
 export class StatusBadge {

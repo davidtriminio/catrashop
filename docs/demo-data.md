@@ -1,4 +1,4 @@
-# Exercising CommerceHub end to end
+# Exercising Catrashop end to end
 
 There is **no automated seed script yet** — seeding is a planned follow-up. Until then, this page shows how to
 drive the system through the API so you can see the full customer journey and the events it emits. Every path is

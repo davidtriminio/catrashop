@@ -6,7 +6,7 @@
   },
   "newProjectRoot": "projects",
   "projects": {
-    "commercehub-web": {
+    "catrashop-web": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
@@ -75,10 +75,10 @@
           },
           "configurations": {
             "production": {
-              "buildTarget": "commercehub-web:build:production"
+              "buildTarget": "catrashop-web:build:production"
             },
             "development": {
-              "buildTarget": "commercehub-web:build:development"
+              "buildTarget": "catrashop-web:build:development"
             }
           },
           "defaultConfiguration": "development"
@@ -88,31 +88,31 @@
         }
       }
     },
-    "commercehub-admin": {
+    "catrashop-admin": {
       "projectType": "application",
       "schematics": {
         "@schematics/angular:component": {
           "style": "scss"
         }
       },
-      "root": "projects/commercehub-admin",
-      "sourceRoot": "projects/commercehub-admin/src",
+      "root": "projects/catrashop-admin",
+      "sourceRoot": "projects/catrashop-admin/src",
       "prefix": "app",
       "architect": {
         "build": {
           "builder": "@angular/build:application",
           "options": {
-            "browser": "projects/commercehub-admin/src/main.ts",
-            "tsConfig": "projects/commercehub-admin/tsconfig.app.json",
+            "browser": "projects/catrashop-admin/src/main.ts",
+            "tsConfig": "projects/catrashop-admin/tsconfig.app.json",
             "inlineStyleLanguage": "scss",
             "assets": [
               {
                 "glob": "**/*",
-                "input": "projects/commercehub-admin/public"
+                "input": "projects/catrashop-admin/public"
               }
             ],
             "styles": [
-              "projects/commercehub-admin/src/styles.scss"
+              "projects/catrashop-admin/src/styles.scss"
             ],
             "stylePreprocessorOptions": {
               "includePaths": [
@@ -142,8 +142,8 @@
               "sourceMap": true,
               "fileReplacements": [
                 {
-                  "replace": "projects/commercehub-admin/src/environments/environment.ts",
-                  "with": "projects/commercehub-admin/src/environments/environment.development.ts"
+                  "replace": "projects/catrashop-admin/src/environments/environment.ts",
+                  "with": "projects/catrashop-admin/src/environments/environment.development.ts"
                 }
               ]
             }
@@ -154,15 +154,15 @@
           "builder": "@angular/build:dev-server",
           "configurations": {
             "production": {
-              "buildTarget": "commercehub-admin:build:production"
+              "buildTarget": "catrashop-admin:build:production"
             },
             "development": {
-              "buildTarget": "commercehub-admin:build:development"
+              "buildTarget": "catrashop-admin:build:development"
             }
           },
           "defaultConfiguration": "development",
           "options": {
-            "proxyConfig": "projects/commercehub-admin/proxy.conf.json",
+            "proxyConfig": "projects/catrashop-admin/proxy.conf.json",
             "port": 4300
           }
         },

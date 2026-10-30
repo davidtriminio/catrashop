@@ -21,7 +21,7 @@ contract other modules (and the Phase 15 event consumers) can call (Section 12).
   `LoggingEmailSender` behind `IEmailSender`, **initial migration** (5 tables).
 - **API:** me-scoped inbox (list / unread-count / read / read-all) and preferences (get / mute-unmute); admin
   `POST /notifications/admin/send` under `notifications.manage`.
-- **Tests:** `CommerceHub.Modules.Notifications.Tests` — **14 unit tests**.
+- **Tests:** `Catrashop.Modules.Notifications.Tests` — **14 unit tests**.
 - ADR-017 (notifications).
 
 ## Technical decisions

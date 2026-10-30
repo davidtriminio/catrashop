@@ -25,7 +25,7 @@ sparkle, bag with an orbit) they chose the bag with an orbit ring and asked for 
 
 ## Things to know
 - It is still a mark drawn in code, not a designed logo; swapping in artwork only means replacing `draw_mark`/`svg`.
-- The visible name ("CommerceHub") is **not** changed by this PR: the owner is still choosing one.
+- The visible name ("Catrashop") is **not** changed by this PR: the owner is still choosing one.
 - Browsers cache favicons and some launchers keep the old icon: hard-reload / private window, reinstall the app.
 
 ## Verification

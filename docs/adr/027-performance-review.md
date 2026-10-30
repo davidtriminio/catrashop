@@ -37,7 +37,7 @@ gaps were narrower and specific:
   shipping-methods listing. Every repository `GetBy…` that loads an aggregate to mutate it is left tracked.
 
 ### HTTP layer — a composition-root `Performance` concern
-Mirrors the Phase 20 `Security` module (`AddCommerceHubPerformance` / `UseCommerceHubPerformance`), config-driven
+Mirrors the Phase 20 `Security` module (`AddCatrashopPerformance` / `UseCatrashopPerformance`), config-driven
 under section `Performance`, safe defaults, framework-only (`Microsoft.AspNetCore.ResponseCompression` and
 `Microsoft.AspNetCore.OutputCaching` ship in the shared framework — no package added).
 

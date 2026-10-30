@@ -6,7 +6,7 @@ Generates every app icon from one drawing: the favicons of the two web apps and 
 The mark is a shopping cart with a ringed planet floating above the basket ("Galactic" e-commerce), on the brand colours
 from `frontend/shared/theme.scss` / `mobile/lib/core/theme.dart`:
   - store  : near-black tile, lime mark   -> frontend/public
-  - admin  : lime tile, near-black mark   -> frontend/projects/commercehub-admin/public and the mobile app
+  - admin  : lime tile, near-black mark   -> frontend/projects/catrashop-admin/public and the mobile app
 To change the look, edit the constants below (or draw_mark / svg) and run the script again; nothing else needs touching.
 Everything is drawn at 4x and scaled down, so edges are smooth at every size.
 """
@@ -221,7 +221,7 @@ def previews():
 
 if __name__ == '__main__':
     web('store', ['frontend', 'public'])
-    web('admin', ['frontend', 'projects', 'commercehub-admin', 'public'])
+    web('admin', ['frontend', 'projects', 'catrashop-admin', 'public'])
     android('admin')   # the mobile app is the admin app
     ios('admin')
     previews()

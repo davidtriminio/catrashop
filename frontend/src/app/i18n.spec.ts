@@ -1,10 +1,10 @@
 import { TestBed } from '@angular/core/testing';
 import { HttpErrorResponse } from '@angular/common/http';
-import en from '@ch/i18n/en.json';
-import es from '@ch/i18n/es.json';
-import { I18n, provideI18n } from '@ch/i18n/i18n';
-import { LocalDatePipe } from '@ch/util/local-date.pipe';
-import { PluralPipe } from '@ch/util/plural.pipe';
+import en from '@cs/i18n/en.json';
+import es from '@cs/i18n/es.json';
+import { I18n, provideI18n } from '@cs/i18n/i18n';
+import { LocalDatePipe } from '@cs/util/local-date.pipe';
+import { PluralPipe } from '@cs/util/plural.pipe';
 
 type Tree = { [key: string]: string | Tree };
 
@@ -69,7 +69,7 @@ describe('I18n at runtime', () => {
 
   it('remembers the chosen language for the next visit', async () => {
     await i18n.use('en');
-    expect(localStorage.getItem('ch_lang')).toBe('en');
+    expect(localStorage.getItem('cs_lang')).toBe('en');
     await i18n.init('es');
     expect(i18n.lang()).toBe('en');
   });

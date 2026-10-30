@@ -15,7 +15,7 @@
     "target": "ES2022",
     "module": "preserve",
     "paths": {
-      "@ch/*": ["./shared/*"]
+      "@cs/*": ["./shared/*"]
     }
   },
   "angularCompilerOptions": {
@@ -32,10 +32,10 @@
       "path": "./tsconfig.spec.json"
     },
     {
-      "path": "./projects/commercehub-admin/tsconfig.app.json"
+      "path": "./projects/catrashop-admin/tsconfig.app.json"
     },
     {
-      "path": "./projects/commercehub-admin/tsconfig.spec.json"
+      "path": "./projects/catrashop-admin/tsconfig.spec.json"
     }
   ]
 }

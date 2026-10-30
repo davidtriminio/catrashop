@@ -19,7 +19,7 @@ test.describe('authentication shell (no backend required)', () => {
     await expect(password).toBeVisible();
     await expect(submit).toBeDisabled();
 
-    await email.fill('user@commercehub.test');
+    await email.fill('user@catrashop.test');
     await password.fill('a-password');
 
     await expect(submit).toBeEnabled();

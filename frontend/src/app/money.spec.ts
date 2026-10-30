@@ -1,5 +1,5 @@
-import { MoneyPipe } from '@ch/util/money.pipe';
-import { STORE_CURRENCY } from '@ch/util/store';
+import { MoneyPipe } from '@cs/util/money.pipe';
+import { STORE_CURRENCY } from '@cs/util/store';
 
 describe('MoneyPipe', () => {
   const pipe = new MoneyPipe();

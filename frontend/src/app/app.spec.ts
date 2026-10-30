@@ -1,4 +1,4 @@
-import { MoneyPipe } from '@ch/util/money.pipe';
+import { MoneyPipe } from '@cs/util/money.pipe';
 
 describe('MoneyPipe', () => {
   const pipe = new MoneyPipe();

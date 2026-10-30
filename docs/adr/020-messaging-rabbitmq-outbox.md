@@ -12,10 +12,10 @@ registration, analytics), without coupling modules to each other.
 ## Decision
 - **Transactional Outbox → RabbitMQ topic exchange.** A per-module `OutboxProcessor<TContext>` drains that
   module's unprocessed `outbox_messages` (oldest first, batched) and publishes each to a durable topic exchange
-  (`commercehub.events`) with **routing key = the event's CLR full name** and **MessageId = the outbox row id**.
+  (`catrashop.events`) with **routing key = the event's CLR full name** and **MessageId = the outbox row id**.
   The row is marked processed in the same context; a publish failure marks it (retry count + error) and stops the
   batch, so it is retried next cycle. Nothing is lost and nothing is published before its domain change committed.
-- **One durable consumer queue** (`commercehub.consumers`) bound to exactly the registered routing keys. An async
+- **One durable consumer queue** (`catrashop.consumers`) bound to exactly the registered routing keys. An async
   consumer reads with **manual ack**: a handled message is acked, a failing one is nacked and **requeued**.
 - **Handlers live at the composition root** (`Api/Integration`), not inside modules — so **no module depends on
   another module's events**. A handler references the publishing module's event contract and the consuming

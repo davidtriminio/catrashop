@@ -1,10 +1,10 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { CustomersApi } from '@ch/api/customers.api';
-import { Address, CustomerProfile, WishlistItem } from '@ch/api/models';
-import { I18n } from '@ch/i18n/i18n';
-import { LocalDatePipe } from '@ch/util/local-date.pipe';
+import { CustomersApi } from '@cs/api/customers.api';
+import { Address, CustomerProfile, WishlistItem } from '@cs/api/models';
+import { I18n } from '@cs/i18n/i18n';
+import { LocalDatePipe } from '@cs/util/local-date.pipe';
 
 @Component({
   selector: 'app-account-page',

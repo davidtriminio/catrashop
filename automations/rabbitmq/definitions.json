@@ -1,7 +1,7 @@
 {
-  "//": "CommerceHub → n8n messaging topology. Import via the RabbitMQ Management UI (Overview → Import definitions) or `rabbitmqadmin`. Declares the shared topic exchange (same shape the backend declares at runtime, so it merges cleanly) plus one durable queue per automation, each bound to the integration-event routing key it reacts to. Routing keys are the events' CLR full names, exactly as the backend publishes them.",
+  "//": "Catrashop → n8n messaging topology. Import via the RabbitMQ Management UI (Overview → Import definitions) or `rabbitmqadmin`. Declares the shared topic exchange (same shape the backend declares at runtime, so it merges cleanly) plus one durable queue per automation, each bound to the integration-event routing key it reacts to. Routing keys are the events' CLR full names, exactly as the backend publishes them.",
   "exchanges": [
-    { "name": "commercehub.events", "vhost": "/", "type": "topic", "durable": true, "auto_delete": false, "internal": false, "arguments": {} }
+    { "name": "catrashop.events", "vhost": "/", "type": "topic", "durable": true, "auto_delete": false, "internal": false, "arguments": {} }
   ],
   "queues": [
     { "name": "n8n.welcome", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} },
@@ -10,9 +10,9 @@
     { "name": "n8n.ops", "vhost": "/", "durable": true, "auto_delete": false, "arguments": {} }
   ],
   "bindings": [
-    { "source": "commercehub.events", "vhost": "/", "destination": "n8n.welcome", "destination_type": "queue", "routing_key": "CommerceHub.Modules.Identity.Contracts.CustomerRegisteredIntegrationEvent", "arguments": {} },
-    { "source": "commercehub.events", "vhost": "/", "destination": "n8n.receipts", "destination_type": "queue", "routing_key": "CommerceHub.Modules.Orders.Contracts.OrderPaidIntegrationEvent", "arguments": {} },
-    { "source": "commercehub.events", "vhost": "/", "destination": "n8n.reviews", "destination_type": "queue", "routing_key": "CommerceHub.Modules.Shipping.Contracts.ShipmentDeliveredIntegrationEvent", "arguments": {} },
-    { "source": "commercehub.events", "vhost": "/", "destination": "n8n.ops", "destination_type": "queue", "routing_key": "CommerceHub.Modules.Inventory.Contracts.LowInventoryDetectedIntegrationEvent", "arguments": {} }
+    { "source": "catrashop.events", "vhost": "/", "destination": "n8n.welcome", "destination_type": "queue", "routing_key": "Catrashop.Modules.Identity.Contracts.CustomerRegisteredIntegrationEvent", "arguments": {} },
+    { "source": "catrashop.events", "vhost": "/", "destination": "n8n.receipts", "destination_type": "queue", "routing_key": "Catrashop.Modules.Orders.Contracts.OrderPaidIntegrationEvent", "arguments": {} },
+    { "source": "catrashop.events", "vhost": "/", "destination": "n8n.reviews", "destination_type": "queue", "routing_key": "Catrashop.Modules.Shipping.Contracts.ShipmentDeliveredIntegrationEvent", "arguments": {} },
+    { "source": "catrashop.events", "vhost": "/", "destination": "n8n.ops", "destination_type": "queue", "routing_key": "Catrashop.Modules.Inventory.Contracts.LowInventoryDetectedIntegrationEvent", "arguments": {} }
   ]
 }

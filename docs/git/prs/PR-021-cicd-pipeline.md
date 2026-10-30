@@ -22,7 +22,7 @@ runs on a clean GitHub-hosted runner exactly like the local suites.
   severity) + `--deprecated` report, `pnpm audit --prod --audit-level high`, and Gitleaks over full history.
   Runs on push/PR and weekly.
 - **`.gitleaks.toml`** — extends the default rules; allowlists the repo's intentional dev placeholders
-  (`.env.example`, dev `appsettings`, test signing keys, compose `commercehub` defaults) so the scan targets
+  (`.env.example`, dev `appsettings`, test signing keys, compose `catrashop` defaults) so the scan targets
   real leaks. Phase 20's `SecretGuard` already blocks those values outside Development.
 - **`.github/dependabot.yml`** — weekly updates for nuget (`/backend`), npm (`/frontend`, Angular + dev-deps
   grouped), and github-actions (`/`).
@@ -37,8 +37,8 @@ runs on a clean GitHub-hosted runner exactly like the local suites.
 
 ## Testing / verification
 Run the CI-equivalent commands locally (the workflows themselves execute on GitHub):
-- `dotnet build/test CommerceHub.slnx -c Release` → **195 passed, 2 skipped, 0 failed**.
-- `dotnet list CommerceHub.slnx package --vulnerable --include-transitive` → **no vulnerable packages**.
+- `dotnet build/test Catrashop.slnx -c Release` → **195 passed, 2 skipped, 0 failed**.
+- `dotnet list Catrashop.slnx package --vulnerable --include-transitive` → **no vulnerable packages**.
 - SDK pin resolves: `dotnet --version` → `10.0.401` (via `latestFeature`).
 - All three workflow YAML files and `.gitleaks.toml` parse cleanly.
 

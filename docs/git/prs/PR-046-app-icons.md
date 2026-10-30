@@ -20,7 +20,7 @@ a home screen and the app drawer all looked unbranded.
     densities, an **adaptive icon** (`mipmap-anydpi-v26/ic_launcher.xml` + foreground layers + background colour), a
     **monochrome layer** for Android 13 themed icons, and the full iOS `AppIcon.appiconset` (opaque, as iOS requires).
 - Both `index.html` link the SVG, the ICO and the apple-touch icon, and set `theme-color`; the admin tab title is now
-  "CommerceHub Admin" (it said "CommercehubAdmin").
+  "Catrashop Admin" (it said "CatrashopAdmin").
 - `branding/README.md` explains how it works, how to regenerate and how to swap in a designed logo; `store`/`admin`
   `.png`/`.svg` previews are kept in `branding/`.
 

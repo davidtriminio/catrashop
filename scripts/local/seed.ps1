@@ -1,9 +1,9 @@
 <#
 .SYNOPSIS
-  Seeds a LOCAL CommerceHub with an admin user, a sample catalog with stock, a customer and a few orders in
+  Seeds a LOCAL Catrashop with an admin user, a sample catalog with stock, a customer and a few orders in
   different states, so the admin SPA and the Flutter app have something to show.
 .DESCRIPTION
-  Requires: migrations applied (setup-db.ps1) and the API running (dotnet run --project backend/src/Api/CommerceHub.Api).
+  Requires: migrations applied (setup-db.ps1) and the API running (dotnet run --project backend/src/Api/Catrashop.Api).
   Everything goes through the real API, except promoting the admin user (a DB update: there is no endpoint for that).
   Re-running is safe for users/catalog (409s are ignored) but adds 4 more orders each time.
   These are LOCAL TEST credentials only; never reuse them anywhere real.
@@ -13,9 +13,9 @@
 #>
 param(
   [string]$ApiUrl = 'http://localhost:5227',
-  [string]$AdminEmail = 'admin@commercehub.local',
+  [string]$AdminEmail = 'admin@catrashop.local',
   [string]$AdminPassword = 'Admin12345',
-  [string]$CustomerEmail = 'cliente@commercehub.local',
+  [string]$CustomerEmail = 'cliente@catrashop.local',
   [string]$CustomerPassword = 'Cliente12345',
   [string]$ConnectionString
 )
@@ -40,13 +40,13 @@ function Login([string]$email, [string]$password) {
 }
 
 Write-Host ">> Checking API at $ApiUrl"
-try { Invoke-RestMethod "$ApiUrl/health/live" | Out-Null } catch { throw "API not reachable at $ApiUrl. Start it first: dotnet run --project backend/src/Api/CommerceHub.Api" }
+try { Invoke-RestMethod "$ApiUrl/health/live" | Out-Null } catch { throw "API not reachable at $ApiUrl. Start it first: dotnet run --project backend/src/Api/Catrashop.Api" }
 
 # --- Users -------------------------------------------------------------------------------------
 Write-Host ">> Admin user $AdminEmail"
 Call POST '/api/v1/identity/register' @{ email = $AdminEmail; password = $AdminPassword; firstName = 'Admin'; lastName = 'Local' } -Soft | Out-Null
 
-$pg = ConvertFrom-NpgsqlConnectionString (Get-CommerceHubConnectionString $ConnectionString)
+$pg = ConvertFrom-NpgsqlConnectionString (Get-CatrashopConnectionString $ConnectionString)
 $env:PGPASSWORD = $pg.Password
 $sql = "INSERT INTO identity.user_roles (user_id, role) SELECT id, 'Administrator' FROM identity.users WHERE lower(email) = lower('$AdminEmail') ON CONFLICT DO NOTHING;"
 & (Get-Psql) -h $pg.Host -p $pg.Port -U $pg.Username -d $pg.Database -v ON_ERROR_STOP=1 -q -c $sql

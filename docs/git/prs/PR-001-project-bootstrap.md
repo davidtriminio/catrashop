@@ -40,7 +40,7 @@ docs) and Phase 1 (backend bootstrap).
 - `dotnet build` → **0 warnings, 0 errors**.
 - API smoke test (manual, `--no-launch-profile`):
   - `GET /health/live` → `Healthy [200]`
-  - `GET /` → `{"service":"CommerceHub API","status":"ok","modules":[]}`
+  - `GET /` → `{"service":"Catrashop API","status":"ok","modules":[]}`
   - `GET /openapi/v1.json` → OpenAPI 3.1 document served.
 
 ## Security considerations

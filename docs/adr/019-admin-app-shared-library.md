@@ -8,12 +8,12 @@ Phase 14 adds the staff administration console (Section 14). It manages the same
 so it must reuse the API layer and auth plumbing rather than duplicate them — the extraction ADR-018 anticipated.
 
 ## Decision
-- **Two applications in one workspace.** `commercehub-web` (customer, Phase 13) and a new `commercehub-admin`
+- **Two applications in one workspace.** `catrashop-web` (customer, Phase 13) and a new `catrashop-admin`
   live in the same Angular workspace. Both are standalone, zoneless, signals-first, built by the same CLI.
-- **Shared code promoted to `frontend/shared/`** and imported through a TypeScript path alias **`@ch/*`** (no
+- **Shared code promoted to `frontend/shared/`** and imported through a TypeScript path alias **`@cs/*`** (no
   `baseUrl`, which TS 6 deprecates — the mapping is resolved relative to the config). It holds the DTO models, the
   per-context API services (customer *and* admin), the auth store/interceptor/guards, and small utilities
-  (money pipe, problem-details helper). The customer app was refactored onto `@ch/*`; the admin app consumes the
+  (money pipe, problem-details helper). The customer app was refactored onto `@cs/*`; the admin app consumes the
   same modules. This is the shared library ADR-018 promised — as path-mapped source rather than an ng-packagr
   package, which keeps the build single-step (no library pre-build) with no loss of isolation.
 - **Shared design system** as `shared/theme.scss`, pulled in by each app's `styles.scss` via a `shared` SCSS
@@ -36,7 +36,7 @@ activate/deactivate); Shipping (create/deactivate methods); Notifications (manua
 
 ## Alternatives considered
 - **An ng-packagr library** (`ng generate library`). Rejected for now — it adds a separate build target and
-  ordering; path-mapped source gives the same import surface (`@ch/*`) with a simpler pipeline. It can be promoted
+  ordering; path-mapped source gives the same import surface (`@cs/*`) with a simpler pipeline. It can be promoted
   to a packaged library later without changing import sites.
 - **Admin as a guarded area of the customer app.** Rejected — a distinct app keeps the storefront bundle lean and
   the two audiences cleanly separated, while the shared library prevents duplication.
@@ -55,9 +55,9 @@ activate/deactivate); Shipping (create/deactivate methods); Notifications (manua
 - **Live end-to-end (SPA ↔ API ↔ Postgres) is deferred** to Docker, as in every prior phase.
 
 ## Verification
-- `ng build commercehub-web` and `ng build commercehub-admin` → **0 errors** (admin initial 288 kB raw / 81 kB
-  transfer; customer unchanged); the customer app builds unchanged after being refactored onto `@ch/*`.
-- `ng test commercehub-web` and `ng test commercehub-admin` (vitest) → **2 + 2 passed**.
-- **Running-app smoke test:** the admin dev server boots the SPA (zoneless, DI, router, shared `@ch/*` all OK);
+- `ng build catrashop-web` and `ng build catrashop-admin` → **0 errors** (admin initial 288 kB raw / 81 kB
+  transfer; customer unchanged); the customer app builds unchanged after being refactored onto `@cs/*`.
+- `ng test catrashop-web` and `ng test catrashop-admin` (vitest) → **2 + 2 passed**.
+- **Running-app smoke test:** the admin dev server boots the SPA (zoneless, DI, router, shared `@cs/*` all OK);
   navigating to `/dashboard` unauthenticated redirects to the admin sign-in; console is clean (no errors, no
   network calls until sign-in).

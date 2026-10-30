@@ -2,12 +2,12 @@ import { Component, DestroyRef, OnInit, computed, inject, signal } from '@angula
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { CatalogApi, ProductQuery } from '@ch/api/catalog.api';
-import { Brand, Category, Paged, PriceRange, ProductListItem } from '@ch/api/models';
-import { I18n } from '@ch/i18n/i18n';
-import { MoneyPipe } from '@ch/util/money.pipe';
-import { PluralPipe } from '@ch/util/plural.pipe';
-import { buildPages } from '@ch/util/pagination';
+import { CatalogApi, ProductQuery } from '@cs/api/catalog.api';
+import { Brand, Category, Paged, PriceRange, ProductListItem } from '@cs/api/models';
+import { I18n } from '@cs/i18n/i18n';
+import { MoneyPipe } from '@cs/util/money.pipe';
+import { PluralPipe } from '@cs/util/plural.pipe';
+import { buildPages } from '@cs/util/pagination';
 
 const PAGE_SIZE = 12;
 /** Soft placeholder tints (used when a product has no photo); picked deterministically from the name. */

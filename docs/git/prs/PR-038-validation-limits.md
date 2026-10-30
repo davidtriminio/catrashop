@@ -49,7 +49,7 @@ unbounded stock figures) and put a test behind each rule.
 | Catalog price filter drops negatives and swaps inverted bounds | `PriceFilter` (used by `/catalog/products`) | `PriceFilterTests` |
 
 ## Verification
-- Backend: new `CommerceHub.Modules.Catalog.Tests` (19) plus additions to Cart (15), Inventory (34) and Promotions
+- Backend: new `Catrashop.Modules.Catalog.Tests` (19) plus additions to Cart (15), Inventory (34) and Promotions
   (26) all pass; the API builds.
 - Web Vitest 30/30; web and admin builds succeed.
 - Not verified: the stock check through the real HTTP API and a database (no PostgreSQL available to me), and the

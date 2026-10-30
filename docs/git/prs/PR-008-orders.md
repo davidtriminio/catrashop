@@ -23,7 +23,7 @@ orchestration spanning multiple modules.
 - **Public contract:** `IOrderWorkflow` + events (`OrderCreated`, `OrderPaid`, `OrderCancelled`).
 - **API:** customer endpoints (checkout, list/get mine, cancel) + admin endpoints (search, get any, process/ship/
   deliver/cancel) guarded by `orders.read_all` / `orders.manage`.
-- **Tests:** `CommerceHub.Modules.Orders.Tests` — **13 domain unit tests**.
+- **Tests:** `Catrashop.Modules.Orders.Tests` — **13 domain unit tests**.
 - ADR-013 (order lifecycle & checkout orchestration).
 
 ## Technical decisions

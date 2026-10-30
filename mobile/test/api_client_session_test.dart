@@ -2,8 +2,8 @@ import 'dart:async';
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:commercehub_admin/core/api_client.dart';
-import 'package:commercehub_admin/core/token_store.dart';
+import 'package:catrashop_admin/core/api_client.dart';
+import 'package:catrashop_admin/core/token_store.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_test/flutter_test.dart';
 

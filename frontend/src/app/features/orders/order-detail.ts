@@ -1,15 +1,15 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { OrderDetail, Tracking } from '@ch/api/models';
-import { OrdersApi } from '@ch/api/orders.api';
-import { PaymentsApi } from '@ch/api/payments.api';
-import { ShippingApi } from '@ch/api/shipping.api';
-import { StatusBadge } from '@ch/ui/status-badge';
-import { Timeline } from '@ch/ui/timeline';
-import { I18n } from '@ch/i18n/i18n';
-import { LocalDatePipe } from '@ch/util/local-date.pipe';
-import { MoneyPipe } from '@ch/util/money.pipe';
+import { OrderDetail, Tracking } from '@cs/api/models';
+import { OrdersApi } from '@cs/api/orders.api';
+import { PaymentsApi } from '@cs/api/payments.api';
+import { ShippingApi } from '@cs/api/shipping.api';
+import { StatusBadge } from '@cs/ui/status-badge';
+import { Timeline } from '@cs/ui/timeline';
+import { I18n } from '@cs/i18n/i18n';
+import { LocalDatePipe } from '@cs/util/local-date.pipe';
+import { MoneyPipe } from '@cs/util/money.pipe';
 
 @Component({
   selector: 'app-order-detail',
@@ -26,7 +26,7 @@ import { MoneyPipe } from '@ch/util/money.pipe';
       <div class="page-head">
         <div class="title">
           <h1>{{ o.orderNumber }}</h1>
-          <ch-status-badge [status]="o.status" />
+          <cs-status-badge [status]="o.status" />
         </div>
         <div class="actions">
           @if (canPay()) { <button class="btn" [disabled]="busy()" (click)="pay(o)">{{ 'orderDetail.payNow' | transloco }}</button> }
@@ -74,14 +74,14 @@ import { MoneyPipe } from '@ch/util/money.pipe';
           @if (tracking(); as t) {
             <div class="card">
               <h2>{{ 'orderDetail.shipment' | transloco }}</h2>
-              <p class="track"><span class="muted">{{ 'orderDetail.tracking' | transloco }}</span> <strong>{{ t.trackingNumber }}</strong> <ch-status-badge [status]="t.status" /></p>
-              <ch-timeline [items]="t.events" />
+              <p class="track"><span class="muted">{{ 'orderDetail.tracking' | transloco }}</span> <strong>{{ t.trackingNumber }}</strong> <cs-status-badge [status]="t.status" /></p>
+              <cs-timeline [items]="t.events" />
             </div>
           }
 
           <div class="card">
             <h2>{{ 'orderDetail.history' | transloco }}</h2>
-            <ch-timeline [items]="o.history" />
+            <cs-timeline [items]="o.history" />
           </div>
         </div>
       </div>

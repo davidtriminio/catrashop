@@ -1,8 +1,8 @@
 import { TestBed } from '@angular/core/testing';
 import { of } from 'rxjs';
-import { AuthApi } from '@ch/api/auth.api';
-import { AuthStore } from '@ch/auth/auth.store';
-import { AuthTokens, UserProfile } from '@ch/api/models';
+import { AuthApi } from '@cs/api/auth.api';
+import { AuthStore } from '@cs/auth/auth.store';
+import { AuthTokens, UserProfile } from '@cs/api/models';
 
 const tokens: AuthTokens = {
   accessToken: 'access-1',
@@ -14,7 +14,7 @@ const tokens: AuthTokens = {
 
 const profile: UserProfile = {
   id: '00000000-0000-0000-0000-000000000001',
-  email: 'user@commercehub.test',
+  email: 'user@catrashop.test',
   firstName: 'Ada',
   lastName: 'Lovelace',
   emailConfirmed: true,
@@ -50,7 +50,7 @@ describe('AuthStore', () => {
     expect(store.accessToken()).toBe('access-1');
     expect(store.hasPermission('catalog.products.manage')).toBe(true);
     expect(store.hasPermission('orders.manage')).toBe(false);
-    expect(localStorage.getItem('ch_auth_tokens')).toContain('access-1');
+    expect(localStorage.getItem('cs_auth_tokens')).toContain('access-1');
   });
 
   it('logout clears state and storage', () => {
@@ -61,11 +61,11 @@ describe('AuthStore', () => {
 
     expect(store.isAuthenticated()).toBe(false);
     expect(store.user()).toBeNull();
-    expect(localStorage.getItem('ch_auth_tokens')).toBeNull();
+    expect(localStorage.getItem('cs_auth_tokens')).toBeNull();
   });
 
   it('restores a persisted session on construction', () => {
-    localStorage.setItem('ch_auth_tokens', JSON.stringify(tokens));
+    localStorage.setItem('cs_auth_tokens', JSON.stringify(tokens));
     const store = makeStore({ me: () => of(profile) });
 
     expect(store.isAuthenticated()).toBe(true);

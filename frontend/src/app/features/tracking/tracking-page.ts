@@ -1,11 +1,11 @@
 import { Component, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { ShippingApi } from '@ch/api/shipping.api';
-import { Tracking } from '@ch/api/models';
-import { StatusBadge } from '@ch/ui/status-badge';
-import { Timeline } from '@ch/ui/timeline';
-import { I18n } from '@ch/i18n/i18n';
+import { ShippingApi } from '@cs/api/shipping.api';
+import { Tracking } from '@cs/api/models';
+import { StatusBadge } from '@cs/ui/status-badge';
+import { Timeline } from '@cs/ui/timeline';
+import { I18n } from '@cs/i18n/i18n';
 
 @Component({
   selector: 'app-tracking-page',
@@ -27,9 +27,9 @@ import { I18n } from '@ch/i18n/i18n';
             <strong class="num">{{ t.trackingNumber }}</strong>
             <p class="muted">{{ t.carrier }} · {{ 'tracking.destination' | transloco: { city: t.city, country: t.country } }}</p>
           </div>
-          <ch-status-badge [status]="t.status" />
+          <cs-status-badge [status]="t.status" />
         </div>
-        <ch-timeline [items]="t.events" />
+        <cs-timeline [items]="t.events" />
       </div>
     }
   `,

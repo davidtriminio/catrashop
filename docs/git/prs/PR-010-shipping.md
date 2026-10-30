@@ -22,7 +22,7 @@ order lifecycle (Section 7).
   implemented by `OrderManagementService`.
 - **API:** public method list + PII-limited tracking; customer "my order's shipment"; admin ops under
   `orders.manage`.
-- **Tests:** `CommerceHub.Modules.Shipping.Tests` — **10 unit tests**.
+- **Tests:** `Catrashop.Modules.Shipping.Tests` — **10 unit tests**.
 - ADR-015 (shipping & fulfillment integration).
 
 ## Technical decisions

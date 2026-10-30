@@ -11,8 +11,8 @@ on the PATH (it ships with PostgreSQL). RabbitMQ is optional: without it set `Me
 Dev secrets live in .NET user-secrets, outside the repo. Replace the values in `<>`:
 
 ```powershell
-$api = "backend/src/Api/CommerceHub.Api"
-dotnet user-secrets set "ConnectionStrings:Postgres" "Host=localhost;Port=5432;Database=commercehub;Username=postgres;Password=<your-postgres-password>" --project $api
+$api = "backend/src/Api/Catrashop.Api"
+dotnet user-secrets set "ConnectionStrings:Postgres" "Host=localhost;Port=5432;Database=catrashop;Username=postgres;Password=<your-postgres-password>" --project $api
 dotnet user-secrets set "Identity:Jwt:SigningKey" "<at-least-32-random-chars>" --project $api
 dotnet user-secrets set "Payments:WebhookSecret" "<at-least-16-random-chars>" --project $api
 # only if you run RabbitMQ:
@@ -25,7 +25,7 @@ Generate a random value with: `[Convert]::ToBase64String((1..48 | % { Get-Random
 ## 2. Database + API
 ```powershell
 ./scripts/local/setup-db.ps1                 # creates the DB if missing and applies every module's migrations
-dotnet run --project backend/src/Api/CommerceHub.Api          # http://localhost:5227
+dotnet run --project backend/src/Api/Catrashop.Api          # http://localhost:5227
 # no RabbitMQ running?  $env:Messaging__Transport = "InProcess"  before dotnet run
 ```
 Check: `Invoke-RestMethod http://localhost:5227/health/live`
@@ -41,8 +41,8 @@ button in the app has something to act on. Local test accounts it prints (never 
 
 | Role | Email | Password |
 |---|---|---|
-| Administrator | `admin@commercehub.local` | `Admin12345` |
-| Customer | `cliente@commercehub.local` | `Cliente12345` |
+| Administrator | `admin@catrashop.local` | `Admin12345` |
+| Customer | `cliente@catrashop.local` | `Cliente12345` |
 
 Custom values: `./scripts/local/seed.ps1 -AdminEmail you@x.dev -AdminPassword 'YourPass123'` (min. 8 chars with
 upper, lower and a digit). Re-running is safe for users/catalog and just adds 4 more orders.
@@ -54,7 +54,7 @@ Create more orders later by hand: log in as the customer, `POST /api/v1/cart/ite
 ```powershell
 cd frontend; pnpm install
 pnpm start                         # customer SPA  http://localhost:4200  (proxies /api to :5227)
-pnpm exec ng serve commercehub-admin   # admin SPA     http://localhost:4300
+pnpm exec ng serve catrashop-admin   # admin SPA     http://localhost:4300
 ```
 Log in to the admin SPA with the admin account.
 
@@ -68,7 +68,7 @@ Pick how the phone reaches the API on your PC (debug builds allow plain HTTP):
 |---|---|
 | Android emulator | `flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5227` |
 | Phone on USB (debugging on) | `adb reverse tcp:5227 tcp:5227` then `flutter run --dart-define=API_BASE_URL=http://localhost:5227` |
-| Phone on Wi-Fi | run the API with `dotnet run --project backend/src/Api/CommerceHub.Api --urls http://0.0.0.0:5227`, allow it in Windows Firewall (`New-NetFirewallRule -DisplayName CommerceHubDev -Direction Inbound -LocalPort 5227 -Protocol TCP -Action Allow`), then `flutter run --dart-define=API_BASE_URL=http://<PC-LAN-IP>:5227` |
+| Phone on Wi-Fi | run the API with `dotnet run --project backend/src/Api/Catrashop.Api --urls http://0.0.0.0:5227`, allow it in Windows Firewall (`New-NetFirewallRule -DisplayName CatrashopDev -Direction Inbound -LocalPort 5227 -Protocol TCP -Action Allow`), then `flutter run --dart-define=API_BASE_URL=http://<PC-LAN-IP>:5227` |
 
 Log in with the **admin** account. A customer account is rejected on purpose ("no tiene permisos").
 
@@ -81,7 +81,7 @@ To skip it while developing, add `--dart-define=SKIP_BIOMETRIC=true` to `flutter
 
 ## 6. Tests
 ```powershell
-dotnet test backend/CommerceHub.slnx
+dotnet test backend/Catrashop.slnx
 cd mobile; flutter test; flutter analyze
 ```
 `HealthAndRootTests.Readiness_reports_...infra_is_down` assumes Postgres/RabbitMQ are **not** running; it fails
@@ -90,12 +90,12 @@ while your local infrastructure is up. That is expected on a dev machine with th
 ## Reset
 ```powershell
 # wipes all data (keeps no seed) — then repeat steps 2-3
-psql -h localhost -U postgres -c "DROP DATABASE commercehub WITH (FORCE)"
+psql -h localhost -U postgres -c "DROP DATABASE catrashop WITH (FORCE)"
 ```
 
 ## Keep your data but switch it to HNL
 Data created before the store moved to lempiras (PR-040) still shows its old currency. Instead of resetting you can
-convert it in place (back up first: `pg_dump -h localhost -U postgres -Fc commercehub > backup.dump`):
+convert it in place (back up first: `pg_dump -h localhost -U postgres -Fc catrashop > backup.dump`):
 ```powershell
 ./scripts/local/convert-currency.ps1 -DryRun            # shows what would change, saves nothing
 ./scripts/local/convert-currency.ps1 -Rate 25.5         # USD -> HNL, amounts x 25.5 (default rate 1 only relabels)

@@ -1,7 +1,7 @@
-import 'package:commercehub_admin/core/api_client.dart';
-import 'package:commercehub_admin/core/token_store.dart';
-import 'package:commercehub_admin/features/orders/order_models.dart';
-import 'package:commercehub_admin/features/orders/orders_repository.dart';
+import 'package:catrashop_admin/core/api_client.dart';
+import 'package:catrashop_admin/core/token_store.dart';
+import 'package:catrashop_admin/features/orders/order_models.dart';
+import 'package:catrashop_admin/features/orders/orders_repository.dart';
 
 /// In-memory orders backend for widget tests (no network, no platform channels).
 class FakeOrdersRepository extends OrdersRepository {

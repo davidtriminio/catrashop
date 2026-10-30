@@ -1,4 +1,4 @@
-# CommerceHub documentation
+# Catrashop documentation
 
 The map of everything under `docs/`.
 

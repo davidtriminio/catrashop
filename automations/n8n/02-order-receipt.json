@@ -1,5 +1,5 @@
 {
-  "name": "CommerceHub — Order receipt",
+  "name": "Catrashop — Order receipt",
   "nodes": [
     {
       "parameters": {
@@ -12,7 +12,7 @@
       "typeVersion": 1,
       "position": [260, 300],
       "credentials": {
-        "rabbitmq": { "id": "REPLACE_WITH_RABBITMQ_CREDENTIAL_ID", "name": "CommerceHub RabbitMQ" }
+        "rabbitmq": { "id": "REPLACE_WITH_RABBITMQ_CREDENTIAL_ID", "name": "Catrashop RabbitMQ" }
       }
     },
     {
@@ -27,8 +27,8 @@
     },
     {
       "parameters": {
-        "fromEmail": "orders@commercehub.example",
-        "toEmail": "={{ $env.ORDERS_NOTIFY_TO || 'orders@commercehub.example' }}",
+        "fromEmail": "orders@catrashop.example",
+        "toEmail": "={{ $env.ORDERS_NOTIFY_TO || 'orders@catrashop.example' }}",
         "subject": "Receipt for order {{ $json.orderNumber }}",
         "emailFormat": "text",
         "text": "Your payment was received.\n\nOrder: {{ $json.orderNumber }}\nTotal: {{ $json.total }} {{ $json.currency }}\n\nThank you for shopping with Catrashop.",
@@ -40,7 +40,7 @@
       "typeVersion": 2,
       "position": [740, 300],
       "credentials": {
-        "smtp": { "id": "REPLACE_WITH_SMTP_CREDENTIAL_ID", "name": "CommerceHub SMTP" }
+        "smtp": { "id": "REPLACE_WITH_SMTP_CREDENTIAL_ID", "name": "Catrashop SMTP" }
       }
     }
   ],
@@ -51,5 +51,5 @@
   "active": false,
   "settings": { "executionOrder": "v1" },
   "pinData": {},
-  "tags": [{ "name": "commercehub" }]
+  "tags": [{ "name": "catrashop" }]
 }

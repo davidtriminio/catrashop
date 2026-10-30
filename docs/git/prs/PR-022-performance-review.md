@@ -22,7 +22,7 @@ paths, per-request DbContext construction, and no compression or caching at the 
 - **No-tracking reads (opt-in)** — `AsNoTracking()` on the four display-only entity reads (catalog product
   detail, order detail, notification inbox listing, shipping-methods listing). Tracking stays the default;
   every aggregate load that mutates is left tracked, so no write can silently stop persisting.
-- **`Performance` composition-root concern** (`AddCommerceHubPerformance` / `UseCommerceHubPerformance`,
+- **`Performance` composition-root concern** (`AddCatrashopPerformance` / `UseCatrashopPerformance`,
   section `Performance`, framework-only, mirrors the Phase 20 `Security` module):
   - *Response compression* — Brotli + Gzip (`Optimal`) over the default MIME set + `application/problem+json`;
     `EnableForHttps` **off by default** (BREACH; a TLS proxy usually compresses).
@@ -44,7 +44,7 @@ paths, per-request DbContext construction, and no compression or caching at the 
   change to search — recorded as the top follow-up, not authored blind.
 
 ## Testing / verification
-- `dotnet build/test CommerceHub.slnx -c Release` → **200 passed, 2 skipped, 0 failed** (+5 integration):
+- `dotnet build/test Catrashop.slnx -c Release` → **200 passed, 2 skipped, 0 failed** (+5 integration):
   Brotli and Gzip negotiated on the live pipeline, no compression when the client doesn't ask, output-cache
   store registered, `PerformanceOptions` bind with safe defaults. Build is warnings-as-errors clean.
 - Architecture tests (66) still pass — the caching seam did not introduce a module→host dependency.

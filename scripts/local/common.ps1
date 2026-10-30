@@ -1,10 +1,10 @@
-function Get-CommerceHubConnectionString([string]$Override) {
+function Get-CatrashopConnectionString([string]$Override) {
   if ($Override) { return $Override }
   if ($env:ConnectionStrings__Postgres) { return $env:ConnectionStrings__Postgres }
-  $apiDir = Join-Path $PSScriptRoot '../../backend/src/Api/CommerceHub.Api'
+  $apiDir = Join-Path $PSScriptRoot '../../backend/src/Api/Catrashop.Api'
   $line = dotnet user-secrets list --project $apiDir 2>$null | Where-Object { $_ -like 'ConnectionStrings:Postgres =*' }
   if (-not $line) {
-    throw "No connection string. Run: dotnet user-secrets set ""ConnectionStrings:Postgres"" ""Host=localhost;Port=5432;Database=commercehub;Username=postgres;Password=<pwd>"" --project backend/src/Api/CommerceHub.Api"
+    throw "No connection string. Run: dotnet user-secrets set ""ConnectionStrings:Postgres"" ""Host=localhost;Port=5432;Database=catrashop;Username=postgres;Password=<pwd>"" --project backend/src/Api/Catrashop.Api"
   }
   return ($line -replace '^ConnectionStrings:Postgres =\s*', '')
 }

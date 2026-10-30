@@ -1,9 +1,9 @@
-import 'package:commercehub_admin/core/api_url.dart';
-import 'package:commercehub_admin/core/config.dart';
-import 'package:commercehub_admin/core/providers.dart';
-import 'package:commercehub_admin/core/theme.dart';
-import 'package:commercehub_admin/core/token_store.dart';
-import 'package:commercehub_admin/features/settings/settings_page.dart';
+import 'package:catrashop_admin/core/api_url.dart';
+import 'package:catrashop_admin/core/config.dart';
+import 'package:catrashop_admin/core/providers.dart';
+import 'package:catrashop_admin/core/theme.dart';
+import 'package:catrashop_admin/core/token_store.dart';
+import 'package:catrashop_admin/features/settings/settings_page.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
@@ -119,7 +119,7 @@ void main() {
         apiUrlStoreProvider.overrideWithValue(urls),
         tokenStoreProvider.overrideWithValue(tokens),
         initialApiUrlProvider.overrideWithValue(saved ?? apiBaseUrl),
-        profileProvider.overrideWith((ref) async => const ProfileInfo(email: 'admin@commercehub.local', roles: {'Administrator'})),
+        profileProvider.overrideWith((ref) async => const ProfileInfo(email: 'admin@catrashop.local', roles: {'Administrator'})),
         if (reachable != null) apiReachableProvider.overrideWithValue(reachable),
       ]);
       addTearDown(c.dispose);

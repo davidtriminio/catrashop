@@ -1,12 +1,12 @@
-import { MAX_LINE_QUANTITY } from '@ch/util/quantity';
+import { MAX_LINE_QUANTITY } from '@cs/util/quantity';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { AuthStore } from '@ch/auth/auth.store';
+import { AuthStore } from '@cs/auth/auth.store';
 import { CartStore } from '../../core/cart/cart.store';
-import { I18n } from '@ch/i18n/i18n';
-import { MoneyPipe } from '@ch/util/money.pipe';
-import { PluralPipe } from '@ch/util/plural.pipe';
+import { I18n } from '@cs/i18n/i18n';
+import { MoneyPipe } from '@cs/util/money.pipe';
+import { PluralPipe } from '@cs/util/plural.pipe';
 
 @Component({
   selector: 'app-cart-page',

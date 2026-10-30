@@ -17,6 +17,6 @@ Future<void> main() async {
     // behind a loading screen for a long time.
     retry: (retryCount, error) => null,
     overrides: [initialApiUrlProvider.overrideWithValue(apiUrl)],
-    child: const CommerceHubAdminApp(),
+    child: const CatrashopAdminApp(),
   ));
 }

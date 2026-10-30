@@ -4,7 +4,7 @@
 - **Date:** 2026-03-29
 
 ## Context
-CommerceHub needs stateless API auth for a SPA + future mobile clients, revocable sessions, and
+Catrashop needs stateless API auth for a SPA + future mobile clients, revocable sessions, and
 fine-grained back-office access control across many modules.
 
 ## Decision

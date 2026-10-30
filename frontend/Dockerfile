@@ -6,10 +6,10 @@ RUN corepack enable
 COPY package.json pnpm-lock.yaml ./
 RUN pnpm install --frozen-lockfile
 COPY . .
-RUN pnpm exec ng build commercehub-web && pnpm exec ng build commercehub-admin
+RUN pnpm exec ng build catrashop-web && pnpm exec ng build catrashop-admin
 
 FROM nginx:1.27-alpine AS web
 COPY nginx.conf /etc/nginx/conf.d/default.conf
-COPY --from=build /app/dist/commercehub-web/browser /usr/share/nginx/html/web
-COPY --from=build /app/dist/commercehub-admin/browser /usr/share/nginx/html/admin
+COPY --from=build /app/dist/catrashop-web/browser /usr/share/nginx/html/web
+COPY --from=build /app/dist/catrashop-admin/browser /usr/share/nginx/html/admin
 EXPOSE 80

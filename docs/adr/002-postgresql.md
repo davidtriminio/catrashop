@@ -4,7 +4,7 @@
 - **Date:** 2026-03-17
 
 ## Context
-CommerceHub needs a relational store for strongly-consistent, transactional data (orders, inventory, payments),
+Catrashop needs a relational store for strongly-consistent, transactional data (orders, inventory, payments),
 plus JSON flexibility (outbox payloads, flexible product attributes) and decent full-text search — ideally without
 adding a separate search engine early (Section 15).
 
