@@ -1,0 +1,59 @@
+<Solution>
+  <Folder Name="/src/" />
+  <Folder Name="/src/Api/">
+    <Project Path="src/Api/Catrashop.Api/Catrashop.Api.csproj" />
+  </Folder>
+  <Folder Name="/src/BuildingBlocks/">
+    <Project Path="src/BuildingBlocks/Catrashop.BuildingBlocks/Catrashop.BuildingBlocks.csproj" />
+    <Project Path="src/BuildingBlocks/Catrashop.Infrastructure/Catrashop.Infrastructure.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/" />
+  <Folder Name="/src/Modules/AI/">
+    <Project Path="src/Modules/AI/Catrashop.Modules.AI/Catrashop.Modules.AI.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Cart/">
+    <Project Path="src/Modules/Cart/Catrashop.Modules.Cart/Catrashop.Modules.Cart.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Catalog/">
+    <Project Path="src/Modules/Catalog/Catrashop.Modules.Catalog/Catrashop.Modules.Catalog.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Customers/">
+    <Project Path="src/Modules/Customers/Catrashop.Modules.Customers/Catrashop.Modules.Customers.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Identity/">
+    <Project Path="src/Modules/Identity/Catrashop.Modules.Identity/Catrashop.Modules.Identity.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Inventory/">
+    <Project Path="src/Modules/Inventory/Catrashop.Modules.Inventory/Catrashop.Modules.Inventory.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Notifications/">
+    <Project Path="src/Modules/Notifications/Catrashop.Modules.Notifications/Catrashop.Modules.Notifications.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Orders/">
+    <Project Path="src/Modules/Orders/Catrashop.Modules.Orders/Catrashop.Modules.Orders.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Payments/">
+    <Project Path="src/Modules/Payments/Catrashop.Modules.Payments/Catrashop.Modules.Payments.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Promotions/">
+    <Project Path="src/Modules/Promotions/Catrashop.Modules.Promotions/Catrashop.Modules.Promotions.csproj" />
+  </Folder>
+  <Folder Name="/src/Modules/Shipping/">
+    <Project Path="src/Modules/Shipping/Catrashop.Modules.Shipping/Catrashop.Modules.Shipping.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/Catrashop.ArchitectureTests/Catrashop.ArchitectureTests.csproj" />
+    <Project Path="tests/Catrashop.IntegrationTests/Catrashop.IntegrationTests.csproj" />
+    <Project Path="tests/Catrashop.Infrastructure.Tests/Catrashop.Infrastructure.Tests.csproj" />
+    <Project Path="tests/Catrashop.Modules.AI.Tests/Catrashop.Modules.AI.Tests.csproj" />
+    <Project Path="tests/Catrashop.Modules.Cart.Tests/Catrashop.Modules.Cart.Tests.csproj" />
+    <Project Path="tests/Catrashop.Modules.Catalog.Tests/Catrashop.Modules.Catalog.Tests.csproj" />
+    <Project Path="tests/Catrashop.Modules.Customers.Tests/Catrashop.Modules.Customers.Tests.csproj" />
+    <Project Path="tests/Catrashop.Modules.Inventory.Tests/Catrashop.Modules.Inventory.Tests.csproj" />
+    <Project Path="tests/Catrashop.Modules.Notifications.Tests/Catrashop.Modules.Notifications.Tests.csproj" />
+    <Project Path="tests/Catrashop.Modules.Orders.Tests/Catrashop.Modules.Orders.Tests.csproj" />
+    <Project Path="tests/Catrashop.Modules.Payments.Tests/Catrashop.Modules.Payments.Tests.csproj" />
+    <Project Path="tests/Catrashop.Modules.Promotions.Tests/Catrashop.Modules.Promotions.Tests.csproj" />
+    <Project Path="tests/Catrashop.Modules.Shipping.Tests/Catrashop.Modules.Shipping.Tests.csproj" />
+  </Folder>
+</Solution>

@@ -1,0 +1,95 @@
+# ---------------------------------------------------------------------------
+# Catrashop .gitignore
+# Covers: .NET, Node/Angular, IDEs, OS, logs, secrets, Docker, AI artifacts
+# ---------------------------------------------------------------------------
+
+# === .NET / C# ===
+bin/
+obj/
+out/
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+*.user
+*.suo
+*.userosscache
+*.sln.docstates
+project.lock.json
+artifacts/
+.vs/
+*.dll
+*.pdb
+# EF Core / migrations bundles output (keep migration source files!)
+*.mdf
+*.ldf
+
+# === Node / Angular ===
+node_modules/
+dist/
+tmp/
+/.angular/cache
+.angular/
+*.tsbuildinfo
+npm-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+.pnpm-store/
+
+# === Test / coverage output ===
+coverage/
+TestResults/
+*.trx
+playwright-report/
+test-results/
+.playwright/
+
+# === IDEs / editors ===
+.idea/
+.vscode/*
+!.vscode/extensions.json
+!.vscode/settings.shared.json
+*.swp
+*.swo
+*~
+
+# === OS files ===
+.DS_Store
+.DS_Store?
+._*
+Thumbs.db
+ehthumbs.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# === Logs / temp ===
+*.log
+logs/
+*.tmp
+*.temp
+*.bak
+
+# === Secrets / environment (NEVER commit real secrets) ===
+.env
+.env.*
+!.env.example
+!.env.prod.example
+*.pfx
+*.p12
+appsettings.*.Local.json
+secrets.json
+**/secrets/*.local
+
+# === Docker local volumes / overrides ===
+docker-compose.override.yml
+.docker-data/
+volumes/
+
+# === Local databases ===
+*.sqlite
+*.db
+
+.aider*
+
+# Release bundles
+deploy/oracle/dist/

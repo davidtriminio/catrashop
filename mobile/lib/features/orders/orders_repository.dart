@@ -1,0 +1,81 @@
+import '../../core/api_client.dart';
+import '../../core/token_store.dart';
+import 'order_models.dart';
+
+class OrdersRepository {
+  OrdersRepository(this._api);
+  final ApiClient _api;
+
+  static const pageSize = 20;
+
+  Future<OrderPage> list({String? status, int page = 1}) async {
+    final d = await _api.get('/api/v1/orders/admin', query: {
+      'status': ?status,
+      'page': page,
+      'pageSize': pageSize,
+    }) as Map<String, dynamic>;
+    final items = (d['items'] as List).map((e) => OrderSummary.fromJson(e as Map<String, dynamic>)).toList();
+    final total = (d['totalCount'] as num).toInt();
+    return OrderPage(items, page, page * pageSize < total, total);
+  }
+
+  /// Number of orders in a status (all orders when [status] is null), without downloading them.
+  Future<int> count({String? status}) async {
+    final d = await _api.get('/api/v1/orders/admin', query: {
+      'status': ?status,
+      'page': 1,
+      'pageSize': 1,
+    }) as Map<String, dynamic>;
+    return (d['totalCount'] as num).toInt();
+  }
+
+  Future<OrderDetail> detail(String id) async =>
+      OrderDetail.fromJson(await _api.get('/api/v1/orders/admin/$id') as Map<String, dynamic>);
+
+  /// The payment of an order, or null when it has none yet.
+  Future<OrderPayment?> payment(String orderId) async {
+    try {
+      return OrderPayment.fromJson(await _api.get('/api/v1/payments/admin/by-order/$orderId') as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      if (e.statusCode == 404) return null;
+      rethrow;
+    }
+  }
+
+  Future<({List<int> bytes, String contentType})> receipt(String paymentId) =>
+      _api.getBytes('/api/v1/payments/admin/$paymentId/receipt');
+
+  /// Verifies a bank transfer: captures the payment and marks the order as paid.
+  Future<void> approvePayment(String paymentId) => _api.post('/api/v1/payments/admin/$paymentId/approve');
+
+  /// Registers that the money of a cash-on-delivery / pay-at-store order was collected (only after delivery).
+  Future<void> collectPayment(String paymentId) => _api.post('/api/v1/payments/admin/$paymentId/collect');
+
+  /// Sends the receipt back to the customer with the reason; they can attach another one.
+  Future<void> rejectPayment(String paymentId, String reason) =>
+      _api.post('/api/v1/payments/admin/$paymentId/reject', body: {'reason': reason});
+
+  Future<void> perform(String id, OrderAction action, {String? reason}) async {
+    await _api.post('/api/v1/orders/admin/$id/${action.path}',
+        body: action == OrderAction.cancel ? {'reason': reason} : null);
+  }
+}
+
+/// Detects orders created since the last check (newest-first page 1 is enough for a 60s/15min cadence).
+/// Shared by the foreground timer and the background isolate.
+class NewOrderWatcher {
+  NewOrderWatcher(this._repo, this._store);
+  final OrdersRepository _repo;
+  final TokenStore _store;
+
+  /// Returns the new orders (empty on the very first run, which only sets the baseline).
+  Future<List<OrderSummary>> check() async {
+    final latest = (await _repo.list()).items;
+    if (latest.isEmpty) return const [];
+    final newest = latest.map((o) => o.createdAtUtc).reduce((a, b) => a.isAfter(b) ? a : b);
+    final lastSeen = await _store.readLastSeen();
+    await _store.writeLastSeen(newest);
+    if (lastSeen == null) return const [];
+    return latest.where((o) => o.createdAtUtc.isAfter(lastSeen)).toList();
+  }
+}

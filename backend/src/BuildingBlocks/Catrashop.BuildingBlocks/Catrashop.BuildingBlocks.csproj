@@ -1,0 +1,7 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- Framework, nullability, implicit usings inherited from Directory.Build.props -->
+  <ItemGroup>
+    <!-- Needed for IModule's ASP.NET Core hosting/routing abstractions. -->
+    <FrameworkReference Include="Microsoft.AspNetCore.App" />
+  </ItemGroup>
+</Project>

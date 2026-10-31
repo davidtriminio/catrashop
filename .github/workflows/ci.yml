@@ -1,0 +1,101 @@
+name: CI
+
+# Build and test both stacks on every push to the long-lived branches and on every PR.
+# Everything here is infrastructure-free: the backend suite uses the in-memory host (Postgres-gated
+# E2E skips without a database) and the frontend specs/e2e are client-side only, so no services are
+# needed in the runner — the Docker-up journeys remain a separate, manual verification pass.
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main, develop]
+
+# Cancel superseded runs on the same ref to save CI minutes.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend (.NET)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET (pinned by backend/global.json)
+        uses: actions/setup-dotnet@v4
+        with:
+          global-json-file: backend/global.json
+
+      - name: Cache NuGet packages
+        uses: actions/cache@v4
+        with:
+          path: ~/.nuget/packages
+          key: nuget-${{ runner.os }}-${{ hashFiles('backend/**/*.csproj', 'backend/Directory.Packages.props') }}
+          restore-keys: nuget-${{ runner.os }}-
+
+      - name: Restore
+        run: dotnet restore Catrashop.slnx
+
+      - name: Build (warnings are errors)
+        run: dotnet build Catrashop.slnx --configuration Release --no-restore
+
+      - name: Test
+        run: dotnet test Catrashop.slnx --configuration Release --no-build --logger "trx;LogFileName=test-results.trx"
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: backend-test-results
+          path: backend/**/TestResults/*.trx
+          if-no-files-found: ignore
+
+  frontend:
+    name: Frontend (Angular)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 11.24.0
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: pnpm
+          cache-dependency-path: frontend/pnpm-lock.yaml
+
+      - name: Install dependencies (frozen lockfile)
+        run: pnpm install --frozen-lockfile
+
+      - name: Build customer app
+        run: pnpm exec ng build catrashop-web --configuration production
+
+      - name: Build admin app
+        run: pnpm exec ng build catrashop-admin --configuration production
+
+      - name: Unit tests (customer)
+        run: pnpm run test:web
+
+      - name: Unit tests (admin)
+        run: pnpm run test:admin
+
+      - name: Install Playwright browser
+        run: pnpm exec playwright install --with-deps chromium
+
+      - name: End-to-end tests
+        run: pnpm run e2e

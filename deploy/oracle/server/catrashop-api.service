@@ -1,0 +1,26 @@
+[Unit]
+Description=Catrashop API
+After=network.target postgresql.service
+Wants=postgresql.service
+
+[Service]
+Type=simple
+User=catrashop
+Group=catrashop
+WorkingDirectory=/opt/catrashop/current
+EnvironmentFile=/etc/catrashop/catrashop.env
+ExecStart=/usr/bin/dotnet /opt/catrashop/current/Catrashop.Api.dll
+Restart=always
+RestartSec=5
+# Keep one process from taking down the 1 GB host
+MemoryHigh=380M
+MemoryMax=450M
+# Hardening
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=strict
+ProtectHome=true
+ReadWritePaths=/var/log/catrashop /var/lib/catrashop
+
+[Install]
+WantedBy=multi-user.target

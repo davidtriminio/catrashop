@@ -1,0 +1,55 @@
+{
+  "name": "Catrashop — Order receipt",
+  "nodes": [
+    {
+      "parameters": {
+        "queue": "n8n.receipts",
+        "options": {}
+      },
+      "id": "trigger-receipt",
+      "name": "On OrderPaid",
+      "type": "n8n-nodes-base.rabbitmqTrigger",
+      "typeVersion": 1,
+      "position": [260, 300],
+      "credentials": {
+        "rabbitmq": { "id": "REPLACE_WITH_RABBITMQ_CREDENTIAL_ID", "name": "Catrashop RabbitMQ" }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const raw = $json.content ?? $json.data ?? $json;\nconst e = typeof raw === 'string' ? JSON.parse(raw) : raw;\nreturn [{ json: {\n  orderNumber: e.OrderNumber,\n  customerId: e.CustomerId,\n  total: Number(e.GrandTotal).toFixed(2),\n  currency: e.Currency,\n  eventId: e.EventId\n} }];"
+      },
+      "id": "shape-receipt",
+      "name": "Build receipt",
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [500, 300]
+    },
+    {
+      "parameters": {
+        "fromEmail": "orders@catrashop.example",
+        "toEmail": "={{ $env.ORDERS_NOTIFY_TO || 'orders@catrashop.example' }}",
+        "subject": "Receipt for order {{ $json.orderNumber }}",
+        "emailFormat": "text",
+        "text": "Your payment was received.\n\nOrder: {{ $json.orderNumber }}\nTotal: {{ $json.total }} {{ $json.currency }}\n\nThank you for shopping with Catrashop.",
+        "options": {}
+      },
+      "id": "send-receipt",
+      "name": "Send receipt",
+      "type": "n8n-nodes-base.emailSend",
+      "typeVersion": 2,
+      "position": [740, 300],
+      "credentials": {
+        "smtp": { "id": "REPLACE_WITH_SMTP_CREDENTIAL_ID", "name": "Catrashop SMTP" }
+      }
+    }
+  ],
+  "connections": {
+    "On OrderPaid": { "main": [[{ "node": "Build receipt", "type": "main", "index": 0 }]] },
+    "Build receipt": { "main": [[{ "node": "Send receipt", "type": "main", "index": 0 }]] }
+  },
+  "active": false,
+  "settings": { "executionOrder": "v1" },
+  "pinData": {},
+  "tags": [{ "name": "catrashop" }]
+}
