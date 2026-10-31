@@ -27,8 +27,13 @@ public sealed class CatrashopApiFactory : WebApplicationFactory<Program>
         Environment.SetEnvironmentVariable("Identity__Jwt__SigningKey", JwtSigningKey);
         Environment.SetEnvironmentVariable("Identity__Jwt__Issuer", JwtIssuer);
         Environment.SetEnvironmentVariable("Identity__Jwt__Audience", JwtAudience);
-        // The PostgreSQL connection string is left to appsettings.Development.json (the docker-compose dev
-        // database). Pipeline tests never open a connection; the DB-backed E2E journey uses it under Docker.
+        // appsettings.Development.json carries no secrets, so a clean checkout (CI) has no PostgreSQL connection
+        // string and module registration would throw. When no database is reachable a placeholder is enough:
+        // pipeline tests never open a connection and the DB-backed journeys skip. When the compose database is
+        // up, the developer's own configuration (user-secrets) is left untouched so those journeys run for real.
+        if (!PostgresProbe.IsAvailable && Environment.GetEnvironmentVariable("ConnectionStrings__Postgres") is null)
+            Environment.SetEnvironmentVariable("ConnectionStrings__Postgres",
+                "Host=localhost;Port=5432;Database=catrashop;Username=catrashop;Password=placeholder;Timeout=1");
     }
 
     protected override void ConfigureWebHost(IWebHostBuilder builder) => builder.UseEnvironment("Development");
