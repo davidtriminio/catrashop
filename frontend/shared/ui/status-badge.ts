@@ -5,7 +5,7 @@ type Tone = 'accent' | 'warn' | 'info' | 'ok' | 'bad' | 'neutral';
 
 /**
  * Order / payment / shipment status as a badge. One mapping for both apps so a state always looks the same:
- * lime = paid or confirmed and waiting for fulfilment, amber = being prepared or under review, indigo = on its way, green = done, red = failed.
+ * light blue = paid or confirmed and waiting for fulfilment, amber = being prepared or under review, blue = on its way, green = done, red = failed.
  */
 @Component({
   selector: 'cs-status-badge',

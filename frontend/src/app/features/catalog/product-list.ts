@@ -179,6 +179,12 @@ interface ActiveFilter { key: string; label: string; params: Record<string, null
     .link:hover { color: var(--text); }
 
     .active { margin-bottom: var(--space-4); align-items: center; }
+    .chips.active { gap: var(--space-2) var(--space-3); }
+    .chips.active .chip.active { background: var(--tint-info-bg); border-color: transparent; color: var(--tint-info-fg); font-weight: 600; box-sizing: border-box; height: 2rem; line-height: 1; margin: 0; padding: 0 0.45rem 0 0.85rem; }
+    .chips.active .chip.active span[aria-hidden] { display: inline-flex; align-items: center; justify-content: center; width: 1.1rem; height: 1.1rem; border-radius: 50%; font-size: 0.85rem; line-height: 1; }
+    .chips.active .chip.active:hover { background: var(--primary); color: var(--primary-contrast); }
+    .chips.active .link { display: inline-flex; align-items: center; box-sizing: border-box; height: 2rem; line-height: 1; margin: 0; color: var(--primary); font-weight: 600; text-decoration: none; padding: 0 0.95rem; border: 1px solid var(--primary); border-radius: var(--radius-pill); background: var(--surface); transition: background 0.15s, color 0.15s; }
+    .chips.active .link:hover { background: var(--primary); color: var(--primary-contrast); }
     .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); }
 
     .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: var(--space-4); transition: opacity 0.15s; }

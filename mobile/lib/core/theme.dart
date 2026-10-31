@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
-/// Design tokens shared with the web apps (frontend/shared/theme.scss): neutral surfaces, near-black primary and one
-/// lime accent reserved for "needs attention" and highlights.
+/// Design tokens shared with the web apps (frontend/shared/theme.scss): neutral surfaces, Honduran-flag blue primary and one
+/// light-blue accent reserved for "needs attention" and highlights.
 class AppColors {
   static const ink = Color(0xFF0B0B0C);
-  static const lime = Color(0xFFC8F169);
-  static const limeInk = Color(0xFF1C2600);
+  static const primary = Color(0xFF003399);
+  static const primaryOnDark = Color(0xFF8FB0FF);
+  static const accent = Color(0xFFDBE6FF);
+  static const accentInk = Color(0xFF00246B);
   static const bg = Color(0xFFF4F4F5);
   static const surface = Colors.white;
   static const border = Color(0xFFE5E5E8);
@@ -31,10 +33,10 @@ class AppTheme {
   static ThemeData light() => _build(
         brightness: Brightness.light,
         scheme: const ColorScheme.light(
-          primary: AppColors.ink,
+          primary: AppColors.primary,
           onPrimary: Colors.white,
-          secondary: AppColors.lime,
-          onSecondary: AppColors.limeInk,
+          secondary: AppColors.accent,
+          onSecondary: AppColors.accentInk,
           surface: AppColors.surface,
           onSurface: AppColors.ink,
           onSurfaceVariant: AppColors.muted,
@@ -49,10 +51,10 @@ class AppTheme {
   static ThemeData dark() => _build(
         brightness: Brightness.dark,
         scheme: const ColorScheme.dark(
-          primary: Colors.white,
-          onPrimary: AppColors.ink,
-          secondary: AppColors.lime,
-          onSecondary: AppColors.limeInk,
+          primary: AppColors.primaryOnDark,
+          onPrimary: AppColors.accentInk,
+          secondary: AppColors.accent,
+          onSecondary: AppColors.accentInk,
           surface: AppColors.darkSurface,
           onSurface: Colors.white,
           onSurfaceVariant: AppColors.darkMuted,
@@ -145,7 +147,7 @@ class AppTheme {
         height: 68,
         labelTextStyle: WidgetStatePropertyAll(text.labelMedium?.copyWith(fontWeight: FontWeight.w600)),
         iconTheme: WidgetStateProperty.resolveWith((states) => IconThemeData(
-              color: states.contains(WidgetState.selected) ? AppColors.limeInk : scheme.onSurfaceVariant,
+              color: states.contains(WidgetState.selected) ? AppColors.accentInk : scheme.onSurfaceVariant,
             )),
       ),
       snackBarTheme: SnackBarThemeData(

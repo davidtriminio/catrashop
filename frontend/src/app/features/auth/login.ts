@@ -5,10 +5,11 @@ import { TranslocoPipe } from '@jsverse/transloco';
 import { AuthStore } from '@cs/auth/auth.store';
 import { CartStore } from '../../core/cart/cart.store';
 import { I18n } from '@cs/i18n/i18n';
+import { PasswordInput } from '@cs/ui/password-input';
 
 @Component({
   selector: 'app-login',
-  imports: [ReactiveFormsModule, RouterLink, TranslocoPipe],
+  imports: [ReactiveFormsModule, RouterLink, TranslocoPipe, PasswordInput],
   template: `
     <div class="auth-wrap">
       <div class="card">
@@ -22,7 +23,7 @@ import { I18n } from '@cs/i18n/i18n';
           </div>
           <div class="field">
             <label for="password">{{ 'auth.password' | transloco }}</label>
-            <input id="password" class="input" type="password" formControlName="password" autocomplete="current-password" />
+            <cs-password-input inputId="password" autocomplete="current-password" formControlName="password" />
           </div>
           <button class="btn block" type="submit" [disabled]="form.invalid || busy()">
             {{ (busy() ? 'auth.login.busy' : 'auth.login.submit') | transloco }}

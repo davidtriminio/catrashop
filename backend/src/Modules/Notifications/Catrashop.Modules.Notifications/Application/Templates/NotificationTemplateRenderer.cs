@@ -4,7 +4,7 @@ using Catrashop.Modules.Notifications.Contracts;
 namespace Catrashop.Modules.Notifications.Application.Templates;
 
 /// <summary>
-/// Renders each notification type into a title and body from its data tokens. Templates are kept in code (a
+/// Renders each notification type into a Spanish title and body (the store is Spanish-first) from its data tokens. Templates are kept in code (a
 /// switch) — a full template engine would be over-engineering at this stage; missing tokens degrade gracefully
 /// to a readable default rather than throwing.
 /// </summary>
@@ -17,50 +17,50 @@ public sealed class NotificationTemplateRenderer : INotificationTemplateRenderer
         return type switch
         {
             NotificationType.Welcome => new(
-                "Welcome to Catrashop",
-                $"Hi {Token("name", "there")}, thanks for creating your account. Happy shopping!"),
+                "Bienvenido a Catrashop",
+                $"Hola {Token("name", "")}, gracias por crear tu cuenta. ¡Felices compras!".Replace("Hola ,", "Hola,")),
 
             NotificationType.PasswordReset => new(
-                "Reset your password",
-                "We received a request to reset your password. If this was you, follow the link we sent to continue."),
+                "Restablece tu contraseña",
+                "Recibimos una solicitud para restablecer tu contraseña. Si fuiste tú, sigue el enlace que te enviamos para continuar."),
 
             NotificationType.OrderPlaced => new(
-                "We received your order",
-                $"Your order {Token("orderNumber")} has been placed and is awaiting payment."),
+                "Recibimos tu pedido",
+                $"Tu pedido {Token("orderNumber")} fue registrado y está pendiente de pago."),
 
             NotificationType.OrderPaid => new(
-                "Your order is confirmed",
-                $"Payment for order {Token("orderNumber")} was received. Total: {Token("total")} {Token("currency")}."),
+                "Tu pedido está confirmado",
+                $"Recibimos el pago del pedido {Token("orderNumber")}. Total: {Token("total")} {Token("currency")}."),
 
             NotificationType.PaymentFailed => new(
-                "Payment could not be processed",
-                $"We couldn't process payment for order {Token("orderNumber")}. You can try again from your orders."),
+                "No se pudo procesar el pago",
+                $"No pudimos procesar el pago del pedido {Token("orderNumber")}. Puedes intentarlo de nuevo desde tus pedidos."),
 
             NotificationType.OrderShipped => new(
-                "Your order is on its way",
-                $"Order {Token("orderNumber")} has shipped. Track it with {Token("trackingNumber")}."),
+                "Tu pedido va en camino",
+                $"El pedido {Token("orderNumber")} fue enviado. Rastréalo con el número {Token("trackingNumber")}."),
 
             NotificationType.OrderDelivered => new(
-                "Your order was delivered",
-                $"Order {Token("orderNumber")} was delivered. We hope you love it — a review would be appreciated!"),
+                "Tu pedido fue entregado",
+                $"El pedido {Token("orderNumber")} fue entregado. ¡Esperamos que lo disfrutes, y tu reseña nos ayudaría mucho!"),
 
             NotificationType.OrderCancelled => new(
-                "Your order was cancelled",
-                $"Order {Token("orderNumber")} has been cancelled. {Token("reason")}".TrimEnd()),
+                "Tu pedido fue cancelado",
+                $"El pedido {Token("orderNumber")} fue cancelado. {Token("reason")}".TrimEnd()),
 
             NotificationType.RefundCompleted => new(
-                "Your refund is complete",
-                $"A refund for order {Token("orderNumber")} has been processed."),
+                "Tu reembolso está completo",
+                $"Se procesó el reembolso del pedido {Token("orderNumber")}."),
 
             NotificationType.BackInStock => new(
-                "It's back in stock",
-                $"{Token("productName", "An item on your wishlist")} is available again."),
+                "Ya hay existencias",
+                $"{Token("productName", "Un producto de tus favoritos")} está disponible de nuevo."),
 
             NotificationType.Promotion => new(
-                Token("title", "A new offer for you"),
-                Token("message", "Check out the latest deals at Catrashop.")),
+                Token("title", "Una nueva oferta para ti"),
+                Token("message", "Descubre las últimas ofertas en Catrashop.")),
 
-            _ => new("Notification", Token("message", "You have a new notification."))
+            _ => new("Notificación", Token("message", "Tienes una nueva notificación."))
         };
     }
 }

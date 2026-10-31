@@ -45,7 +45,7 @@ import { CartStore } from '../../core/cart/cart.store';
     .bar { display: flex; align-items: center; gap: var(--space-5); padding-top: var(--space-3); padding-bottom: var(--space-3); }
     .brand { font-weight: 800; font-size: 1.2rem; letter-spacing: -0.03em; }
     .brand:hover { text-decoration: none; }
-    .brand span { background: var(--accent); color: var(--accent-ink); padding: 0 0.3rem; border-radius: 6px; margin-left: 1px; }
+    .brand span { background: var(--primary); color: var(--primary-contrast); padding: 0 0.3rem; border-radius: 6px; margin-left: 1px; }
     .nav { display: flex; gap: var(--space-4); flex: 1; }
     .nav a { color: var(--muted); font-weight: 600; font-size: 0.92rem; padding: var(--space-1) 0; border-bottom: 2px solid transparent; }
     .nav a:hover { color: var(--text); text-decoration: none; }
@@ -53,7 +53,7 @@ import { CartStore } from '../../core/cart/cart.store';
     .actions { display: flex; align-items: center; gap: var(--space-3); }
     .cart { position: relative; display: inline-flex; padding: var(--space-2); border-radius: var(--radius-pill); color: var(--text); }
     .cart:hover { background: var(--bg); text-decoration: none; }
-    .count { position: absolute; top: -2px; right: -4px; background: var(--accent); color: var(--accent-ink); border-radius: var(--radius-pill); min-width: 1.1rem; padding: 0 0.3rem; font-size: 0.7rem; font-weight: 700; line-height: 1.1rem; text-align: center; }
+    .count { position: absolute; top: -2px; right: -4px; background: var(--primary); color: var(--primary-contrast); border-radius: var(--radius-pill); min-width: 1.1rem; padding: 0 0.3rem; font-size: 0.7rem; font-weight: 700; line-height: 1.1rem; text-align: center; }
     .avatar { width: 2rem; height: 2rem; border-radius: 50%; background: var(--primary); color: var(--primary-contrast); display: inline-flex; align-items: center; justify-content: center; font-weight: 700; font-size: 0.85rem; }
 
     /* Narrow screens: brand + actions on the first row, the menu scrolls horizontally on its own row. */

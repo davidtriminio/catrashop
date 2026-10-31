@@ -25,7 +25,7 @@ import { TranslocoPipe } from '@jsverse/transloco';
     .site-footer { border-top: 1px solid var(--border); margin-top: var(--space-7); background: var(--surface); }
     .foot { display: flex; justify-content: space-between; align-items: flex-start; gap: var(--space-5); flex-wrap: wrap; padding-top: var(--space-6); padding-bottom: var(--space-6); }
     .brand { font-weight: 800; font-size: 1.1rem; letter-spacing: -0.03em; }
-    .brand span { background: var(--accent); color: var(--accent-ink); padding: 0 0.3rem; border-radius: 6px; margin-left: 1px; }
+    .brand span { background: var(--primary); color: var(--primary-contrast); padding: 0 0.3rem; border-radius: 6px; margin-left: 1px; }
     .about p { margin: var(--space-2) 0 0; font-size: 0.88rem; }
     .links { display: flex; gap: var(--space-5); flex-wrap: wrap; font-size: 0.9rem; font-weight: 500; }
     .links a { color: var(--muted); }

@@ -15,8 +15,8 @@ class BrandMark extends StatelessWidget {
       const SizedBox(width: 2),
       Container(
         padding: EdgeInsets.symmetric(horizontal: size * 0.2),
-        decoration: BoxDecoration(color: AppColors.lime, borderRadius: BorderRadius.circular(size * 0.22)),
-        child: Text('Hub', style: style.copyWith(color: AppColors.limeInk)),
+        decoration: BoxDecoration(color: AppColors.primary, borderRadius: BorderRadius.circular(size * 0.22)),
+        child: Text('Hub', style: style.copyWith(color: Colors.white)),
       ),
     ]);
   }

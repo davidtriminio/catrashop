@@ -1,14 +1,17 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { CatalogApi } from '@cs/api/catalog.api';
 import { CustomersApi } from '@cs/api/customers.api';
-import { Address, CustomerProfile, WishlistItem } from '@cs/api/models';
+import { Address, CustomerProfile, ProductListItem, WishlistItem } from '@cs/api/models';
 import { I18n } from '@cs/i18n/i18n';
 import { LocalDatePipe } from '@cs/util/local-date.pipe';
+import { MoneyPipe } from '@cs/util/money.pipe';
 
 @Component({
   selector: 'app-account-page',
-  imports: [ReactiveFormsModule, LocalDatePipe, TranslocoPipe],
+  imports: [ReactiveFormsModule, RouterLink, LocalDatePipe, MoneyPipe, TranslocoPipe],
   template: `
     <h1>{{ 'account.title' | transloco }}</h1>
     @if (error()) { <div class="alert error">{{ error() }}</div> }
@@ -73,8 +76,25 @@ import { LocalDatePipe } from '@cs/util/local-date.pipe';
     <section class="card">
       <h2>{{ 'account.wishlist' | transloco }}</h2>
       @for (w of wishlist(); track w.productId) {
-        <div class="addr">
-          <div><span class="muted">{{ 'account.product' | transloco }}</span> {{ w.productId }}<div class="muted">{{ 'account.added' | transloco: { date: (w.addedAtUtc | localDate: 'date') } }}</div></div>
+        @let p = products()[w.productId];
+        <div class="wish-row">
+          @if (p) {
+            <a class="wish-thumb" [routerLink]="['/products', p.slug]" [attr.aria-label]="p.name">
+              @if (p.primaryImageUrl) { <img [src]="p.primaryImageUrl" [alt]="p.name" loading="lazy" /> } @else { <span>{{ p.name.charAt(0) }}</span> }
+            </a>
+            <div class="wish-info">
+              @if (p.brandName) { <div class="muted wish-brand">{{ p.brandName }}</div> }
+              <a class="wish-name" [routerLink]="['/products', p.slug]">{{ p.name }}</a>
+              @if (p.minPrice !== null) { <div class="wish-price">{{ p.minPrice | money: p.currency }}</div> }
+              <div class="muted wish-date">{{ 'account.added' | transloco: { date: (w.addedAtUtc | localDate: 'date') } }}</div>
+            </div>
+          } @else {
+            <div class="wish-thumb"><span>?</span></div>
+            <div class="wish-info">
+              <div class="wish-name">{{ (wishlistLoaded() ? 'account.productUnavailable' : 'account.product') | transloco }}</div>
+              <div class="muted wish-date">{{ 'account.added' | transloco: { date: (w.addedAtUtc | localDate: 'date') } }}</div>
+            </div>
+          }
           <button class="btn secondary sm" (click)="removeWishlist(w)">{{ 'cart.remove' | transloco }}</button>
         </div>
       } @empty { <p class="muted">{{ 'account.wishlistEmpty' | transloco }}</p> }
@@ -83,6 +103,16 @@ import { LocalDatePipe } from '@cs/util/local-date.pipe';
   styles: [`
     section { margin-bottom: 1.5rem; }
     .addr { display: flex; justify-content: space-between; align-items: center; gap: 1rem; padding: 0.6rem 0; border-bottom: 1px solid var(--border); }
+    .wish-row { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-3) 0; border-bottom: 1px solid var(--border); }
+    .wish-row:last-of-type { border-bottom: none; }
+    .wish-thumb { width: 64px; height: 64px; flex-shrink: 0; border-radius: var(--radius-sm); background: var(--tint-info-bg); overflow: hidden; display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 1.4rem; color: var(--primary); }
+    .wish-thumb img { width: 100%; height: 100%; object-fit: cover; }
+    .wish-info { flex: 1; min-width: 0; }
+    .wish-brand { font-size: 0.72rem; text-transform: uppercase; letter-spacing: 0.06em; }
+    .wish-name { font-weight: 650; }
+    a.wish-name:hover { color: var(--primary); }
+    .wish-price { font-weight: 650; font-size: 0.9rem; }
+    .wish-date { font-size: 0.78rem; }
     .new { margin-top: 1rem; }
     .new summary { cursor: pointer; font-weight: 600; color: var(--primary); }
   `],
@@ -91,10 +121,13 @@ export class AccountPage implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly api = inject(CustomersApi);
   private readonly i18n = inject(I18n);
+  private readonly catalog = inject(CatalogApi);
 
   readonly profile = signal<CustomerProfile | null>(null);
   readonly addresses = signal<Address[]>([]);
   readonly wishlist = signal<WishlistItem[]>([]);
+  readonly products = signal<Record<string, ProductListItem>>({});
+  readonly wishlistLoaded = signal(false);
   readonly error = signal<string | null>(null);
   readonly message = signal<string | null>(null);
   readonly busy = signal(false);
@@ -123,7 +156,24 @@ export class AccountPage implements OnInit {
       error: (err) => this.error.set(this.i18n.problem(err)),
     });
     this.loadAddresses();
-    this.api.wishlist().subscribe({ next: (w) => this.wishlist.set(w), error: () => {} });
+    this.api.wishlist().subscribe({
+      next: (w) => { this.wishlist.set(w); this.loadWishlistProducts(w); },
+      error: () => this.wishlistLoaded.set(true),
+    });
+  }
+
+  /** The wishlist only stores product ids, so look the products up in the catalog (paged, at most a few pages) to show names and prices. */
+  private loadWishlistProducts(items: WishlistItem[], page = 1): void {
+    const missing = items.filter((i) => !this.products()[i.productId]);
+    if (!missing.length || page > 5) { this.wishlistLoaded.set(true); return; }
+    this.catalog.searchProducts({ page, pageSize: 100 }).subscribe({
+      next: (res) => {
+        this.products.update((current) => ({ ...current, ...Object.fromEntries(res.items.map((p) => [p.id, p])) }));
+        if (res.items.length < res.pageSize) this.wishlistLoaded.set(true);
+        else this.loadWishlistProducts(items, page + 1);
+      },
+      error: () => this.wishlistLoaded.set(true),
+    });
   }
 
   private loadAddresses(): void {

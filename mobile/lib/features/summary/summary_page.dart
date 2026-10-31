@@ -87,7 +87,7 @@ class _AttentionCard extends StatelessWidget {
     final theme = Theme.of(context);
     return Container(
       decoration: BoxDecoration(
-        color: AppColors.ink,
+        color: AppColors.primary,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(color: AppColors.darkBorder),
       ),
@@ -95,8 +95,8 @@ class _AttentionCard extends StatelessWidget {
       child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
         Container(
           padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-          decoration: BoxDecoration(color: AppColors.lime, borderRadius: BorderRadius.circular(999)),
-          child: const Text('Por atender', style: TextStyle(color: AppColors.limeInk, fontSize: 12, fontWeight: FontWeight.w700)),
+          decoration: BoxDecoration(color: AppColors.accent, borderRadius: BorderRadius.circular(999)),
+          child: const Text('Por atender', style: TextStyle(color: AppColors.accentInk, fontSize: 12, fontWeight: FontWeight.w700)),
         ),
         const SizedBox(height: Gap.s4),
         Text('$count', style: theme.textTheme.displayMedium?.copyWith(color: Colors.white, fontWeight: FontWeight.w700, letterSpacing: -2, height: 1)),
@@ -111,7 +111,7 @@ class _AttentionCard extends StatelessWidget {
         ),
         const SizedBox(height: Gap.s4),
         FilledButton(
-          style: FilledButton.styleFrom(backgroundColor: AppColors.lime, foregroundColor: AppColors.limeInk),
+          style: FilledButton.styleFrom(backgroundColor: AppColors.accent, foregroundColor: AppColors.accentInk),
           onPressed: onTap,
           child: const Text('Ver pedidos pagados'),
         ),

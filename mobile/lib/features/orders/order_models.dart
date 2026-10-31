@@ -33,11 +33,11 @@ class OrderStatus {
       };
 
   /// Soft background/foreground pair for a status chip (same pairs as the web badges, all AA contrast).
-  /// Lime marks "Paid": the queue an operator needs to act on.
+  /// Light blue marks "Paid": the queue an operator needs to act on.
   static StatusTone tone(String s) => switch (s) {
-        paid || confirmed => const StatusTone(Color(0xFFC8F169), Color(0xFF1C2600)),
+        paid || confirmed => const StatusTone(Color(0xFFDBE6FF), Color(0xFF00246B)),
         processing => const StatusTone(Color(0xFFFEF3C7), Color(0xFF78350F)),
-        shipped => const StatusTone(Color(0xFFE0E7FF), Color(0xFF312E81)),
+        shipped => const StatusTone(Color(0xFFC7D8FF), Color(0xFF00246B)),
         delivered => const StatusTone(Color(0xFFDCFCE7), Color(0xFF14532D)),
         cancelled || paymentFailed => const StatusTone(Color(0xFFFEE2E2), Color(0xFF7F1D1D)),
         _ => const StatusTone(Color(0xFFECECEF), Color(0xFF3F3F46)),

@@ -59,6 +59,8 @@
   "auth": {
     "email": "Correo electrónico",
     "password": "Contraseña",
+    "showPassword": "Mostrar contraseña",
+    "hidePassword": "Ocultar contraseña",
     "firstName": "Nombre",
     "lastName": "Apellido",
     "login": {
@@ -143,6 +145,7 @@
     "notFound": "Producto no encontrado.",
     "added": "Agregado a tu carrito.",
     "addFailed": "No se pudo agregar al carrito.",
+    "wishlisted": "En favoritos",
     "wishlistSaved": "Guardado en tus favoritos.",
     "wishlistFailed": "No se pudieron actualizar los favoritos."
   },
@@ -306,6 +309,8 @@
     "preferencesNote": "Los mensajes transaccionales (pedidos, pagos) siempre se envían. Puedes silenciar los mensajes de marketing por canal.",
     "topic": "Tema",
     "mute": "Silenciar",
+    "active": "Activo",
+    "muted": "Silenciado",
     "topics": {
       "promotion": "Promociones",
       "backInStock": "Disponible de nuevo"
@@ -340,6 +345,7 @@
     "country": "País (ISO-2)",
     "wishlist": "Favoritos",
     "product": "Producto",
+    "productUnavailable": "Producto no disponible",
     "added": "Agregado el {{date}}",
     "wishlistEmpty": "Tus favoritos están vacíos.",
     "messages": {

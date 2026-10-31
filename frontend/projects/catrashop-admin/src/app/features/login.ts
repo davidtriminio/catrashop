@@ -3,10 +3,11 @@ import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthStore } from '@cs/auth/auth.store';
 import { problemMessage } from '@cs/util/problem';
+import { PasswordInput } from '@cs/ui/password-input';
 
 @Component({
   selector: 'app-admin-login',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, PasswordInput],
   template: `
     <div class="wrap">
       <div class="brand">Catra<span>shop</span> <small>Admin</small></div>
@@ -16,7 +17,7 @@ import { problemMessage } from '@cs/util/problem';
         @if (error()) { <div class="alert error">{{ error() }}</div> }
         <form [formGroup]="form" (ngSubmit)="submit()">
           <div class="field"><label for="email">Email</label><input id="email" class="input" type="email" autocomplete="username" formControlName="email" /></div>
-          <div class="field"><label for="password">Password</label><input id="password" class="input" type="password" autocomplete="current-password" formControlName="password" /></div>
+          <div class="field"><label for="password">Password</label><cs-password-input inputId="password" autocomplete="current-password" formControlName="password" /></div>
           <button class="btn block" type="submit" [disabled]="form.invalid || busy()">{{ busy() ? 'Signing in…' : 'Sign in' }}</button>
         </form>
       </div>
@@ -25,7 +26,7 @@ import { problemMessage } from '@cs/util/problem';
   styles: [`
     .wrap { max-width: 420px; margin: var(--space-8) auto; padding: 0 var(--space-4); }
     .brand { text-align: center; font-weight: 800; font-size: 1.7rem; letter-spacing: -0.04em; margin-bottom: var(--space-5); }
-    .brand span { background: var(--accent); color: var(--accent-ink); padding: 0 0.35rem; border-radius: 8px; margin-left: 1px; }
+    .brand span { background: var(--primary); color: var(--primary-contrast); padding: 0 0.35rem; border-radius: 8px; margin-left: 1px; }
     .brand small { display: block; font-size: 0.7rem; font-weight: 650; letter-spacing: 0.25em; text-transform: uppercase; color: var(--muted); margin-top: var(--space-1); }
     h1 { margin-bottom: var(--space-1); }
     .muted { margin-bottom: var(--space-4); }

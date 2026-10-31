@@ -69,7 +69,7 @@ const KPIS: Kpi[] = [
     .kpi .value { font-size: 2.4rem; letter-spacing: -0.03em; line-height: 1.1; }
     .kpi .hint { font-size: 0.85rem; color: var(--muted); }
     .kpi.accent { background: var(--primary); border-color: var(--primary); color: #fff; }
-    .kpi.accent .label, .kpi.accent .hint { color: #a1a1aa; }
+    .kpi.accent .label, .kpi.accent .hint { color: rgba(255, 255, 255, 0.78); }
     .kpi.accent .value { color: var(--accent); }
     .section { margin-bottom: var(--space-3); }
     .tiles { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: var(--space-4); margin-bottom: var(--space-6); }

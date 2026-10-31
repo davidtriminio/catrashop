@@ -41,8 +41,11 @@ interface Topic { labelKey: string; value: number; name: string; }
               <td>{{ t.labelKey | transloco }}</td>
               @for (c of channels; track c.value) {
                 <td>
-                  <label class="mute">
-                    <input type="checkbox" [checked]="isMuted(t, c)" (change)="toggle(t, c, $event)" /> {{ 'notifications.mute' | transloco }}
+                  <label class="switch" [class.off]="isMuted(t, c)">
+                    <input type="checkbox" role="switch" [checked]="!isMuted(t, c)" (change)="toggle(t, c, $event)"
+                           [attr.aria-label]="(c.labelKey | transloco) + ': ' + (t.labelKey | transloco)" />
+                    <span class="track" aria-hidden="true"></span>
+                    <span class="state">{{ (isMuted(t, c) ? 'notifications.muted' : 'notifications.active') | transloco }}</span>
                   </label>
                 </td>
               }
@@ -55,7 +58,14 @@ interface Topic { labelKey: string; value: number; name: string; }
   styles: [`
     .note-text { display: flex; flex-direction: column; gap: var(--space-1); min-width: 0; }
     .note-text small { margin-top: var(--space-1); }
-    .mute { font-size: 0.85rem; color: var(--muted); display: inline-flex; gap: var(--space-2); align-items: center; }
+    .switch { display: inline-flex; align-items: center; gap: var(--space-3); cursor: pointer; font-size: 0.85rem; font-weight: 600; color: var(--primary); }
+    .switch.off { color: var(--muted); }
+    .switch input { position: absolute; opacity: 0; width: 1px; height: 1px; }
+    .track { position: relative; width: 40px; height: 22px; border-radius: var(--radius-pill); background: var(--primary); transition: background 0.15s; flex-shrink: 0; }
+    .track::after { content: ''; position: absolute; top: 3px; left: 21px; width: 16px; height: 16px; border-radius: 50%; background: #fff; transition: left 0.15s; }
+    .switch.off .track { background: var(--border-strong); }
+    .switch.off .track::after { left: 3px; }
+    .switch input:focus-visible + .track { outline: 2px solid var(--primary); outline-offset: 2px; }
   `],
 })
 export class NotificationsPage implements OnInit {
@@ -109,7 +119,7 @@ export class NotificationsPage implements OnInit {
   }
 
   toggle(topic: Topic, channel: Topic, event: Event): void {
-    const muted = (event.target as HTMLInputElement).checked;
+    const muted = !(event.target as HTMLInputElement).checked;
     this.api.updatePreference({ type: topic.value, channel: channel.value, muted }).subscribe({
       next: (p) => this.preferences.set(p),
       error: (err) => { this.error.set(this.i18n.problem(err)); this.api.preferences().subscribe({ next: (p) => this.preferences.set(p) }); },

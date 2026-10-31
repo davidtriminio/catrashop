@@ -1,7 +1,7 @@
 /* Catrashop shared design system: tokens + primitives, used by the customer and admin apps through the
    `shared` SCSS include path (`@use 'theme';`). Apps may override tokens after the @use.
 
-   Direction: neutral and editorial. Near-black primary, one lime accent reserved for highlights (badges, marks),
+   Direction: neutral and editorial. Honduran-flag blue primary (#003399), one light-blue accent reserved for highlights (badges, marks),
    generous spacing on a fixed scale, soft borders instead of heavy shadows. Existing class names (btn, card, badge,
    alert, field, input, row, muted ...) are kept so every page benefits without template changes. */
 :root {
@@ -13,21 +13,21 @@
   --border-strong: #d4d4d8;
   --text: #0b0b0c;
   --muted: #6b6b73;
-  --primary: #0b0b0c;
-  --primary-600: #27272a;
+  --primary: #003399;
+  --primary-600: #002a7d;
   --primary-contrast: #ffffff;
-  --accent: #c8f169;
-  --accent-ink: #1c2600;
+  --accent: #dbe6ff;
+  --accent-ink: #00246b;
   --success: #15803d;
   --danger: #b91c1c;
   --warning: #b45309;
-  --info: #1d4ed8;
+  --info: #0b5ed7;
 
   /* soft status tints (background / foreground pairs meet WCAG AA) */
   --tint-ok-bg: #dcfce7;   --tint-ok-fg: #14532d;
   --tint-warn-bg: #fef3c7; --tint-warn-fg: #78350f;
   --tint-bad-bg: #fee2e2;  --tint-bad-fg: #7f1d1d;
-  --tint-info-bg: #e0e7ff; --tint-info-fg: #312e81;
+  --tint-info-bg: #dbe6ff; --tint-info-fg: #00246b;
   --tint-neutral-bg: #ececef; --tint-neutral-fg: #3f3f46;
 
   /* spacing scale (4px base): use these, not ad-hoc rem values */
@@ -47,7 +47,7 @@
   --radius-pill: 999px;
   --shadow: 0 1px 2px rgba(11, 11, 12, 0.04);
   --shadow-raised: 0 8px 24px rgba(11, 11, 12, 0.08);
-  --ring: 0 0 0 3px rgba(11, 11, 12, 0.16);
+  --ring: 0 0 0 3px rgba(0, 51, 153, 0.22);
 
   /* type */
   --font: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
@@ -71,7 +71,7 @@ h2 { font-size: 1.15rem; font-weight: 650; }
 h3 { font-size: 1rem; font-weight: 650; }
 p { margin: 0 0 var(--space-3); }
 img { max-width: 100%; display: block; }
-:focus-visible { outline: 2px solid var(--text); outline-offset: 2px; }
+:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
 
 /* layout */
 .container { max-width: var(--maxw); margin: 0 auto; padding: var(--space-5) var(--space-4) var(--space-7); }
@@ -114,7 +114,7 @@ img { max-width: 100%; display: block; }
 .btn.secondary { background: var(--surface); color: var(--text); border-color: var(--border-strong); }
 .btn.secondary:hover { background: var(--surface-2); border-color: var(--text); }
 .btn.accent { background: var(--accent); color: var(--accent-ink); }
-.btn.accent:hover { background: #bbe356; }
+.btn.accent:hover { background: #c7d8ff; }
 .btn.danger { background: var(--danger); }
 .btn.danger:hover { background: #991b1b; }
 .btn.sm { padding: 0.35rem 0.75rem; font-size: 0.8rem; }
@@ -122,12 +122,27 @@ img { max-width: 100%; display: block; }
 
 /* forms */
 .field { display: flex; flex-direction: column; gap: var(--space-2); margin-bottom: var(--space-4); }
-.field label { font-weight: 600; font-size: 0.82rem; }
+.field label { font-weight: 600; font-size: 0.85rem; }
 .input, select, textarea {
-  padding: 0.65rem 0.85rem; border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
-  font: inherit; background: var(--surface); color: var(--text); width: 100%;
+  padding: 0.7rem 0.9rem; border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  font: inherit; background-color: var(--surface-2); color: var(--text); width: 100%;
+  transition: border-color 0.15s, box-shadow 0.15s, background-color 0.15s;
 }
-.input:focus, select:focus, textarea:focus { outline: none; border-color: var(--text); box-shadow: var(--ring); }
+.input:hover, select:hover, textarea:hover { border-color: #a1a1aa; }
+.input::placeholder, textarea::placeholder { color: #9a9aa3; }
+.input.ng-touched.ng-invalid, .input.ng-dirty.ng-invalid { border-color: var(--danger); }
+select {
+  appearance: none; -webkit-appearance: none; cursor: pointer; padding-right: 2.25rem;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23003399' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 0.75rem center; background-size: 1rem;
+}
+.input:focus, select:focus, textarea:focus { outline: none; border-color: var(--primary); background-color: var(--surface); box-shadow: var(--ring); }
+
+/* sign in / register cards: a centred, raised card so the form reads as one unit */
+.auth-wrap .card { padding: var(--space-6); box-shadow: var(--shadow-raised); border-top: 4px solid var(--primary); }
+.auth-wrap h1 { text-align: center; }
+.auth-wrap h1 + .muted { text-align: center; margin-bottom: var(--space-5); }
+.auth-wrap .btn.block { padding: 0.8rem 1.1rem; margin-top: var(--space-2); }
 
 /* chips (filters, toggles) and badges (state) */
 .chip {

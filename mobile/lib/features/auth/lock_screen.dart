@@ -52,8 +52,8 @@ class _LockScreenState extends ConsumerState<LockScreen> {
               Container(
                 width: 88,
                 height: 88,
-                decoration: const BoxDecoration(color: AppColors.lime, shape: BoxShape.circle),
-                child: const Icon(Icons.lock_outline, size: 40, color: AppColors.limeInk),
+                decoration: const BoxDecoration(color: AppColors.accent, shape: BoxShape.circle),
+                child: const Icon(Icons.lock_outline, size: 40, color: AppColors.accentInk),
               ),
               const SizedBox(height: Gap.s5),
               const BrandMark(size: 28),

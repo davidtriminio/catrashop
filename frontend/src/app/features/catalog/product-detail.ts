@@ -86,7 +86,12 @@ const RELATED_COUNT = 4;
             <div class="buy">
               <button class="btn" [disabled]="!selectedVariantId() || busy()" (click)="addToCart()">{{ 'product.addToCart' | transloco }}</button>
               @if (auth.isAuthenticated()) {
-                <button class="btn secondary" [disabled]="busy()" (click)="addToWishlist(p.id)">♥ {{ 'product.wishlist' | transloco }}</button>
+                <button class="btn secondary wish" [class.on]="wishlisted()" [disabled]="busy()" [attr.aria-pressed]="wishlisted()" (click)="toggleWishlist(p.id)">
+                  <svg viewBox="0 0 24 24" width="18" height="18" [attr.fill]="wishlisted() ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                  </svg>
+                  {{ (wishlisted() ? 'product.wishlisted' : 'product.wishlist') | transloco }}
+                </button>
               }
             </div>
 
@@ -179,6 +184,10 @@ const RELATED_COUNT = 4;
     .stepper button:hover:not(:disabled) { background: var(--bg); }
     .stepper button:disabled { opacity: 0.35; cursor: not-allowed; }
     .stepper span { min-width: 2.2rem; text-align: center; font-weight: 650; }
+    .btn.wish svg { transition: transform 0.15s; }
+    .btn.wish.on { color: var(--primary); border-color: var(--primary); background: var(--tint-info-bg); }
+    .btn.wish.on:hover { background: var(--tint-info-bg); }
+    .btn.wish.on svg { transform: scale(1.1); }
     .buy { display: flex; gap: var(--space-3); flex-wrap: wrap; }
     .buy .btn:first-child { flex: 1; min-width: 160px; padding: 0.8rem 1.5rem; }
     .perks { list-style: none; margin: var(--space-4) 0 0; padding: var(--space-4) 0 0; border-top: 1px solid var(--border); display: grid; gap: var(--space-2); font-size: 0.86rem; color: var(--muted); }
@@ -240,6 +249,7 @@ export class ProductDetail {
   readonly actionError = signal<string | null>(null);
   readonly message = signal<string | null>(null);
   readonly busy = signal(false);
+  readonly wishlisted = signal(false);
 
   readonly selectedVariantId = signal('');
   readonly maxQuantity = MAX_LINE_QUANTITY;
@@ -268,6 +278,7 @@ export class ProductDetail {
     this.imageIndex.set(0);
     this.message.set(null);
     this.actionError.set(null);
+    this.wishlisted.set(false);
     this.api.getProduct(slug).subscribe({
       next: (p) => {
         this.product.set(p);
@@ -277,6 +288,7 @@ export class ProductDetail {
         if (primary > 0) this.imageIndex.set(primary);
         this.loading.set(false);
         this.loadRelated(p);
+        this.loadWishlisted(p.id);
       },
       error: (err) => { this.error.set(this.i18n.problem(err, 'product.notFound')); this.loading.set(false); },
     });
@@ -315,11 +327,22 @@ export class ProductDetail {
     });
   }
 
-  addToWishlist(productId: string): void {
+  /** Whether the signed-in customer already has this product in their wishlist, so the heart shows its real state. */
+  private loadWishlisted(productId: string): void {
+    if (!this.auth.isAuthenticated()) return;
+    this.customers.wishlist().subscribe({
+      next: (items) => this.wishlisted.set(items.some((i) => i.productId === productId)),
+      error: () => {},
+    });
+  }
+
+  toggleWishlist(productId: string): void {
+    const adding = !this.wishlisted();
     this.busy.set(true);
     this.actionError.set(null);
-    this.customers.addWishlist(productId).subscribe({
-      next: () => { this.message.set(this.i18n.t('product.wishlistSaved')); this.busy.set(false); },
+    const request = adding ? this.customers.addWishlist(productId) : this.customers.removeWishlist(productId);
+    request.subscribe({
+      next: () => { this.wishlisted.set(adding); this.busy.set(false); },
       error: (err) => { this.actionError.set(this.i18n.problem(err, 'product.wishlistFailed')); this.busy.set(false); },
     });
   }

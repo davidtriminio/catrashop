@@ -59,6 +59,8 @@
   "auth": {
     "email": "Email",
     "password": "Password",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password",
     "firstName": "First name",
     "lastName": "Last name",
     "login": {
@@ -143,6 +145,7 @@
     "notFound": "Product not found.",
     "added": "Added to your cart.",
     "addFailed": "Could not add to cart.",
+    "wishlisted": "In wishlist",
     "wishlistSaved": "Saved to your wishlist.",
     "wishlistFailed": "Could not update wishlist."
   },
@@ -306,6 +309,8 @@
     "preferencesNote": "Transactional messages (orders, payments) are always sent. You can mute marketing messages per channel.",
     "topic": "Topic",
     "mute": "Mute",
+    "active": "On",
+    "muted": "Muted",
     "topics": {
       "promotion": "Promotions",
       "backInStock": "Back in stock"
@@ -340,6 +345,7 @@
     "country": "Country (ISO-2)",
     "wishlist": "Wishlist",
     "product": "Product",
+    "productUnavailable": "Product unavailable",
     "added": "Added {{date}}",
     "wishlistEmpty": "Your wishlist is empty.",
     "messages": {
