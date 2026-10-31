@@ -162,8 +162,9 @@ class _Body extends ConsumerWidget {
                   Icon(Icons.payments_outlined, color: muted),
                   const SizedBox(width: Gap.s3),
                   Expanded(child: Text(payment.methodLabel, style: theme.textTheme.titleMedium)),
-                  Text(payment.statusLabel, style: theme.textTheme.bodySmall?.copyWith(color: muted, fontWeight: FontWeight.w600)),
                 ]),
+                const SizedBox(height: Gap.s1),
+                Text(payment.statusLabel, style: theme.textTheme.bodySmall?.copyWith(color: muted, fontWeight: FontWeight.w600)),
                 if (payment.reference != null) ...[
                   const SizedBox(height: Gap.s2),
                   Text('Referencia: ${payment.reference}${payment.bankAccountCode != null ? ' · ${payment.bankAccountCode}' : ''}',
@@ -182,6 +183,10 @@ class _Body extends ConsumerWidget {
                     icon: const Icon(Icons.receipt_long_outlined, size: 20),
                     label: const Text('Ver comprobante'),
                   ),
+                ],
+                if (payment.status == 'UnderReview') ...[
+                  const SizedBox(height: Gap.s3),
+                  _TransferActions(orderId: o.id, payment: payment),
                 ],
               ]),
             ),
@@ -394,6 +399,163 @@ class _ConfirmSheetState extends State<_ConfirmSheet> {
                 cancel ? (_reason.text.trim().isEmpty ? 'Cancelado por administración' : _reason.text.trim()) : '',
               ),
               child: Text(cancel ? 'Cancelar pedido' : 'Confirmar'),
+            ),
+          ),
+        ]),
+      ]),
+    );
+  }
+}
+
+/// Approve / reject buttons for a transfer whose receipt is waiting for verification.
+class _TransferActions extends ConsumerStatefulWidget {
+  const _TransferActions({required this.orderId, required this.payment});
+  final String orderId;
+  final OrderPayment payment;
+
+  @override
+  ConsumerState<_TransferActions> createState() => _TransferActionsState();
+}
+
+class _TransferActionsState extends ConsumerState<_TransferActions> {
+  bool _busy = false;
+
+  Future<void> _run(Future<void> Function() action, String done) async {
+    setState(() => _busy = true);
+    try {
+      await action();
+      ref.invalidate(orderPaymentProvider(widget.orderId));
+      ref.invalidate(orderDetailProvider(widget.orderId));
+      ref.invalidate(ordersProvider);
+      ref.invalidate(summaryProvider);
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(done)));
+    } catch (e) {
+      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _approve() async {
+    final ok = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (_) => const _VerifySheet(),
+    );
+    if (ok != true) return;
+    await _run(() => ref.read(ordersRepositoryProvider).approvePayment(widget.payment.id), 'Transferencia verificada: el pedido quedó pagado.');
+  }
+
+  Future<void> _reject() async {
+    final reason = await showModalBottomSheet<String>(
+      context: context,
+      isScrollControlled: true,
+      builder: (_) => const _RejectSheet(),
+    );
+    if (reason == null || reason.isEmpty) return;
+    await _run(() => ref.read(ordersRepositoryProvider).rejectPayment(widget.payment.id, reason), 'Comprobante devuelto al cliente.');
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final scheme = Theme.of(context).colorScheme;
+    return Row(children: [
+      Expanded(
+        child: OutlinedButton(
+          style: OutlinedButton.styleFrom(foregroundColor: scheme.error, side: BorderSide(color: scheme.error.withValues(alpha: 0.5))),
+          onPressed: _busy ? null : _reject,
+          child: const Text('Rechazar'),
+        ),
+      ),
+      const SizedBox(width: Gap.s3),
+      Expanded(
+        child: FilledButton.icon(
+          onPressed: _busy ? null : _approve,
+          icon: _busy
+              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+              : const Icon(Icons.verified_outlined, size: 20),
+          label: const Text('Aprobar'),
+        ),
+      ),
+    ]);
+  }
+}
+
+/// Confirms that the receipt was checked against the bank statement. Pops true on confirm.
+class _VerifySheet extends StatelessWidget {
+  const _VerifySheet();
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(Gap.s5, Gap.s1, Gap.s5, Gap.s5),
+      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text('Aprobar transferencia', style: theme.textTheme.titleLarge),
+        const SizedBox(height: Gap.s2),
+        Text(
+          'El pago se registrará como cobrado y el pedido pasará a Pagado. Confirma que el dinero ya está en la cuenta.',
+          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: Gap.s5),
+        Row(children: [
+          Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(context, false), child: const Text('Volver'))),
+          const SizedBox(width: Gap.s3),
+          Expanded(child: FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Aprobar'))),
+        ]),
+      ]),
+    );
+  }
+}
+
+/// Asks why the receipt is not accepted (required: the customer sees it). Pops with the reason, or null when dismissed.
+class _RejectSheet extends StatefulWidget {
+  const _RejectSheet();
+
+  @override
+  State<_RejectSheet> createState() => _RejectSheetState();
+}
+
+class _RejectSheetState extends State<_RejectSheet> {
+  final _reason = TextEditingController();
+
+  @override
+  void dispose() {
+    _reason.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final scheme = theme.colorScheme;
+    return Padding(
+      padding: EdgeInsets.fromLTRB(Gap.s5, Gap.s1, Gap.s5, MediaQuery.of(context).viewInsets.bottom + Gap.s5),
+      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text('Rechazar comprobante', style: theme.textTheme.titleLarge),
+        const SizedBox(height: Gap.s2),
+        Text(
+          'El cliente verá el motivo y podrá adjuntar otro comprobante.',
+          style: theme.textTheme.bodyMedium?.copyWith(color: scheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: Gap.s4),
+        TextField(
+          controller: _reason,
+          autofocus: true,
+          maxLength: 500,
+          maxLines: 3,
+          textCapitalization: TextCapitalization.sentences,
+          onChanged: (_) => setState(() {}),
+          decoration: const InputDecoration(labelText: 'Motivo'),
+        ),
+        const SizedBox(height: Gap.s4),
+        Row(children: [
+          Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(context), child: const Text('Volver'))),
+          const SizedBox(width: Gap.s3),
+          Expanded(
+            child: FilledButton(
+              style: FilledButton.styleFrom(backgroundColor: scheme.error, foregroundColor: Colors.white),
+              onPressed: _reason.text.trim().isEmpty ? null : () => Navigator.pop(context, _reason.text.trim()),
+              child: const Text('Rechazar'),
             ),
           ),
         ]),

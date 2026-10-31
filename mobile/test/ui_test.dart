@@ -112,6 +112,41 @@ void main() {
     expect(repo.performed, ['1:cancel:Sin stock']);
   });
 
+  testWidgets('a transfer under review can be approved after confirming', (tester) async {
+    final repo = await pump(tester, const OrderDetailPage(orderId: '1'));
+
+    expect(find.text('Ver comprobante'), findsOneWidget);
+    await tester.tap(find.widgetWithText(FilledButton, 'Aprobar'));
+    await tester.pumpAndSettle();
+    expect(find.text('Aprobar transferencia'), findsOneWidget);
+    await tester.tap(find.descendant(of: find.byType(BottomSheet), matching: find.widgetWithText(FilledButton, 'Aprobar')));
+    await tester.pumpAndSettle();
+
+    expect(repo.performed, ['pay-1:approve']);
+  });
+
+  testWidgets('rejecting a receipt requires a reason and sends it', (tester) async {
+    final repo = await pump(tester, const OrderDetailPage(orderId: '1'));
+
+    await tester.tap(find.widgetWithText(OutlinedButton, 'Rechazar'));
+    await tester.pumpAndSettle();
+    final send = find.widgetWithText(FilledButton, 'Rechazar');
+    expect(tester.widget<FilledButton>(send).onPressed, isNull); // no reason yet
+    await tester.enterText(find.byType(TextField), 'Monto incorrecto');
+    await tester.pump();
+    await tester.tap(send);
+    await tester.pumpAndSettle();
+
+    expect(repo.performed, ['pay-1:reject:Monto incorrecto']);
+  });
+
+  testWidgets('an order without a transfer to verify shows no payment actions', (tester) async {
+    await pump(tester, const OrderDetailPage(orderId: '5'));
+
+    expect(find.text('Aprobar'), findsNothing);
+    expect(find.text('Rechazar'), findsNothing);
+  });
+
   testWidgets('a delivered order has no action bar', (tester) async {
     await pump(tester, const OrderDetailPage(orderId: '5'));
 

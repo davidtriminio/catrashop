@@ -28,6 +28,18 @@ class FakeOrdersRepository extends OrdersRepository {
     return sampleDetail(o);
   }
 
+  /// Order 1 has a transfer waiting for verification; every other order has no payment.
+  @override
+  Future<OrderPayment?> payment(String orderId) async => orderId == '1'
+      ? OrderPayment(id: 'pay-1', status: 'UnderReview', method: 'TRANSFERENCIA', hasReceipt: true, reference: 'TR-77', bankAccountCode: 'BAC')
+      : null;
+
+  @override
+  Future<void> approvePayment(String paymentId) async => performed.add('$paymentId:approve');
+
+  @override
+  Future<void> rejectPayment(String paymentId, String reason) async => performed.add('$paymentId:reject:$reason');
+
   @override
   Future<void> perform(String id, OrderAction action, {String? reason}) async {
     performed.add('$id:${action.path}${reason == null ? '' : ':$reason'}');

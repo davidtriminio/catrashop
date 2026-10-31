@@ -45,6 +45,13 @@ class OrdersRepository {
   Future<({List<int> bytes, String contentType})> receipt(String paymentId) =>
       _api.getBytes('/api/v1/payments/admin/$paymentId/receipt');
 
+  /// Verifies a bank transfer: captures the payment and marks the order as paid.
+  Future<void> approvePayment(String paymentId) => _api.post('/api/v1/payments/admin/$paymentId/approve');
+
+  /// Sends the receipt back to the customer with the reason; they can attach another one.
+  Future<void> rejectPayment(String paymentId, String reason) =>
+      _api.post('/api/v1/payments/admin/$paymentId/reject', body: {'reason': reason});
+
   Future<void> perform(String id, OrderAction action, {String? reason}) async {
     await _api.post('/api/v1/orders/admin/$id/${action.path}',
         body: action == OrderAction.cancel ? {'reason': reason} : null);
