@@ -35,9 +35,10 @@ void main() {
   testWidgets('orders list shows cards, count and filter chips', (tester) async {
     await pump(tester, const OrdersPage());
 
-    expect(find.text('ORD-1001'), findsOneWidget);
+    expect(find.text('1001'), findsOneWidget);
     expect(find.text('5 pedidos'), findsOneWidget);
-    expect(find.text('hace 12 min · 3 artículos'), findsOneWidget);
+    // Each card shows its date (no relative time or item count) next to the id without the ORD- prefix.
+    expect(find.textContaining(RegExp(r'\d{4}, \d{2}:\d{2}')), findsNWidgets(5));
     // The chip row scrolls horizontally: the first ones are visible, the rest are reachable by scrolling.
     for (final label in ['Todos', 'Pagado', 'En proceso']) {
       expect(find.widgetWithText(ChoiceChip, label), findsOneWidget);
@@ -56,8 +57,8 @@ void main() {
     await tester.pumpAndSettle();
     await tester.tap(find.widgetWithText(ChoiceChip, 'Enviado'));
     await tester.pumpAndSettle();
-    expect(find.text('ORD-1004'), findsOneWidget);
-    expect(find.text('ORD-1001'), findsNothing);
+    expect(find.text('1004'), findsOneWidget);
+    expect(find.text('1001'), findsNothing);
     expect(find.text('1 pedido'), findsOneWidget);
 
     await tester.ensureVisible(find.widgetWithText(ChoiceChip, 'Cancelado'));
@@ -67,7 +68,7 @@ void main() {
     expect(find.text('No hay pedidos'), findsOneWidget);
     await tester.tap(find.text('Quitar filtro'));
     await tester.pumpAndSettle();
-    expect(find.text('ORD-1001'), findsOneWidget);
+    expect(find.text('1001'), findsOneWidget);
   });
 
   testWidgets('summary highlights paid orders and opens the filtered list', (tester) async {
@@ -80,8 +81,8 @@ void main() {
 
     await tester.tap(find.text('Ver pedidos pagados'));
     await tester.pumpAndSettle();
-    expect(find.text('ORD-1001'), findsOneWidget);
-    expect(find.text('ORD-1003'), findsNothing); // processing, filtered out
+    expect(find.text('1001'), findsOneWidget);
+    expect(find.text('1003'), findsNothing); // processing, filtered out
   });
 
   testWidgets('detail offers the next action and confirms it in a sheet', (tester) async {

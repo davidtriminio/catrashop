@@ -32,6 +32,19 @@ class OrdersRepository {
   Future<OrderDetail> detail(String id) async =>
       OrderDetail.fromJson(await _api.get('/api/v1/orders/admin/$id') as Map<String, dynamic>);
 
+  /// The payment of an order, or null when it has none yet.
+  Future<OrderPayment?> payment(String orderId) async {
+    try {
+      return OrderPayment.fromJson(await _api.get('/api/v1/payments/admin/by-order/$orderId') as Map<String, dynamic>);
+    } on ApiException catch (e) {
+      if (e.statusCode == 404) return null;
+      rethrow;
+    }
+  }
+
+  Future<({List<int> bytes, String contentType})> receipt(String paymentId) =>
+      _api.getBytes('/api/v1/payments/admin/$paymentId/receipt');
+
   Future<void> perform(String id, OrderAction action, {String? reason}) async {
     await _api.post('/api/v1/orders/admin/$id/${action.path}',
         body: action == OrderAction.cancel ? {'reason': reason} : null);

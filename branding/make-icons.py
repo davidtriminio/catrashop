@@ -5,8 +5,8 @@ Generates every app icon from one drawing: the favicons of the two web apps and 
 
 The mark is a shopping cart with a ringed planet floating above the basket ("Galactic" e-commerce), on the brand colours
 from `frontend/shared/theme.scss` / `mobile/lib/core/theme.dart`:
-  - store  : near-black tile, lime mark   -> frontend/public
-  - admin  : lime tile, near-black mark   -> frontend/projects/catrashop-admin/public and the mobile app
+  - store  : blue tile, white mark        -> frontend/public
+  - admin  : light-blue tile, blue mark   -> frontend/projects/catrashop-admin/public and the mobile app
 To change the look, edit the constants below (or draw_mark / svg) and run the script again; nothing else needs touching.
 Everything is drawn at 4x and scaled down, so edges are smooth at every size.
 """
@@ -19,11 +19,12 @@ from PIL import Image, ImageDraw
 
 ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 
-INK = (11, 11, 12)          # --primary
-LIME = (200, 241, 105)      # --accent
+BLUE = (0, 51, 153)         # --primary (Honduran flag blue)
+WHITE = (255, 255, 255)
+SKY = (219, 230, 255)       # --accent
 VARIANTS = {
-    'store': {'bg': INK, 'fg': LIME},
-    'admin': {'bg': LIME, 'fg': INK},
+    'store': {'bg': BLUE, 'fg': WHITE},
+    'admin': {'bg': SKY, 'fg': BLUE},
 }
 
 # --- the drawing, in unit coordinates (0..1 across the tile) ----------------------------------------------

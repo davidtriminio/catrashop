@@ -276,6 +276,9 @@ class OrdersNotifier extends AsyncNotifier<OrdersState> {
 
 final ordersProvider = AsyncNotifierProvider<OrdersNotifier, OrdersState>(OrdersNotifier.new);
 
+final orderPaymentProvider = FutureProvider.autoDispose.family<OrderPayment?, String>((ref, orderId) =>
+    ref.watch(ordersRepositoryProvider).payment(orderId));
+
 final orderDetailProvider = FutureProvider.autoDispose.family<OrderDetail, String>((ref, id) async {
   await _showRetryProgress(ref);
   final detail = await ref.watch(ordersRepositoryProvider).detail(id);

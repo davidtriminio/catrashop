@@ -4,13 +4,13 @@ One drawing, `make-icons.py`, produces every icon the project ships. Nothing els
 
 | App | Look | Files written |
 |---|---|---|
-| Store (`frontend`) | near-black tile, lime mark | `frontend/public/` `favicon.ico`, `favicon.svg`, `apple-touch-icon.png` |
-| Admin (`frontend/projects/catrashop-admin`) | lime tile, near-black mark | the same three files in its `public/` |
-| Mobile app (it *is* the admin app) | lime tile, near-black mark | Android: `mipmap-*/ic_launcher.png` (Android 7 and older), `ic_launcher_foreground.png` + `ic_launcher_monochrome.png`, `mipmap-anydpi-v26/ic_launcher.xml` (adaptive icon), `values/ic_launcher_background.xml`; iOS: every size in `AppIcon.appiconset` |
+| Store (`frontend`) | blue tile, white mark | `frontend/public/` `favicon.ico`, `favicon.svg`, `apple-touch-icon.png` |
+| Admin (`frontend/projects/catrashop-admin`) | light-blue tile, blue mark | the same three files in its `public/` |
+| Mobile app (it *is* the admin app) | light-blue tile, blue mark | Android: `mipmap-*/ic_launcher.png` (Android 7 and older), `ic_launcher_foreground.png` + `ic_launcher_monochrome.png`, `mipmap-anydpi-v26/ic_launcher.xml` (adaptive icon), `values/ic_launcher_background.xml`; iOS: every size in `AppIcon.appiconset` |
 
 The mark is a **shopping cart with a ringed planet above the basket**: the cart says "online store" at a glance and the planet
 nods to the "Galactic" demo brand. `store.png/.svg` and `admin.png/.svg` in this folder are previews of the two variants. The colours are the brand tokens
-(`--primary #0b0b0c`, `--accent #c8f169`).
+(`--primary #003399`, `--accent #dbe6ff`).
 
 ## Regenerate
 ```bash

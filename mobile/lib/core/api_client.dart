@@ -118,6 +118,16 @@ class ApiClient {
     }
   }
 
+  /// Downloads a file (e.g. a payment receipt) with the session's bearer token.
+  Future<({List<int> bytes, String contentType})> getBytes(String path) async {
+    try {
+      final r = await _dio.get<List<int>>(path, options: Options(responseType: ResponseType.bytes, headers: {'Accept': '*/*'}));
+      return (bytes: r.data ?? const <int>[], contentType: r.headers.value('content-type') ?? 'application/octet-stream');
+    } on DioException catch (e) {
+      throw _toException(e);
+    }
+  }
+
   Future<dynamic> post(String path, {Object? body}) async {
     try {
       return (await _dio.post(path, data: body)).data;

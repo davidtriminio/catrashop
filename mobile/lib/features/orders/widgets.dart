@@ -39,7 +39,7 @@ IconData statusIcon(String status) => switch (status) {
       _ => Icons.receipt_long_outlined,
     };
 
-/// One order in the list: status icon, number, relative time, total and status chip.
+/// One order in the list: status icon, order id (without the ORD- prefix), date, total and status chip.
 class OrderCard extends StatelessWidget {
   const OrderCard({super.key, required this.order, required this.onTap});
   final OrderSummary order;
@@ -50,7 +50,6 @@ class OrderCard extends StatelessWidget {
     final theme = Theme.of(context);
     final tone = OrderStatus.tone(order.status);
     final muted = theme.colorScheme.onSurfaceVariant;
-    final items = order.itemCount == 1 ? '1 artículo' : '${order.itemCount} artículos';
 
     return Card(
       clipBehavior: Clip.antiAlias,
@@ -68,9 +67,9 @@ class OrderCard extends StatelessWidget {
             const SizedBox(width: Gap.s3),
             Expanded(
               child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
-                Text(order.orderNumber, style: theme.textTheme.titleMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
+                Text(shortOrderId(order.orderNumber), style: theme.textTheme.titleMedium, maxLines: 1, overflow: TextOverflow.ellipsis),
                 const SizedBox(height: 2),
-                Text('${timeAgo(order.createdAtUtc)} · $items', style: theme.textTheme.bodySmall?.copyWith(color: muted)),
+                Text(formatDateTime(order.createdAtUtc), style: theme.textTheme.bodySmall?.copyWith(color: muted), maxLines: 1, overflow: TextOverflow.ellipsis),
               ]),
             ),
             const SizedBox(width: Gap.s3),

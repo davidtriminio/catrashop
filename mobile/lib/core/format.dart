@@ -19,6 +19,9 @@ String formatMoney(double value, String currency) {
 
 String formatDateTime(DateTime dt) => _full.format(dt.toLocal());
 
+/// The order number without its constant "ORD-" prefix, so the meaningful part fits on a list row.
+String shortOrderId(String orderNumber) => orderNumber.replaceFirst(RegExp(r'^ORD-', caseSensitive: false), '');
+
 /// Short Spanish relative time: "ahora", "hace 5 min", "hace 3 h", "ayer", "12 oct".
 /// [now] is injectable so it can be tested.
 String timeAgo(DateTime when, {DateTime? now}) {

@@ -218,3 +218,52 @@ class OrderPage {
   final bool hasNext;
   final int totalCount;
 }
+
+/// The payment attached to an order (what the operator needs to verify or collect it).
+class OrderPayment {
+  OrderPayment({
+    required this.id,
+    required this.status,
+    required this.method,
+    required this.hasReceipt,
+    this.bankAccountCode,
+    this.reference,
+    this.reviewNote,
+  });
+
+  final String id;
+  final String status;
+  final String? method;
+  final bool hasReceipt;
+  final String? bankAccountCode;
+  final String? reference;
+  final String? reviewNote;
+
+  factory OrderPayment.fromJson(Map<String, dynamic> j) => OrderPayment(
+        id: j['id'] as String,
+        status: j['status'] as String,
+        method: j['method'] as String?,
+        hasReceipt: j['hasReceipt'] as bool? ?? false,
+        bankAccountCode: j['transferBankAccountCode'] as String?,
+        reference: j['transferReference'] as String?,
+        reviewNote: j['reviewNote'] as String?,
+      );
+
+  String get methodLabel => switch (method) {
+        'TRANSFERENCIA' => 'Transferencia bancaria',
+        'CONTRA_ENTREGA' => 'Contra entrega',
+        'PAGO_EN_TIENDA' => 'Pago en tienda',
+        null => 'Pasarela de pago',
+        final m => m,
+      };
+
+  String get statusLabel => switch (status) {
+        'Pending' => 'Pendiente',
+        'Authorized' => 'Autorizado',
+        'Captured' => 'Cobrado',
+        'Failed' => 'Fallido',
+        'Refunded' => 'Reembolsado',
+        'UnderReview' => 'Comprobante por verificar',
+        final s => s,
+      };
+}

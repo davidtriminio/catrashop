@@ -88,7 +88,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 700));
     await tester.pumpAndSettle();
 
-    expect(find.text('ORD-1001'), findsOneWidget);
+    expect(find.text('1001'), findsOneWidget);
     expect(find.textContaining('Intento'), findsNothing);
     final container = ProviderScope.containerOf(tester.element(find.byType(OrdersPage)));
     expect(container.read(retryInfoProvider), isNull);

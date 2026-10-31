@@ -5,6 +5,7 @@ import '../../core/format.dart';
 import '../../core/providers.dart';
 import '../../core/theme.dart';
 import 'order_models.dart';
+import 'receipt_page.dart';
 import 'widgets.dart';
 
 class OrderDetailPage extends ConsumerStatefulWidget {
@@ -117,15 +118,16 @@ class _ActionBar extends StatelessWidget {
   }
 }
 
-class _Body extends StatelessWidget {
+class _Body extends ConsumerWidget {
   const _Body({required this.order});
   final OrderDetail order;
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
     final muted = theme.colorScheme.onSurfaceVariant;
     final o = order;
+    final payment = ref.watch(orderPaymentProvider(o.id)).value;
     final itemsCount = o.items.fold<int>(0, (sum, i) => sum + i.quantity);
 
     return ListView(
@@ -149,6 +151,42 @@ class _Body extends StatelessWidget {
             ]),
           ),
         ),
+
+        if (payment != null) ...[
+          _section(context, 'Pago'),
+          Card(
+            child: Padding(
+              padding: const EdgeInsets.all(Gap.s4),
+              child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [
+                Row(children: [
+                  Icon(Icons.payments_outlined, color: muted),
+                  const SizedBox(width: Gap.s3),
+                  Expanded(child: Text(payment.methodLabel, style: theme.textTheme.titleMedium)),
+                  Text(payment.statusLabel, style: theme.textTheme.bodySmall?.copyWith(color: muted, fontWeight: FontWeight.w600)),
+                ]),
+                if (payment.reference != null) ...[
+                  const SizedBox(height: Gap.s2),
+                  Text('Referencia: ${payment.reference}${payment.bankAccountCode != null ? ' · ${payment.bankAccountCode}' : ''}',
+                      style: theme.textTheme.bodyMedium?.copyWith(color: muted)),
+                ],
+                if (payment.reviewNote != null && payment.reviewNote!.isNotEmpty) ...[
+                  const SizedBox(height: Gap.s2),
+                  Text('Nota: ${payment.reviewNote}', style: theme.textTheme.bodyMedium?.copyWith(color: muted)),
+                ],
+                if (payment.hasReceipt) ...[
+                  const SizedBox(height: Gap.s3),
+                  OutlinedButton.icon(
+                    onPressed: () => Navigator.of(context).push(MaterialPageRoute<void>(
+                      builder: (_) => ReceiptPage(paymentId: payment.id, orderNumber: o.orderNumber),
+                    )),
+                    icon: const Icon(Icons.receipt_long_outlined, size: 20),
+                    label: const Text('Ver comprobante'),
+                  ),
+                ],
+              ]),
+            ),
+          ),
+        ],
 
         _section(context, o.pickupStoreName != null ? 'Recoger en tienda' : 'Envío'),
         Card(
