@@ -48,6 +48,9 @@ class OrdersRepository {
   /// Verifies a bank transfer: captures the payment and marks the order as paid.
   Future<void> approvePayment(String paymentId) => _api.post('/api/v1/payments/admin/$paymentId/approve');
 
+  /// Registers that the money of a cash-on-delivery / pay-at-store order was collected (only after delivery).
+  Future<void> collectPayment(String paymentId) => _api.post('/api/v1/payments/admin/$paymentId/collect');
+
   /// Sends the receipt back to the customer with the reason; they can attach another one.
   Future<void> rejectPayment(String paymentId, String reason) =>
       _api.post('/api/v1/payments/admin/$paymentId/reject', body: {'reason': reason});

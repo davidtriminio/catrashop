@@ -188,6 +188,14 @@ class _Body extends ConsumerWidget {
                   const SizedBox(height: Gap.s3),
                   _TransferActions(orderId: o.id, payment: payment),
                 ],
+                if (payment.collectedLater && payment.isPending) ...[
+                  const SizedBox(height: Gap.s3),
+                  if (o.status == OrderStatus.delivered)
+                    _CollectAction(orderId: o.id, payment: payment, amount: formatMoney(o.grandTotal, o.currency))
+                  else
+                    Text('El cobro se podrá registrar cuando el pedido esté entregado.',
+                        style: theme.textTheme.bodySmall?.copyWith(color: muted)),
+                ],
               ]),
             ),
           ),
@@ -422,18 +430,8 @@ class _TransferActionsState extends ConsumerState<_TransferActions> {
 
   Future<void> _run(Future<void> Function() action, String done) async {
     setState(() => _busy = true);
-    try {
-      await action();
-      ref.invalidate(orderPaymentProvider(widget.orderId));
-      ref.invalidate(orderDetailProvider(widget.orderId));
-      ref.invalidate(ordersProvider);
-      ref.invalidate(summaryProvider);
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(done)));
-    } catch (e) {
-      if (mounted) ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(e.toString())));
-    } finally {
-      if (mounted) setState(() => _busy = false);
-    }
+    await runPaymentAction(context, ref, widget.orderId, action, done);
+    if (mounted) setState(() => _busy = false);
   }
 
   Future<void> _approve() async {
@@ -558,6 +556,89 @@ class _RejectSheetState extends State<_RejectSheet> {
               child: const Text('Rechazar'),
             ),
           ),
+        ]),
+      ]),
+    );
+  }
+}
+
+/// Runs a payment action, then refreshes everything that shows the order and tells the operator how it went.
+Future<void> runPaymentAction(BuildContext context, WidgetRef ref, String orderId, Future<void> Function() action, String done) async {
+  final messenger = ScaffoldMessenger.of(context);
+  try {
+    await action();
+    ref.invalidate(orderPaymentProvider(orderId));
+    ref.invalidate(orderDetailProvider(orderId));
+    ref.invalidate(ordersProvider);
+    ref.invalidate(summaryProvider);
+    messenger.showSnackBar(SnackBar(content: Text(done)));
+  } catch (e) {
+    messenger.showSnackBar(SnackBar(content: Text(e.toString())));
+  }
+}
+
+/// "Registrar cobro" for a cash-on-delivery / pay-at-store order that was already delivered.
+class _CollectAction extends ConsumerStatefulWidget {
+  const _CollectAction({required this.orderId, required this.payment, required this.amount});
+  final String orderId;
+  final OrderPayment payment;
+  final String amount;
+
+  @override
+  ConsumerState<_CollectAction> createState() => _CollectActionState();
+}
+
+class _CollectActionState extends ConsumerState<_CollectAction> {
+  bool _busy = false;
+
+  Future<void> _collect() async {
+    final ok = await showModalBottomSheet<bool>(
+      context: context,
+      builder: (_) => _CollectSheet(amount: widget.amount, payment: widget.payment),
+    );
+    if (ok != true || !mounted) return;
+    setState(() => _busy = true);
+    await runPaymentAction(context, ref, widget.orderId, () => ref.read(ordersRepositoryProvider).collectPayment(widget.payment.id),
+        'Cobro registrado.');
+    if (mounted) setState(() => _busy = false);
+  }
+
+  @override
+  Widget build(BuildContext context) => SizedBox(
+        width: double.infinity,
+        child: FilledButton.icon(
+          onPressed: _busy ? null : _collect,
+          icon: _busy
+              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
+              : const Icon(Icons.payments_outlined, size: 20),
+          label: const Text('Registrar cobro'),
+        ),
+      );
+}
+
+/// Confirms the money was really received. Pops true on confirm.
+class _CollectSheet extends StatelessWidget {
+  const _CollectSheet({required this.amount, required this.payment});
+  final String amount;
+  final OrderPayment payment;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(Gap.s5, Gap.s1, Gap.s5, Gap.s5),
+      child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
+        Text('Registrar cobro', style: theme.textTheme.titleLarge),
+        const SizedBox(height: Gap.s2),
+        Text(
+          'Confirma que ya recibiste $amount (${payment.methodLabel.toLowerCase()}). El pago quedará como cobrado y el pedido como pagado.',
+          style: theme.textTheme.bodyMedium?.copyWith(color: theme.colorScheme.onSurfaceVariant),
+        ),
+        const SizedBox(height: Gap.s5),
+        Row(children: [
+          Expanded(child: OutlinedButton(onPressed: () => Navigator.pop(context, false), child: const Text('Volver'))),
+          const SizedBox(width: Gap.s3),
+          Expanded(child: FilledButton(onPressed: () => Navigator.pop(context, true), child: const Text('Confirmar cobro'))),
         ]),
       ]),
     );
