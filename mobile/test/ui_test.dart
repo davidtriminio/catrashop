@@ -141,10 +141,29 @@ void main() {
   });
 
   testWidgets('an order without a transfer to verify shows no payment actions', (tester) async {
-    await pump(tester, const OrderDetailPage(orderId: '5'));
+    await pump(tester, const OrderDetailPage(orderId: '4'));
 
     expect(find.text('Aprobar'), findsNothing);
     expect(find.text('Rechazar'), findsNothing);
+  });
+
+  testWidgets('a delivered cash-on-delivery order can be registered as collected', (tester) async {
+    final repo = await pump(tester, const OrderDetailPage(orderId: '5'));
+
+    await tester.tap(find.widgetWithText(FilledButton, 'Registrar cobro'));
+    await tester.pumpAndSettle();
+    expect(find.text('Confirmar cobro'), findsOneWidget);
+    await tester.tap(find.text('Confirmar cobro'));
+    await tester.pumpAndSettle();
+
+    expect(repo.performed, ['pay-5:collect']);
+  });
+
+  testWidgets('collecting is not offered until the order is delivered', (tester) async {
+    await pump(tester, const OrderDetailPage(orderId: '3'));
+
+    expect(find.text('Registrar cobro'), findsNothing);
+    expect(find.textContaining('cuando el pedido esté entregado'), findsOneWidget);
   });
 
   testWidgets('a delivered order has no action bar', (tester) async {

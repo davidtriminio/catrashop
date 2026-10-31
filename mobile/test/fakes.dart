@@ -28,11 +28,17 @@ class FakeOrdersRepository extends OrdersRepository {
     return sampleDetail(o);
   }
 
-  /// Order 1 has a transfer waiting for verification; every other order has no payment.
+  /// Order 1 has a transfer under review; orders 3 and 5 are cash on delivery still to collect; the rest have no payment.
   @override
-  Future<OrderPayment?> payment(String orderId) async => orderId == '1'
-      ? OrderPayment(id: 'pay-1', status: 'UnderReview', method: 'TRANSFERENCIA', hasReceipt: true, reference: 'TR-77', bankAccountCode: 'BAC')
-      : null;
+  Future<OrderPayment?> payment(String orderId) async => switch (orderId) {
+        '1' => OrderPayment(id: 'pay-1', status: 'UnderReview', method: 'TRANSFERENCIA', hasReceipt: true, reference: 'TR-77', bankAccountCode: 'BAC'),
+        '3' => OrderPayment(id: 'pay-3', status: 'Pending', method: 'CONTRA_ENTREGA', hasReceipt: false),
+        '5' => OrderPayment(id: 'pay-5', status: 'Pending', method: 'CONTRA_ENTREGA', hasReceipt: false),
+        _ => null,
+      };
+
+  @override
+  Future<void> collectPayment(String paymentId) async => performed.add('$paymentId:collect');
 
   @override
   Future<void> approvePayment(String paymentId) async => performed.add('$paymentId:approve');

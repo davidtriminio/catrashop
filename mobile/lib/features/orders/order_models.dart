@@ -249,6 +249,11 @@ class OrderPayment {
         reviewNote: j['reviewNote'] as String?,
       );
 
+  /// Cash on delivery and pay-at-store: no receipt, the money is collected later and registered by an operator.
+  bool get collectedLater => method == 'CONTRA_ENTREGA' || method == 'PAGO_EN_TIENDA';
+
+  bool get isPending => status == 'Pending';
+
   String get methodLabel => switch (method) {
         'TRANSFERENCIA' => 'Transferencia bancaria',
         'CONTRA_ENTREGA' => 'Contra entrega',
