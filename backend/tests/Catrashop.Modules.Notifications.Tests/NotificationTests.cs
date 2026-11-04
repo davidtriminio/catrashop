@@ -1,3 +1,4 @@
+using Catrashop.Modules.Notifications.Application.Services;
 using Catrashop.Modules.Notifications.Application.Templates;
 using Catrashop.Modules.Notifications.Contracts;
 using Catrashop.Modules.Notifications.Domain;
@@ -114,6 +115,81 @@ public class NotificationTests
 
         Assert.False(string.IsNullOrWhiteSpace(rendered.Title));
         Assert.False(string.IsNullOrWhiteSpace(rendered.Body)); // no throw, still readable
+    }
+
+    [Theory]
+    [InlineData(null, "es")]
+    [InlineData("", "es")]
+    [InlineData("es-HN,es;q=0.9", "es")]
+    [InlineData("en-US,en;q=0.9", "en")]
+    [InlineData("fr", "es")]
+    public void Language_is_resolved_from_accept_language_defaulting_to_spanish(string? header, string expected) =>
+        Assert.Equal(expected, NotificationTemplateRenderer.ResolveLanguage(header));
+
+    [Fact]
+    public void Same_data_renders_in_either_language()
+    {
+        var renderer = new NotificationTemplateRenderer();
+        var data = new Dictionary<string, string> { ["orderNumber"] = "ORD-7" };
+
+        var es = renderer.Render(NotificationType.OrderPlaced, data, "es");
+        var en = renderer.Render(NotificationType.OrderPlaced, data, "en");
+
+        Assert.Equal("Recibimos tu pedido", es.Title);
+        Assert.Equal("We received your order", en.Title);
+        Assert.Contains("ORD-7", es.Body);
+        Assert.Contains("ORD-7", en.Body);
+    }
+
+    [Fact]
+    public void Notification_keeps_its_data_so_it_can_be_rendered_again()
+    {
+        var data = new Dictionary<string, string> { ["orderNumber"] = "ORD-9" };
+        var n = Notification.Create(Guid.NewGuid(), NotificationType.OrderPlaced, "t", "b", Now, data);
+
+        Assert.Equal("ORD-9", n.ReadData()!["orderNumber"]);
+        Assert.Null(Notification.Create(Guid.NewGuid(), NotificationType.OrderPlaced, "t", "b", Now).ReadData());
+    }
+
+    [Theory]
+    [InlineData(NotificationType.OrderPaid, "Payment for order ORD-1 was received. Total: 42.00 HNL.", "orderNumber", "ORD-1")]
+    [InlineData(NotificationType.OrderShipped, "Order ORD-2 has shipped. Track it with TRK 99.", "trackingNumber", "TRK 99")]
+    [InlineData(NotificationType.Welcome, "Hi Ana, thanks for creating your account. Happy shopping!", "name", "Ana")]
+    [InlineData(NotificationType.BackInStock, "Blue Mug is available again.", "productName", "Blue Mug")]
+    [InlineData(NotificationType.OrderCancelled, "Order ORD-3 has been cancelled. Out of stock", "reason", "Out of stock")]
+    [InlineData(NotificationType.OrderPlaced, "Tu pedido ORD-4 fue registrado y está pendiente de pago.", "orderNumber", "ORD-4")]
+    public void Old_notifications_get_their_data_back_from_their_text(NotificationType type, string body, string key, string value)
+    {
+        var data = LegacyNotificationData.TryExtract(type, body);
+
+        Assert.NotNull(data);
+        Assert.Equal(value, data![key]);
+    }
+
+    [Fact]
+    public void Old_english_notification_is_shown_in_spanish()
+    {
+        var renderer = new NotificationTemplateRenderer();
+        var n = Notification.Create(Guid.NewGuid(), NotificationType.OrderShipped, "Your order is on its way",
+            "Order ORD-5 has shipped. Track it with ABC123.", Now);
+
+        var response = NotificationMappers.ToResponse(n, renderer, "es");
+
+        Assert.Equal("Tu pedido va en camino", response.Title);
+        Assert.Contains("ORD-5", response.Body);
+        Assert.Contains("ABC123", response.Body);
+    }
+
+    [Fact]
+    public void Unrecognised_old_text_is_shown_as_stored()
+    {
+        var renderer = new NotificationTemplateRenderer();
+        var n = Notification.Create(Guid.NewGuid(), NotificationType.Promotion, "Verano", "50% de descuento", Now);
+
+        var response = NotificationMappers.ToResponse(n, renderer, "en");
+
+        Assert.Equal("Verano", response.Title);
+        Assert.Equal("50% de descuento", response.Body);
     }
 
     [Fact]

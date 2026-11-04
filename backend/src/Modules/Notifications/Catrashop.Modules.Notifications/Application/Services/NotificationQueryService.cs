@@ -13,18 +13,26 @@ public sealed class NotificationQueryService
     private readonly INotificationsUnitOfWork _unitOfWork;
     private readonly TimeProvider _clock;
 
-    public NotificationQueryService(INotificationRepository notifications, INotificationsUnitOfWork unitOfWork, TimeProvider clock)
+    private readonly INotificationTemplateRenderer _renderer;
+
+    public NotificationQueryService(
+        INotificationRepository notifications, INotificationsUnitOfWork unitOfWork, TimeProvider clock,
+        INotificationTemplateRenderer renderer)
     {
         _notifications = notifications;
         _unitOfWork = unitOfWork;
         _clock = clock;
+        _renderer = renderer;
     }
 
-    public async Task<PagedResult<NotificationResponse>> ListAsync(Guid recipientId, bool unreadOnly, int page, int pageSize, CancellationToken ct = default)
+    /// <summary>Lists the inbox with each notification's text rendered in <paramref name="language"/> ("es" or "en").</summary>
+    public async Task<PagedResult<NotificationResponse>> ListAsync(
+        Guid recipientId, bool unreadOnly, int page, int pageSize, string language = "es", CancellationToken ct = default)
     {
         var result = await _notifications.ListForRecipientAsync(recipientId, unreadOnly, page, pageSize, ct);
         return new PagedResult<NotificationResponse>(
-            result.Items.Select(NotificationMappers.ToResponse).ToArray(), result.Page, result.PageSize, result.TotalCount);
+            result.Items.Select(n => NotificationMappers.ToResponse(n, _renderer, language)).ToArray(),
+            result.Page, result.PageSize, result.TotalCount);
     }
 
     public async Task<int> UnreadCountAsync(Guid recipientId, CancellationToken ct = default) =>

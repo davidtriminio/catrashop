@@ -21,7 +21,7 @@ public sealed record EmailMessage(string ToEmail, string? ToName, string Subject
 /// <summary>Renders a notification type + its data tokens into the title/body shown to the recipient.</summary>
 public interface INotificationTemplateRenderer
 {
-    RenderedNotification Render(NotificationType type, IReadOnlyDictionary<string, string> data);
+    RenderedNotification Render(NotificationType type, IReadOnlyDictionary<string, string> data, string language = "es");
 }
 
 public sealed record RenderedNotification(string Title, string Body);
