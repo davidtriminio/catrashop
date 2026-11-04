@@ -14,4 +14,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\..\BuildingBlocks\Catrashop.Infrastructure\Catrashop.Infrastructure.csproj" />
   </ItemGroup>
+  <ItemGroup>
+    <InternalsVisibleTo Include="Catrashop.Modules.Notifications.Tests" />
+  </ItemGroup>
 </Project>

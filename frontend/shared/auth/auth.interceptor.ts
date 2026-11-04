@@ -30,8 +30,12 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
   const store = inject(AuthStore);
   const api = inject(AuthApi);
 
+  // The API renders texts such as notifications in the language the user picked (kept on <html lang> by I18n).
+  const lang = document.documentElement.lang === 'en' ? 'en' : 'es';
+  const localized = req.clone({ setHeaders: { 'Accept-Language': lang } });
+
   const token = store.accessToken();
-  const authed = token && !isAuthFree(req.url) ? withToken(req, token) : req;
+  const authed = token && !isAuthFree(req.url) ? withToken(localized, token) : localized;
 
   return next(authed).pipe(
     catchError((error: unknown) => {
@@ -53,7 +57,7 @@ export const authInterceptor: HttpInterceptorFn = (req, next) => {
 
       return inflight.pipe(
         switchMap((tokens) => {
-          const retried = withToken(req, tokens.accessToken).clone({ setHeaders: { [RETRY_HEADER]: '1' } });
+          const retried = withToken(localized, tokens.accessToken).clone({ setHeaders: { [RETRY_HEADER]: '1' } });
           return next(retried);
         }),
         catchError((refreshError: unknown) => {

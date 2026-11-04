@@ -3,6 +3,8 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { CatalogApi, ProductQuery } from '@cs/api/catalog.api';
+import { CustomersApi } from '@cs/api/customers.api';
+import { AuthStore } from '@cs/auth/auth.store';
 import { Brand, Category, Paged, PriceRange, ProductListItem } from '@cs/api/models';
 import { I18n } from '@cs/i18n/i18n';
 import { MoneyPipe } from '@cs/util/money.pipe';
@@ -120,6 +122,14 @@ interface ActiveFilter { key: string; label: string; params: Record<string, null
           } @else {
             <div class="products" [class.dim]="loading()">
               @for (p of r.items; track p.id) {
+                <div class="pcard">
+                <button class="heart" type="button" [class.on]="isWished(p.id)" [disabled]="wishBusy().has(p.id)"
+                  [attr.aria-pressed]="isWished(p.id)" [attr.aria-label]="(isWished(p.id) ? 'product.wishlisted' : 'product.wishlist') | transloco"
+                  (click)="toggleWish(p.id)">
+                  <svg viewBox="0 0 24 24" width="18" height="18" [attr.fill]="isWished(p.id) ? 'currentColor' : 'none'" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                    <path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/>
+                  </svg>
+                </button>
                 <a class="product card flush" [routerLink]="['/products', p.slug]">
                   <div class="thumb" [style.background]="p.primaryImageUrl ? null : tint(p.name)">
                     @if (p.primaryImageUrl) { <img [src]="p.primaryImageUrl" [alt]="p.name" loading="lazy" /> }
@@ -137,6 +147,7 @@ interface ActiveFilter { key: string; label: string; params: Record<string, null
                     </span>
                   </div>
                 </a>
+                </div>
               }
             </div>
 
@@ -190,6 +201,14 @@ interface ActiveFilter { key: string; label: string; params: Record<string, null
     .products { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: var(--space-4); transition: opacity 0.15s; }
     .products.dim { opacity: 0.55; }
     .products > .card + .card { margin-top: 0; }
+    .pcard { position: relative; display: flex; }
+    .pcard > .product { flex: 1; min-width: 0; }
+    .heart { position: absolute; right: var(--space-3); top: var(--space-3); z-index: 1; display: inline-flex; align-items: center; justify-content: center; width: 2.2rem; height: 2.2rem; border-radius: 50%; border: 1px solid var(--border); background: var(--surface); color: var(--muted); cursor: pointer; transition: color 0.15s, border-color 0.15s, background 0.15s, transform 0.15s; }
+    .heart:hover:not(:disabled) { color: var(--primary); border-color: var(--primary); }
+    .heart.on { color: var(--primary); border-color: var(--primary); background: var(--tint-info-bg); }
+    .heart.on svg { transform: scale(1.1); }
+    .heart:disabled { opacity: 0.6; cursor: progress; }
+    @media (prefers-reduced-motion: reduce) { .heart, .heart svg { transition: none; } }
     .product { color: var(--text); display: flex; flex-direction: column; transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s; }
     .product:hover { text-decoration: none; border-color: var(--border-strong); box-shadow: var(--shadow-raised); transform: translateY(-2px); }
     .thumb { position: relative; aspect-ratio: 1 / 1; display: flex; align-items: center; justify-content: center; }
@@ -231,6 +250,8 @@ interface ActiveFilter { key: string; label: string; params: Record<string, null
 export class ProductList implements OnInit {
   private readonly api = inject(CatalogApi);
   private readonly i18n = inject(I18n);
+  private readonly customers = inject(CustomersApi);
+  private readonly auth = inject(AuthStore);
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
   private readonly destroyRef = inject(DestroyRef);
@@ -244,6 +265,9 @@ export class ProductList implements OnInit {
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
   readonly filtersOpen = signal(false);
+  /** Ids of the signed-in customer's wishlisted products, and the ones with a request in flight. */
+  readonly wished = signal<ReadonlySet<string>>(new Set());
+  readonly wishBusy = signal<ReadonlySet<string>>(new Set());
 
   // The filter state lives in the URL (shareable, back button works); these signals mirror it.
   readonly q = signal('');
@@ -273,6 +297,9 @@ export class ProductList implements OnInit {
   });
 
   ngOnInit(): void {
+    if (this.auth.isAuthenticated()) {
+      this.customers.wishlist().subscribe({ next: (items) => this.wished.set(new Set(items.map((i) => i.productId))), error: () => {} });
+    }
     this.api.listCategories().subscribe({ next: (c) => this.categories.set(c), error: () => {} });
     this.api.listBrands().subscribe({ next: (b) => this.brands.set(b), error: () => {} });
     this.api.priceRange().subscribe({ next: (r) => this.range.set(r), error: () => {} });
@@ -286,6 +313,29 @@ export class ProductList implements OnInit {
       this.maxPrice.set(toNumber(params.get('maxPrice')));
       this.page.set(Math.max(1, Number(params.get('page')) || 1));
       this.load();
+    });
+  }
+
+  isWished(productId: string): boolean { return this.wished().has(productId); }
+
+  /** Adds or removes a product from the wishlist; guests are sent to sign in first. */
+  toggleWish(productId: string): void {
+    if (!this.auth.isAuthenticated()) {
+      this.router.navigate(['/login'], { queryParams: { returnUrl: this.router.url } });
+      return;
+    }
+    const adding = !this.isWished(productId);
+    this.wishBusy.update((s) => new Set(s).add(productId));
+    const request = adding ? this.customers.addWishlist(productId) : this.customers.removeWishlist(productId);
+    request.subscribe({
+      next: () => {
+        this.wished.update((s) => { const n = new Set(s); if (adding) n.add(productId); else n.delete(productId); return n; });
+        this.wishBusy.update((s) => { const n = new Set(s); n.delete(productId); return n; });
+      },
+      error: (err) => {
+        this.error.set(this.i18n.problem(err, 'product.wishlistFailed'));
+        this.wishBusy.update((s) => { const n = new Set(s); n.delete(productId); return n; });
+      },
     });
   }
 

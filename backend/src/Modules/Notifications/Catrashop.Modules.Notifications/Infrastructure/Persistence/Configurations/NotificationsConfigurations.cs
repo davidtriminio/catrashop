@@ -13,6 +13,7 @@ public sealed class NotificationConfiguration : IEntityTypeConfiguration<Notific
         builder.Property(n => n.Type).HasConversion<string>().HasMaxLength(40);
         builder.Property(n => n.Title).HasMaxLength(200).IsRequired();
         builder.Property(n => n.Body).HasMaxLength(2000).IsRequired();
+        builder.Property(n => n.DataJson).HasMaxLength(4000);
 
         // Inbox queries are per recipient, newest first, often filtered to unread.
         builder.HasIndex(n => new { n.RecipientId, n.IsRead }).HasDatabaseName("ix_notifications_recipient_read");
