@@ -1,59 +1,66 @@
 # Catrashop
 
-> Formerly named *CommerceHub*: the product, the code (namespaces, projects, packages), the configuration and the docs are all called **Catrashop** now (see [PR-050](docs/git/prs/PR-050-rename-everything.md)).
+An online store for Honduras built on .NET 10, Angular 22 and Flutter: a customer storefront, an admin console and a
+mobile app for operators, all on top of one modular API.
 
-> A modular-monolith, event-driven **enterprise e-commerce platform** built with .NET 10 + Angular 22, designed as a realistic reference of how production commerce software is structured, secured, tested, and operated.
-
-[![status](https://img.shields.io/badge/status-v1.2.0-brightgreen)](#project-status)
 [![backend](https://img.shields.io/badge/backend-.NET%2010-512BD4)](#stack)
 [![frontend](https://img.shields.io/badge/frontend-Angular%2022-DD0031)](#stack)
+[![mobile](https://img.shields.io/badge/mobile-Flutter-02569B)](#mobile-app)
 
 ---
 
 ## Table of contents
-- [Overview](#overview)
-- [The business problem](#the-business-problem)
+- [About](#about)
+- [What it covers](#what-it-covers)
 - [Architecture](#architecture)
-- [Why a modular monolith?](#why-a-modular-monolith)
 - [Stack](#stack)
 - [Prerequisites](#prerequisites)
 - [Quick start](#quick-start)
 - [Mobile app](#mobile-app)
 - [Deployment](#deployment)
-- [Project status](#project-status)
 - [Git workflow](#git-workflow)
 - [Documentation map](#documentation-map)
 
 ---
 
-## Overview
+## About
 
-Catrashop is a full commerce platform covering the real lifecycle of an online store: identity, catalog and
-inventory, cart and checkout, orders, (simulated) payments, shipping, promotions, notifications, and an AI
-shopping assistant with **strictly bounded** tools. Back-office administration is a separate Angular app calling
-permission-gated endpoints, and security-sensitive actions (login, password changes) are recorded in the
-Identity module's audit log. It is built as a **modular monolith** — eleven independent modules with enforced
-boundaries that can be extracted into services later *if and when* a real reason appears, not before.
+Catrashop started as a university project: an online store written in Laravel with Blade. It was rebuilt from scratch
+on a modern stack: a **.NET** backend, an **Angular** web app, and a **Flutter** app so the system reaches beyond the
+browser and covers store operations from a phone as well.
 
-## The business problem
+The store is Spanish-first and sells in Honduran lempiras (HNL), with national shipping by zone and payment methods that
+match how people actually pay there.
 
-Mid-market retailers need a platform that is cheap to operate, fast to evolve, and safe to change — without the
-operational tax of a premature microservice fleet. Catrashop targets that sweet spot: one deployable unit, clear
-internal seams, event-driven side effects (email, analytics, fulfillment), and an AI assistant that can help
-customers **without ever being able to leak or mutate data it shouldn't touch**.
+## What it covers
+
+- **Storefront:** catalog with search, filters and sorting, product pages, wishlist, cart, checkout and order tracking,
+  in Spanish and English.
+- **Orders and payments:** cash on delivery, bank transfer (with receipt and manual verification) and pay at the store,
+  depending on the delivery option. Payments are simulated; no real payment processor is connected.
+- **Shipping:** delivery by zone across the 18 departments of Honduras, plus pickup stores.
+- **Promotions and notifications:** coupons, in-app and e-mail notifications in the customer's language.
+- **Admin console:** products, inventory, orders, payments, coupons and notifications, behind role-based permissions.
+- **Mobile app:** order and payment management for operators.
+- **Assistant:** a shopping assistant limited to a small set of read-only tools.
 
 ## Architecture
+
+The backend is a **modular monolith**: eleven modules with their own data and a small public contract each, deployed as
+one API. Architecture tests fail the build when a module reaches into another one's internals, and side effects such as
+e-mail go through an outbox to RabbitMQ.
 
 ```mermaid
 flowchart TB
     subgraph Client
-      WEB[catrashop-web<br/>customer SPA]
-      ADM[catrashop-admin<br/>admin SPA]
+      WEB[catrashop-web<br/>storefront]
+      ADM[catrashop-admin<br/>admin console]
+      MOB[mobile<br/>Flutter]
     end
     subgraph API[ASP.NET Core API · one deployable]
-      GW[Composition root<br/>JWT auth · permission policies · ProblemDetails<br/>security headers · CORS · rate limit · compression · cache]
+      GW[JWT auth · permission policies · ProblemDetails<br/>security headers · CORS · rate limit · cache]
     end
-    subgraph Modules[Modular Monolith · 11 modules]
+    subgraph Modules[11 modules]
       ID[Identity]:::m
       CAT[Catalog]:::m
       INV[Inventory]:::m
@@ -67,114 +74,83 @@ flowchart TB
       AI[AI Assistant]:::m
     end
     subgraph Infra[Infrastructure · docker-compose]
-      PG[(PostgreSQL<br/>schema-per-module)]
+      PG[(PostgreSQL<br/>schema per module)]
       MQ[(RabbitMQ)]
       N8N[n8n automations]
       OBS[(Jaeger + Prometheus)]
-      REDIS[(Redis · provisioned,<br/>not yet wired)]:::future
     end
-    WEB & ADM -->|HTTPS/JSON + JWT| GW --> Modules
+    WEB & ADM & MOB -->|HTTPS/JSON + JWT| GW --> Modules
     Modules -->|Outbox| MQ --> N8N
     Modules --> PG
     GW -. traces/metrics .-> OBS
     classDef m fill:#eef,stroke:#88a;
-    classDef future fill:#f6f6f6,stroke:#bbb,stroke-dasharray:4 3,color:#777;
 ```
 
-See [`docs/architecture`](docs/architecture/README.md) for the module map, module-boundary enforcement, the
-checkout sequence, the order lifecycle state machine, the Outbox flow, and the AI assistant boundary diagram.
-
-## Why a modular monolith?
-
-Distributed systems trade *in-process* complexity (a method call) for *distributed* complexity (network,
-partial failure, eventual consistency, deploy choreography, distributed tracing just to read a stack trace). For a
-product at this stage that trade is a **net loss**: you pay the operational cost immediately and collect the
-scaling benefit maybe never. A modular monolith keeps the one thing microservices are genuinely good at —
-**enforced module boundaries** — while deferring the costs:
-
-- **Boundaries without the network.** Each module exposes a small public contract (commands/queries/events) and
-  hides its `Domain`/`Infrastructure` internals. Architecture tests fail the build if one module reaches into
-  another's internals. That's the same discipline a service boundary gives you, enforced by the compiler + CI
-  instead of by HTTP.
-- **One transaction when you need one.** Checkout touches cart, inventory, pricing, orders and payments. In a
-  monolith the consistency-critical part is a single ACID transaction; cross-module side effects go through the
-  **Outbox** as events. No sagas required for the happy path.
-- **One deploy, one trace, one log stream.** Debuggable by a single engineer on a laptop.
-- **Extraction stays open.** Because communication already goes through contracts and events, promoting a module
-  to a service later is a mechanical change, not a rewrite.
-
-Full reasoning: [ADR-001 — Modular Monolith](docs/adr/001-modular-monolith.md).
+The module map, the checkout sequence, the order lifecycle and the outbox flow are in
+[`docs/architecture`](docs/architecture/README.md). The reasoning behind the monolith is in
+[ADR-001](docs/adr/001-modular-monolith.md).
 
 ## Stack
 
 | Layer | Technology |
 |---|---|
-| Frontend | Angular 22 (standalone, **zoneless**, signals, reactive forms, `withFetch`), TypeScript |
-| Backend | .NET 10, ASP.NET Core (minimal APIs), EF Core + Npgsql, FluentValidation, OpenAPI |
-| Auth | JWT bearer + refresh tokens; BCrypt password hashing; on-demand permission policies |
-| Database | PostgreSQL (schema-per-module, snake_case, full-text search) |
-| Rate-limit / cache | In-process (framework rate limiter + output cache). *Redis is provisioned in compose but not yet wired.* |
-| Messaging | RabbitMQ (Outbox → publisher → consumers) |
+| Web | Angular 22 (standalone, zoneless, signals), TypeScript, Transloco |
+| Mobile | Flutter (Android and iOS), Riverpod |
+| Backend | .NET 10, ASP.NET Core minimal APIs, EF Core + Npgsql, FluentValidation, OpenAPI |
+| Auth | JWT bearer + refresh tokens, BCrypt, permission policies |
+| Database | PostgreSQL (schema per module, full-text search) |
+| Messaging | RabbitMQ (outbox → publisher → consumers) |
 | Automation | n8n |
-| AI | Provider-abstracted `IChatModel` + bounded tool-calling + RAG over a seeded KB |
-| Observability | Structured JSON logging (`Microsoft.Extensions.Logging`), OpenTelemetry traces/metrics (Prometheus/OTLP/Jaeger), health probes |
-| Testing | xUnit, NetArchTest (architecture), WebApplicationFactory (integration) + Postgres-gated E2E; Vitest + Playwright (frontend) |
-| Delivery | Docker Compose, GitHub Actions (build/test + security scanning) |
+| Observability | Structured logging, OpenTelemetry (Prometheus, OTLP, Jaeger), health probes |
+| Testing | xUnit, NetArchTest, WebApplicationFactory; Vitest and Playwright; Flutter tests |
+| Delivery | Docker Compose, GitHub Actions (build, tests, security scans, Dependabot) |
 
 ## Prerequisites
 
 - .NET SDK **10.0.400+** (pinned in [`backend/global.json`](backend/global.json))
-- Node **24+** and **pnpm 11+** (Angular 22)
-- Docker Desktop (for Postgres, RabbitMQ, n8n, and the opt-in Jaeger/Prometheus profile)
+- Node **24+** and **pnpm 11+**
+- Docker Desktop (Postgres, RabbitMQ, n8n and the optional Jaeger/Prometheus profile)
+- Flutter SDK, only for the mobile app
 - Git
 
 ## Quick start
 
 ```bash
-# 1. Bring up infrastructure (Postgres, RabbitMQ, n8n; add --profile observability for Jaeger + Prometheus)
+# 1. Infrastructure (add --profile observability for Jaeger + Prometheus)
 docker compose up -d
 
-# 2. Apply EF Core migrations (each module owns its own; the app does NOT auto-migrate on startup)
+# 2. Apply the EF Core migrations (each module owns its own; the app does not migrate on startup)
 #    e.g. per context:  dotnet ef database update --project backend/src/Modules/Identity/Catrashop.Modules.Identity
 
-# 3. Run the backend
+# 3. Backend
 dotnet run --project backend/src/Api/Catrashop.Api
 
-# 4. Run the customer SPA (http://localhost:4200)
+# 4. Storefront (http://localhost:4200)
 cd frontend && pnpm install && pnpm start
-#    …and the admin SPA (http://localhost:4300)
+#    and the admin console (http://localhost:4300)
 pnpm ng serve catrashop-admin
 ```
 
-There is no automated seed script yet; [`docs/demo-data.md`](docs/demo-data.md) walks the full journey through
-the API in the meantime. No real secrets are ever committed — see [`.env.example`](.env.example).
+[`docs/local-development.md`](docs/local-development.md) covers secrets, the database and the seed script, and
+[`docs/demo-data.md`](docs/demo-data.md) walks the full purchase journey through the API. Secrets are never committed;
+see [`.env.example`](.env.example).
 
 ## Mobile app
 
-`mobile/` is a Flutter app (Android + iOS) for operators: sign in as an admin, list/filter orders and advance them
-(process → ship → deliver) or cancel. Biometric unlock, no Firebase. See [`mobile/README.md`](mobile/README.md).
+`mobile/` is a Flutter app for operators: sign in as an admin, filter orders and move them through processing, shipping
+and delivery, review bank-transfer receipts and register collections. It has biometric unlock, local notifications for
+new orders, and no Firebase. See [`mobile/README.md`](mobile/README.md).
 
 ## Deployment
 
-API on an Oracle VM (systemd + Apache + Cloudflare, no Docker, no RabbitMQ), frontends on Vercel, mobile as
-APK/IPA. Step by step in [`docs/deployment.md`](docs/deployment.md).
-
-## Project status
-
-**Current release: v1.2.0** — see the [CHANGELOG](CHANGELOG.md).
-
-Built **incrementally, phase by phase** (see the 24-phase plan in [`docs/roadmap.md`](docs/roadmap.md)): **all
-24 phases complete**, accepted as **release-ready (v1.0.0)** in the [final architectural
-review](docs/adr/028-final-architectural-review.md). Every guard is green — backend Release build 0/0, tests
-**200 pass / 2 skip**, architecture **66/66**, no vulnerable packages; frontend both apps build, Vitest **23** +
-Playwright **3**. Runtime verification of infrastructure-dependent parts requires Docker; the recorded residual
-follow-ups live in ADR-028. The [CHANGELOG](CHANGELOG.md) tracks the evolution phase by phase.
+The API runs on an Oracle VM (systemd, Apache, Cloudflare), the frontends on Vercel and the mobile app as APK/IPA.
+Step by step in [`docs/deployment.md`](docs/deployment.md).
 
 ## Git workflow
 
-`main` (releasable) ← `release/*` ← `develop` ← `feature/*`. Conventional Commits. Every substantial feature has a
-simulated-but-documented PR under [`docs/git/prs`](docs/git/prs) — these are **local workflow simulations**, clearly
-labeled as such; no human actually reviewed the code.
+`main` ← `develop` ← `feature/*` and `fix/*`. Everything goes through a pull request and a merge commit, with
+Conventional Commits. CI builds and tests the backend and both web apps, and a separate workflow runs CodeQL, secret
+scanning and dependency audits. See the [CHANGELOG](CHANGELOG.md) for what changed in each release.
 
 ## Documentation map
 
@@ -182,12 +158,12 @@ Start at the [documentation hub](docs/README.md), or jump straight in:
 
 | Path | Contents |
 |---|---|
-| [`docs/architecture`](docs/architecture/README.md) | Module map, boundaries, checkout sequence, order state machine, Outbox & AI diagrams |
-| [`docs/adr`](docs/adr/README.md) | Architecture Decision Records (indexed) |
-| [`docs/git/prs`](docs/git/prs/README.md) | Simulated PR history |
-| [`docs/roadmap.md`](docs/roadmap.md) | The 24-phase build plan |
+| [`docs/architecture`](docs/architecture/README.md) | Module map, boundaries, checkout sequence, order lifecycle, outbox and assistant diagrams |
+| [`docs/adr`](docs/adr/README.md) | Architecture decision records |
+| [`docs/git/prs`](docs/git/prs/README.md) | Pull request write-ups |
+| [`docs/roadmap.md`](docs/roadmap.md) | Build plan by phase |
 | [`docs/demo-data.md`](docs/demo-data.md) | Driving the system end to end |
-| [`docs/local-development.md`](docs/local-development.md) | Local setup: secrets, DB, seed script, web and mobile |
-| [`docs/deployment.md`](docs/deployment.md) | Oracle VM + Vercel + mobile release guide |
+| [`docs/local-development.md`](docs/local-development.md) | Local setup: secrets, database, seed script, web and mobile |
+| [`docs/deployment.md`](docs/deployment.md) | Oracle VM, Vercel and mobile release guide |
 | [`mobile/`](mobile/README.md) | Flutter admin app |
-| [`CHANGELOG.md`](CHANGELOG.md) | Phase-by-phase history |
+| [`CHANGELOG.md`](CHANGELOG.md) | Release history |

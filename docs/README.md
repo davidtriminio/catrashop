@@ -6,7 +6,7 @@ The map of everything under `docs/`.
 |---|---|
 | [architecture/](architecture/README.md) | System context, module map, checkout sequence, order state machine, messaging & AI boundary diagrams |
 | [adr/](adr/README.md) | Architecture Decision Records (indexed, with the numbering explained) |
-| [git/prs/](git/prs/README.md) | Simulated pull-request history (local workflow simulations — no human reviewed the code) |
+| [git/prs/](git/prs/README.md) | Pull request write-ups |
 | [roadmap.md](roadmap.md) | The 24-phase build plan and per-phase status |
 | [demo-data.md](demo-data.md) | How to exercise the running system end to end |
 | [local-development.md](local-development.md) | Run API + seed data + web + Flutter app on your PC |
