@@ -87,13 +87,16 @@ def draw_mark(n, fg, bg, transparent):
 
 def render(size, variant, mode):
     """mode: 'rounded' (tile with transparent corners), 'full' (opaque square, the OS rounds it),
-    'foreground' (only the mark, smaller, for Android adaptive icons) or 'mono' (that mark in black, for themed icons)."""
+    'foreground' (only the mark, smaller, for Android adaptive icons), 'mono' (that mark in black, for themed icons)
+    or 'status' (the mark in white, large, for the small Android notification icon)."""
     v = VARIANTS[variant]
     big = size * SS
-    if mode in ('foreground', 'mono'):
+    if mode in ('foreground', 'mono', 'status'):
         # Adaptive icons keep ~66% of the canvas safe from masking: the mark sits well inside it.
-        mark = draw_mark(big, v['fg'] if mode == 'foreground' else (0, 0, 0), v['bg'], transparent=True)
-        inner = int(big * 0.70)
+        # The notification icon is not masked, so its mark nearly fills the canvas; Android only uses its shape.
+        color = {'foreground': v['fg'], 'mono': (0, 0, 0), 'status': (255, 255, 255)}[mode]
+        mark = draw_mark(big, color, v['bg'], transparent=True)
+        inner = int(big * (0.92 if mode == 'status' else 0.70))
         mark = mark.resize((inner, inner), Image.LANCZOS)
         im = Image.new('RGBA', (big, big), (0, 0, 0, 0))
         im.alpha_composite(mark, ((big - inner) // 2, (big - inner) // 2))
@@ -192,6 +195,9 @@ def android(variant):
     for name, px in {'mdpi': 108, 'hdpi': 162, 'xhdpi': 216, 'xxhdpi': 324, 'xxxhdpi': 432}.items():
         save(render(px, variant, 'foreground'), *res, f'mipmap-{name}', 'ic_launcher_foreground.png')
         save(render(px, variant, 'mono'), *res, f'mipmap-{name}', 'ic_launcher_monochrome.png')
+    # Small status-bar icon of notifications: Android uses only its shape, tinted by the system.
+    for name, px in {'mdpi': 24, 'hdpi': 36, 'xhdpi': 48, 'xxhdpi': 72, 'xxxhdpi': 96}.items():
+        save(render(px, variant, 'status'), *res, f'drawable-{name}', 'ic_stat_notification.png')
     write('<?xml version="1.0" encoding="utf-8"?>\n'
           '<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">\n'
           '    <background android:drawable="@color/ic_launcher_background"/>\n'

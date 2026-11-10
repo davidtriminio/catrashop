@@ -2,6 +2,7 @@ using Catrashop.BuildingBlocks.Results;
 using Catrashop.BuildingBlocks.Security;
 using Catrashop.Modules.Notifications.Application.Contracts;
 using Catrashop.Modules.Notifications.Application.Services;
+using Catrashop.Modules.Notifications.Application.Templates;
 using Catrashop.Modules.Notifications.Contracts;
 using Catrashop.Modules.Notifications.Domain;
 using FluentValidation;
@@ -20,13 +21,14 @@ internal static class NotificationEndpoints
         // --- Customer inbox (me-scoped) ----------------------------------------------------------
         group.MapGet("/", async (
             ICurrentUser user, NotificationQueryService query,
-            bool? unreadOnly, int page, int pageSize, CancellationToken ct) =>
+            HttpRequest http, bool? unreadOnly, int page, int pageSize, CancellationToken ct) =>
         {
             if (user.UserId is not { } recipientId) return Results.Unauthorized();
-            return Results.Ok(await query.ListAsync(recipientId, unreadOnly ?? false, page, pageSize, ct));
+            var language = NotificationTemplateRenderer.ResolveLanguage(http.Headers.AcceptLanguage.ToString());
+            return Results.Ok(await query.ListAsync(recipientId, unreadOnly ?? false, page, pageSize, language, ct));
         })
         .RequireAuthorization()
-        .WithSummary("List my in-app notifications (newest first).");
+        .WithSummary("List my in-app notifications (newest first), in the language of Accept-Language (Spanish by default).");
 
         group.MapGet("/unread-count", async (ICurrentUser user, NotificationQueryService query, CancellationToken ct) =>
         {

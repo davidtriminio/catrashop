@@ -18,7 +18,7 @@ namespace Catrashop.Modules.Notifications.Infrastructure.Persistence.Migrations
 #pragma warning disable 612, 618
             modelBuilder
                 .HasDefaultSchema("notifications")
-                .HasAnnotation("ProductVersion", "10.0.11")
+                .HasAnnotation("ProductVersion", "10.0.14")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -26,7 +26,6 @@ namespace Catrashop.Modules.Notifications.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Catrashop.Infrastructure.Outbox.OutboxMessage", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -74,7 +73,6 @@ namespace Catrashop.Modules.Notifications.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Catrashop.Modules.Notifications.Domain.Notification", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -87,6 +85,11 @@ namespace Catrashop.Modules.Notifications.Infrastructure.Persistence.Migrations
                     b.Property<DateTimeOffset>("CreatedAtUtc")
                         .HasColumnType("timestamp with time zone")
                         .HasColumnName("created_at_utc");
+
+                    b.Property<string>("DataJson")
+                        .HasMaxLength(4000)
+                        .HasColumnType("character varying(4000)")
+                        .HasColumnName("data_json");
 
                     b.Property<bool>("IsRead")
                         .HasColumnType("boolean")
@@ -124,7 +127,6 @@ namespace Catrashop.Modules.Notifications.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Catrashop.Modules.Notifications.Domain.NotificationDispatch", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -169,7 +171,6 @@ namespace Catrashop.Modules.Notifications.Infrastructure.Persistence.Migrations
             modelBuilder.Entity("Catrashop.Modules.Notifications.Domain.NotificationPreference", b =>
                 {
                     b.Property<Guid>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("uuid")
                         .HasColumnName("id");
 
@@ -192,7 +193,6 @@ namespace Catrashop.Modules.Notifications.Infrastructure.Persistence.Migrations
                     b.OwnsMany("Catrashop.Modules.Notifications.Domain.MutedChannel", "Mutes", b1 =>
                         {
                             b1.Property<Guid>("Id")
-                                .ValueGeneratedOnAdd()
                                 .HasColumnType("uuid")
                                 .HasColumnName("id");
 

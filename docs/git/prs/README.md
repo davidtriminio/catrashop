@@ -1,8 +1,6 @@
-# Simulated Pull Request history
+# Pull request history
 
-> **These PRs are local workflow simulations.** No human reviewer approved this code. They exist to demonstrate a
-> professional branch → commit → review → merge workflow, including a few deliberate `REQUEST CHANGES` cycles
-> followed by corrective commits. Every review comment below was authored as part of the simulation.
+One write-up per change: what it does, why, and how it was checked.
 
 Index:
 
@@ -56,6 +54,4 @@ Index:
 | [PR-046](PR-046-app-icons.md) | New app icons: web favicons and the mobile launcher icon | `feature/app-icons` | `develop` |
 | [PR-047](PR-047-ecommerce-icon.md) | App icon: a shopping bag in orbit instead of the H | `feature/ecommerce-icon` | `develop` |
 | [PR-048](PR-048-cart-planet-icon.md) | App icon: a shopping cart with a planet | `feature/cart-planet-icon` | `develop` |
-| [PR-049](PR-049-rename-catrashop.md) | The product is now called Catrashop | `feature/rename-catrashop` | `develop` |
-| [PR-050](PR-050-rename-everything.md) | Rename the code, configuration and docs to Catrashop | `feature/rename-internal-catrashop` | `develop` |
 | [PR-051](PR-051-payment-methods.md) | Payment methods: cash on delivery, bank transfer and pay at the store | `feature/payment-methods` | `develop` |

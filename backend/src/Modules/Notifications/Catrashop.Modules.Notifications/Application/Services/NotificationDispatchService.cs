@@ -60,7 +60,7 @@ public sealed class NotificationDispatchService : INotificationDispatcher
         var deliveredInApp = false;
         if (Allowed(NotificationChannel.InApp))
         {
-            _notifications.Add(Notification.Create(request.RecipientId, request.Type, rendered.Title, rendered.Body, now));
+            _notifications.Add(Notification.Create(request.RecipientId, request.Type, rendered.Title, rendered.Body, now, request.Data));
             deliveredInApp = true;
         }
 
