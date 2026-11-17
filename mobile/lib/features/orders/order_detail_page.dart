@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format.dart';
+import '../../core/insets.dart';
 import '../../core/providers.dart';
 import '../../core/theme.dart';
 import 'order_models.dart';
@@ -131,7 +132,7 @@ class _Body extends ConsumerWidget {
     final itemsCount = o.items.fold<int>(0, (sum, i) => sum + i.quantity);
 
     return ListView(
-      padding: const EdgeInsets.fromLTRB(Gap.s4, Gap.s2, Gap.s4, Gap.s5),
+      padding: EdgeInsets.fromLTRB(Gap.s4, Gap.s2, Gap.s4, Gap.s5 + MediaQuery.of(context).padding.bottom),
       children: [
         // Summary
         Card(
@@ -370,7 +371,7 @@ class _ConfirmSheetState extends State<_ConfirmSheet> {
     final cancel = widget.action == OrderAction.cancel;
 
     return Padding(
-      padding: EdgeInsets.fromLTRB(Gap.s5, Gap.s1, Gap.s5, MediaQuery.of(context).viewInsets.bottom + Gap.s5),
+      padding: EdgeInsets.fromLTRB(Gap.s5, Gap.s1, Gap.s5, sheetBottomInset(context) + Gap.s5),
       child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text(cancel ? 'Cancelar pedido' : widget.action.label, style: theme.textTheme.titleLarge),
         const SizedBox(height: Gap.s2),
@@ -486,7 +487,7 @@ class _VerifySheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(Gap.s5, Gap.s1, Gap.s5, Gap.s5),
+      padding: EdgeInsets.fromLTRB(Gap.s5, Gap.s1, Gap.s5, sheetBottomInset(context) + Gap.s5),
       child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('Aprobar transferencia', style: theme.textTheme.titleLarge),
         const SizedBox(height: Gap.s2),
@@ -527,7 +528,7 @@ class _RejectSheetState extends State<_RejectSheet> {
     final theme = Theme.of(context);
     final scheme = theme.colorScheme;
     return Padding(
-      padding: EdgeInsets.fromLTRB(Gap.s5, Gap.s1, Gap.s5, MediaQuery.of(context).viewInsets.bottom + Gap.s5),
+      padding: EdgeInsets.fromLTRB(Gap.s5, Gap.s1, Gap.s5, sheetBottomInset(context) + Gap.s5),
       child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('Rechazar comprobante', style: theme.textTheme.titleLarge),
         const SizedBox(height: Gap.s2),
@@ -626,7 +627,7 @@ class _CollectSheet extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     return Padding(
-      padding: const EdgeInsets.fromLTRB(Gap.s5, Gap.s1, Gap.s5, Gap.s5),
+      padding: EdgeInsets.fromLTRB(Gap.s5, Gap.s1, Gap.s5, sheetBottomInset(context) + Gap.s5),
       child: Column(mainAxisSize: MainAxisSize.min, crossAxisAlignment: CrossAxisAlignment.start, children: [
         Text('Registrar cobro', style: theme.textTheme.titleLarge),
         const SizedBox(height: Gap.s2),
