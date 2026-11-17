@@ -6,14 +6,14 @@ Target topology:
 Browser ──► Vercel (Angular web + admin) ──/api/* rewrite──►┐
 Flutter admin app ──────────────────────────────────────────┤
                                                              ▼
-                        Cloudflare (api.davidtriminio.dev, proxied, Full strict)
+                        Cloudflare (catrashop-api.davidtriminio.dev, proxied, Full strict)
                                                              ▼
                         Oracle VM (Ubuntu 24.04, 1 OCPU / 1 GB / ~5 GB free)
                           Apache :443 ─► Kestrel 127.0.0.1:5080 (systemd) ─► PostgreSQL (existing)
 ```
 
 Because Vercel proxies `/api/*` to the API (`frontend/vercel.json`), the Angular apps keep using relative
-`/api/...` URLs and no CORS setup is needed for them. The mobile app calls `https://api.davidtriminio.dev` directly.
+`/api/...` URLs and no CORS setup is needed for them. The mobile app calls `https://catrashop-api.davidtriminio.dev` directly.
 
 ## Local development (no secrets in the repo)
 Secrets live in `.env` (gitignored, for docker compose) and in .NET User Secrets (outside the repo):
@@ -63,7 +63,7 @@ ssh ubuntu@<vm> sudo /opt/catrashop/update.sh /tmp/catrashop-release.tar.gz
 `update.sh` unpacks, applies the idempotent SQL migrations (`psql`), switches the `current` symlink, restarts,
 checks `/health/live`, rolls back automatically on failure and keeps only the last 2 releases (disk).
 
-Verify: `curl https://api.davidtriminio.dev/health/ready` and `journalctl -u catrashop-api -f`.
+Verify: `curl https://catrashop-api.davidtriminio.dev/health/ready` and `journalctl -u catrashop-api -f`.
 
 ### Create the first admin
 Register a normal account (`POST /api/v1/identity/register`), then promote it once in the database:
