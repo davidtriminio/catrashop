@@ -16,7 +16,7 @@ through the fulfilment states (process → ship → deliver) or cancel it. See
 ```bash
 cd mobile
 flutter pub get
-flutter run                      # talks to https://api.davidtriminio.dev
+flutter run                      # talks to https://catrashop-api.davidtriminio.dev
 flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5227   # Android emulator -> local API
 flutter test && flutter analyze
 ```
@@ -25,7 +25,7 @@ Debug builds allow plain HTTP (for a local API); release builds are HTTPS-only.
 ### Changing the API address without rebuilding
 **Ajustes → Servidor → Cambiar** edits the address this device talks to (an absolute `http(s)://` URL; **Probar**
 checks `/health/live`). It is saved in the Keychain/Keystore, so it survives closing the app, and **Restablecer** goes
-back to the address the app was built with (`--dart-define=API_BASE_URL`, default `https://api.davidtriminio.dev`).
+back to the address the app was built with (`--dart-define=API_BASE_URL`, default `https://catrashop-api.davidtriminio.dev`).
 Changing it signs the admin out, because the session belongs to the previous server. The background order check uses
 the saved address too.
 

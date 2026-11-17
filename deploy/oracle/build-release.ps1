@@ -6,7 +6,7 @@
   Output: deploy/oracle/dist/catrashop-release.tar.gz (~15-25 MB). Nothing is built on the server.
 .EXAMPLE
   ./build-release.ps1
-  ./build-release.ps1 -Upload -Server ubuntu@api.davidtriminio.dev -Key ~/.ssh/oracle.key
+  ./build-release.ps1 -Upload -Server ubuntu@catrashop-api.davidtriminio.dev -Key ~/.ssh/oracle.key
 #>
 param(
   [switch]$Upload,

@@ -2,7 +2,7 @@
 /// `flutter run --dart-define=API_BASE_URL=http://10.0.2.2:5227`
 const String apiBaseUrl = String.fromEnvironment(
   'API_BASE_URL',
-  defaultValue: 'https://api.davidtriminio.dev',
+  defaultValue: 'https://catrashop-api.davidtriminio.dev',
 );
 
 /// Permissions that make an account eligible to use this app (granted to OrderManager/Administrator).
