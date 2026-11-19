@@ -1,14 +1,15 @@
 import { STORE_CURRENCY } from '@cs/util/store';
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CatalogApi } from '@cs/api/catalog.api';
 import { CatalogAdminApi } from '@cs/api/catalog-admin.api';
 import { Brand, Category, ProductListItem } from '@cs/api/models';
 import { problemMessage } from '@cs/util/problem';
+import { Select } from '../ui/select';
 
 @Component({
   selector: 'app-catalog-admin',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, Select],
   template: `
     <h1>Catalog</h1>
     @if (error()) { <div class="alert error">{{ error() }}</div> }
@@ -42,16 +43,10 @@ import { problemMessage } from '@cs/util/problem';
         <div class="row">
           <div class="field" style="flex:2"><label>Name</label><input class="input" formControlName="name" /></div>
           <div class="field" style="flex:1"><label>Category</label>
-            <select formControlName="categoryId">
-              <option value="">Select…</option>
-              @for (c of categories(); track c.id) { <option [value]="c.id">{{ c.name }}</option> }
-            </select>
+            <cs-select formControlName="categoryId" [options]="categoryOptions()" placeholder="Select…" />
           </div>
           <div class="field" style="flex:1"><label>Brand (optional)</label>
-            <select formControlName="brandId">
-              <option value="">None</option>
-              @for (b of brands(); track b.id) { <option [value]="b.id">{{ b.name }}</option> }
-            </select>
+            <cs-select formControlName="brandId" [options]="brandOptions()" placeholder="None" />
           </div>
         </div>
         <div class="field"><label>Description</label><textarea rows="2" formControlName="description"></textarea></div>
@@ -100,6 +95,8 @@ export class CatalogAdmin implements OnInit {
   readonly categories = signal<Category[]>([]);
   readonly brands = signal<Brand[]>([]);
   readonly products = signal<ProductListItem[]>([]);
+  readonly categoryOptions = computed(() => this.categories().map((c) => ({ value: c.id, label: c.name })));
+  readonly brandOptions = computed(() => [{ value: '', label: 'None' }, ...this.brands().map((b) => ({ value: b.id, label: b.name }))]);
   readonly error = signal<string | null>(null);
   readonly message = signal<string | null>(null);
   readonly busy = signal(false);

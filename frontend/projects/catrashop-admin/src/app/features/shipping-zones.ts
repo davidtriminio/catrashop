@@ -6,11 +6,12 @@ import { HONDURAS_DEPARTMENTS } from '@cs/util/departments';
 import { MoneyPipe } from '@cs/util/money.pipe';
 import { problemMessage } from '@cs/util/problem';
 import { STORE_CURRENCY } from '@cs/util/store';
+import { Select } from '../ui/select';
 
 /** Delivery zones (cost, lead time, cash-on-delivery coverage, departments) and the stores that offer pickup. */
 @Component({
   selector: 'app-shipping-zones',
-  imports: [ReactiveFormsModule, MoneyPipe],
+  imports: [ReactiveFormsModule, MoneyPipe, Select],
   template: `
     @if (error()) { <div class="alert error">{{ error() }}</div> }
     @if (message()) { <div class="alert success">{{ message() }}</div> }
@@ -78,10 +79,7 @@ import { STORE_CURRENCY } from '@cs/util/store';
           <div class="field" style="flex:1"><label>City</label><input class="input" formControlName="city" /></div>
           <div class="field" style="flex:1">
             <label>Department</label>
-            <select formControlName="departmentCode">
-              <option value="">Select…</option>
-              @for (d of departments; track d.code) { <option [value]="d.code">{{ d.name }}</option> }
-            </select>
+            <cs-select formControlName="departmentCode" [options]="departmentOptions" placeholder="Select…" />
           </div>
         </div>
         <div class="field"><label>Opening hours</label><input class="input" formControlName="hours" placeholder="Mon–Sat 9:00–18:00" /></div>
@@ -125,6 +123,7 @@ export class ShippingZones implements OnInit {
   private readonly api = inject(ShippingAdminApi);
 
   readonly departments = HONDURAS_DEPARTMENTS;
+  readonly departmentOptions = HONDURAS_DEPARTMENTS.map((d) => ({ value: d.code, label: d.name }));
   readonly zones = signal<ShippingZone[]>([]);
   readonly stores = signal<PickupStore[]>([]);
   readonly selected = signal<ReadonlySet<string>>(new Set());
