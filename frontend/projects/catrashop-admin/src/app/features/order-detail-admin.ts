@@ -1,26 +1,27 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { ActivatedRoute, RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { I18n } from '@cs/i18n/i18n';
+import { LocalDatePipe } from '@cs/util/local-date.pipe';
 import { OrdersAdminApi } from '@cs/api/orders-admin.api';
 import { OrderDetail, PaymentResponse } from '@cs/api/models';
 import { PaymentsAdminApi } from '@cs/api/payments-admin.api';
 import { StatusBadge } from '@cs/ui/status-badge';
 import { Timeline } from '@cs/ui/timeline';
 import { MoneyPipe } from '@cs/util/money.pipe';
-import { problemMessage } from '@cs/util/problem';
 
 type Action = 'process' | 'ship' | 'deliver' | 'cancel';
 
 @Component({
   selector: 'app-order-detail-admin',
-  imports: [DatePipe, RouterLink, MoneyPipe, StatusBadge, Timeline],
+  imports: [LocalDatePipe, RouterLink, MoneyPipe, StatusBadge, Timeline, TranslocoPipe],
   template: `
     @if (error()) { <div class="alert error">{{ error() }}</div> }
     @if (message()) { <div class="alert success">{{ message() }}</div> }
 
     @if (order(); as o) {
-      <nav class="crumbs" aria-label="Breadcrumb">
-        <a routerLink="/orders">Orders</a><span>/</span><span aria-current="page">{{ o.orderNumber }}</span>
+      <nav class="crumbs" [aria-label]="'admin.orderDetail.breadcrumb' | transloco">
+        <a routerLink="/orders">{{ 'admin.nav.orders' | transloco }}</a><span>/</span><span aria-current="page">{{ o.orderNumber }}</span>
       </nav>
 
       <div class="page-head">
@@ -30,18 +31,18 @@ type Action = 'process' | 'ship' | 'deliver' | 'cancel';
         </div>
         <div class="actions">
           @if (next(o.status); as n) {
-            <button class="btn" [disabled]="busy()" (click)="act(n.action, o)">{{ n.label }}</button>
+            <button class="btn" [disabled]="busy()" (click)="act(n.action, o)">{{ n.label | transloco }}</button>
           }
           @if (canCancel(o.status)) {
-            <button class="btn secondary danger-text" [disabled]="busy()" (click)="act('cancel', o)">Cancel order</button>
+            <button class="btn secondary danger-text" [disabled]="busy()" (click)="act('cancel', o)">{{ 'admin.orderDetail.cancelOrder' | transloco }}</button>
           }
         </div>
       </div>
-      <p class="muted placed">Customer {{ o.customerId }} · placed {{ o.createdAtUtc | date: 'MMMM d, y, h:mm a' }}</p>
+      <p class="muted placed">{{ 'admin.orderDetail.customer' | transloco }} {{ o.customerId }} · {{ 'admin.orderDetail.placed' | transloco }} {{ o.createdAtUtc | localDate: 'long' }}</p>
 
       <div class="cols grids">
         <div class="card">
-          <h2>Items</h2>
+          <h2>{{ 'admin.orderDetail.items' | transloco }}</h2>
           @for (i of o.items; track i.id) {
             <div class="item">
               <div class="what"><strong>{{ i.productName }}</strong><span class="muted">{{ i.sku }} · {{ i.quantity }} × {{ i.unitPrice | money: o.currency }}</span></div>
@@ -49,17 +50,17 @@ type Action = 'process' | 'ship' | 'deliver' | 'cancel';
             </div>
           }
           <div class="totals">
-            <div class="line"><span class="muted">Subtotal</span><span>{{ o.subtotal | money: o.currency }}</span></div>
-            @if (o.discountTotal > 0) { <div class="line"><span class="muted">Discount</span><span>−{{ o.discountTotal | money: o.currency }}</span></div> }
-            <div class="line"><span class="muted">Tax</span><span>{{ o.taxTotal | money: o.currency }}</span></div>
-            <div class="line"><span class="muted">Shipping</span><span>{{ o.shippingTotal | money: o.currency }}</span></div>
-            <div class="line total"><span>Total</span><strong>{{ o.grandTotal | money: o.currency }}</strong></div>
+            <div class="line"><span class="muted">{{ 'admin.orderDetail.subtotal' | transloco }}</span><span>{{ o.subtotal | money: o.currency }}</span></div>
+            @if (o.discountTotal > 0) { <div class="line"><span class="muted">{{ 'admin.orderDetail.discount' | transloco }}</span><span>−{{ o.discountTotal | money: o.currency }}</span></div> }
+            <div class="line"><span class="muted">{{ 'admin.orderDetail.tax' | transloco }}</span><span>{{ o.taxTotal | money: o.currency }}</span></div>
+            <div class="line"><span class="muted">{{ 'admin.orderDetail.shipping' | transloco }}</span><span>{{ o.shippingTotal | money: o.currency }}</span></div>
+            <div class="line total"><span>{{ 'admin.c.total' | transloco }}</span><strong>{{ o.grandTotal | money: o.currency }}</strong></div>
           </div>
         </div>
 
         <div class="side">
           <div class="card">
-            <h2>{{ o.deliveryMode === 'Pickup' ? 'Pickup at store' : 'Ship to' }}</h2>
+            <h2>{{ (o.deliveryMode === 'Pickup' ? 'admin.orderDetail.pickup' : 'admin.orderDetail.shipTo') | transloco }}</h2>
             <p class="addr">
               <strong>{{ o.shippingAddress.recipientName }}</strong><br />
               {{ o.shippingAddress.line1 }}@if (o.shippingAddress.line2) { , {{ o.shippingAddress.line2 }} }<br />
@@ -69,22 +70,22 @@ type Action = 'process' | 'ship' | 'deliver' | 'cancel';
           </div>
           @if (o.paymentMethod) {
             <div class="card">
-              <h2>Payment</h2>
-              <p class="line"><span class="muted">Method</span><strong>{{ methodLabel(o.paymentMethod) }}</strong></p>
+              <h2>{{ 'admin.orderDetail.payment' | transloco }}</h2>
+              <p class="line"><span class="muted">{{ 'admin.c.method' | transloco }}</span><strong>{{ methodLabel(o.paymentMethod) }}</strong></p>
               @if (payment(); as p) {
-                <p class="line"><span class="muted">Status</span><cs-status-badge [status]="p.status" /></p>
-                @if (p.transferReference) { <p class="line"><span class="muted">Transfer</span><span>{{ p.transferBankAccountCode }} · {{ p.transferReference }}</span></p> }
-                @if (p.status === 'UnderReview') { <a class="btn secondary sm" routerLink="/payments">Verify the receipt</a> }
+                <p class="line"><span class="muted">{{ 'admin.c.status' | transloco }}</span><cs-status-badge [status]="p.status" /></p>
+                @if (p.transferReference) { <p class="line"><span class="muted">{{ 'admin.orderDetail.transfer' | transloco }}</span><span>{{ p.transferBankAccountCode }} · {{ p.transferReference }}</span></p> }
+                @if (p.status === 'UnderReview') { <a class="btn secondary sm" routerLink="/payments">{{ 'admin.orderDetail.verify' | transloco }}</a> }
                 @if (p.status === 'Pending' && o.paymentMethod !== 'TRANSFERENCIA') {
                   @if (o.status === 'Delivered') {
-                    <button class="btn sm" [disabled]="busy()" (click)="collect(p)">Mark money collected</button>
-                  } @else { <p class="muted">The money is collected once the order is delivered.</p> }
+                    <button class="btn sm" [disabled]="busy()" (click)="collect(p)">{{ 'admin.orderDetail.markCollected' | transloco }}</button>
+                  } @else { <p class="muted">{{ 'admin.orderDetail.collectedHint' | transloco }}</p> }
                 }
-              } @else { <p class="muted">The customer has not started the payment.</p> }
+              } @else { <p class="muted">{{ 'admin.orderDetail.notStarted' | transloco }}</p> }
             </div>
           }
           <div class="card">
-            <h2>History</h2>
+            <h2>{{ 'admin.orderDetail.history' | transloco }}</h2>
             <cs-timeline [items]="o.history" />
           </div>
         </div>
@@ -116,6 +117,7 @@ export class OrderDetailAdmin implements OnInit {
   private readonly api = inject(OrdersAdminApi);
   private readonly payments = inject(PaymentsAdminApi);
   private readonly route = inject(ActivatedRoute);
+  private readonly i18n = inject(I18n);
 
   readonly order = signal<OrderDetail | null>(null);
   readonly payment = signal<PaymentResponse | null>(null);
@@ -128,7 +130,7 @@ export class OrderDetailAdmin implements OnInit {
   private load(): void {
     this.api.get(this.id()).subscribe({
       next: (o) => { this.order.set(o); this.loadPayment(o); },
-      error: (e) => this.error.set(problemMessage(e, 'Order not found.')),
+      error: (e) => this.error.set(this.i18n.problem(e, 'admin.orderDetail.notFound')),
     });
   }
 
@@ -138,23 +140,24 @@ export class OrderDetailAdmin implements OnInit {
   }
 
   methodLabel(method: string): string {
-    return { CONTRA_ENTREGA: 'Cash on delivery', TRANSFERENCIA: 'Bank transfer', PAGO_EN_TIENDA: 'Pay at the store' }[method] ?? method;
+    this.i18n.lang(); // recompute when the language changes
+    return this.i18n.tOr(`admin.method.${method}`, method);
   }
 
   collect(p: PaymentResponse): void {
     this.busy.set(true); this.error.set(null); this.message.set(null);
     this.payments.collect(p.id).subscribe({
-      next: () => { this.message.set('Payment registered as collected.'); this.busy.set(false); this.load(); },
-      error: (e) => { this.error.set(problemMessage(e)); this.busy.set(false); },
+      next: () => { this.message.set(this.i18n.t('admin.orderDetail.collectedDone')); this.busy.set(false); this.load(); },
+      error: (e) => { this.error.set(this.i18n.problem(e)); this.busy.set(false); },
     });
   }
 
   /** The one fulfilment step the order state machine allows next (null when there is none). */
   next(status: string): { action: Action; label: string } | null {
     switch (status) {
-      case 'Paid': case 'Confirmed': return { action: 'process', label: 'Start processing' };
-      case 'Processing': return { action: 'ship', label: 'Mark shipped' };
-      case 'Shipped': return { action: 'deliver', label: 'Mark delivered' };
+      case 'Paid': case 'Confirmed': return { action: 'process', label: 'admin.orderDetail.start' };
+      case 'Processing': return { action: 'ship', label: 'admin.orderDetail.markShipped' };
+      case 'Shipped': return { action: 'deliver', label: 'admin.orderDetail.markDelivered' };
       default: return null;
     }
   }
@@ -168,10 +171,10 @@ export class OrderDetailAdmin implements OnInit {
     const op = action === 'process' ? this.api.process(o.id)
       : action === 'ship' ? this.api.ship(o.id)
       : action === 'deliver' ? this.api.deliver(o.id)
-      : this.api.cancel(o.id, 'Cancelled by staff');
+      : this.api.cancel(o.id, this.i18n.t('admin.orderDetail.cancelReason'));
     op.subscribe({
-      next: () => { this.message.set('Order updated.'); this.busy.set(false); this.load(); },
-      error: (e) => { this.error.set(problemMessage(e)); this.busy.set(false); },
+      next: () => { this.message.set(this.i18n.t('admin.orderDetail.updated')); this.busy.set(false); this.load(); },
+      error: (e) => { this.error.set(this.i18n.problem(e)); this.busy.set(false); },
     });
   }
 }

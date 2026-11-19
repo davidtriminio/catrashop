@@ -1,16 +1,17 @@
 import { Component } from '@angular/core';
 import { RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
 import { Icon } from '../ui/icon';
 
 @Component({
   selector: 'app-forbidden',
-  imports: [RouterLink, Icon],
+  imports: [RouterLink, Icon, TranslocoPipe],
   template: `
     <div class="card denied">
       <span class="ico"><cs-icon name="shield" [size]="26" /></span>
-      <h1>Access denied</h1>
-      <p class="muted">Your account doesn't have permission to view that section.</p>
-      <a routerLink="/dashboard" class="btn">Back to dashboard</a>
+      <h1>{{ 'admin.forbidden.title' | transloco }}</h1>
+      <p class="muted">{{ 'admin.forbidden.text' | transloco }}</p>
+      <a routerLink="/dashboard" class="btn">{{ 'admin.forbidden.back' | transloco }}</a>
     </div>
   `,
   styles: [`
