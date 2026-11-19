@@ -1,12 +1,15 @@
 using Catrashop.BuildingBlocks.Caching;
 using Catrashop.BuildingBlocks.Results;
 using Catrashop.BuildingBlocks.Security;
+using Catrashop.Modules.Catalog.Application.Configuration;
 using Catrashop.Modules.Catalog.Application.Contracts;
 using Catrashop.Modules.Catalog.Application.Services;
 using Catrashop.Modules.Catalog.Domain;
 using FluentValidation;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Http.Features;
+using Microsoft.Extensions.Options;
 using Microsoft.AspNetCore.Routing;
 
 namespace Catrashop.Modules.Catalog.Api;
@@ -53,6 +56,18 @@ internal static class CatalogEndpoints
             Results.Ok(await queries.ListBrandsAsync(ct)))
         .CacheCatalogReads()
         .WithSummary("List active brands.");
+
+        group.MapGet("/images/{key}", async (string key, HttpContext http, ProductImageService images, CancellationToken ct) =>
+        {
+            var image = await images.OpenAsync(key, ct);
+            if (image is null)
+                return Results.NotFound();
+
+            // File names are random and never reused, so browsers and CDNs may keep an image for good.
+            http.Response.Headers.CacheControl = "public, max-age=31536000, immutable";
+            return Results.File(image.Content, image.ContentType, enableRangeProcessing: false);
+        })
+        .WithSummary("A product image uploaded from the back office.");
 
         // --- Admin (require catalog management permission) --------------------------------------
 
@@ -105,6 +120,65 @@ internal static class CatalogEndpoints
             return (await service.AddVariantAsync(id, request, ct)).ToHttpResult();
         })
         .WithSummary("Add a variant to a product.");
+
+        admin.MapGet("/admin/products", async (
+            string? status, string? q, int? page, int? pageSize, CatalogQueryService queries, CancellationToken ct) =>
+            Results.Ok(await queries.SearchAdminProductsAsync(new AdminProductSearchCriteria(status, q, page ?? 1, pageSize ?? 20), ct)))
+        .WithSummary("List products in any status (Draft, Active, Archived), filterable by status and by name or SKU.");
+
+        admin.MapGet("/admin/products/{id:guid}", async (Guid id, CatalogQueryService queries, CancellationToken ct) =>
+            (await queries.GetAdminProductAsync(id, ct)).ToHttpResult())
+        .WithSummary("A product in any status, with variants, attributes and images (with their ids).");
+
+        admin.MapPut("/products/{id:guid}/variants/{variantId:guid}", async (
+            Guid id, Guid variantId, UpdateVariantRequest request, IValidator<UpdateVariantRequest> validator,
+            ProductService service, CancellationToken ct) =>
+        {
+            if (await Validate(validator, request) is { } problem) return problem;
+            return (await service.UpdateVariantAsync(id, variantId, request, ct)).ToHttpResult();
+        })
+        .WithSummary("Change a variant's name, price and availability.");
+
+        admin.MapPost("/products/{id:guid}/images", async (
+            Guid id, HttpContext http, ProductImageService images, IOptions<CatalogOptions> options, CancellationToken ct) =>
+        {
+            var max = options.Value.MaxImageBytes;
+            // Cap what the server will read before looking at the form (the image plus a little for the text fields).
+            http.Features.Get<IHttpMaxRequestBodySizeFeature>()!.MaxRequestBodySize = max + 64 * 1024;
+            if (!http.Request.HasFormContentType)
+                return Results.ValidationProblem(new Dictionary<string, string[]> { ["image"] = ["Send the image as multipart/form-data."] });
+
+            IFormCollection form;
+            try { form = await http.Request.ReadFormAsync(ct); }
+            catch (Exception ex) when (ex is InvalidDataException or BadHttpRequestException or IOException)
+            {
+                return Results.ValidationProblem(new Dictionary<string, string[]> { ["image"] = [CatalogErrors.ImageTooLarge(max).Message] });
+            }
+
+            var file = form.Files.GetFile("image");
+            if (file is null || file.Length == 0)
+                return Results.ValidationProblem(new Dictionary<string, string[]> { ["image"] = [CatalogErrors.ImageRequired.Message] });
+            if (file.Length > max)
+                return Results.ValidationProblem(new Dictionary<string, string[]> { ["image"] = [CatalogErrors.ImageTooLarge(max).Message] });
+
+            await using var stream = file.OpenReadStream();
+            using var buffer = new MemoryStream((int)file.Length);
+            await stream.CopyToAsync(buffer, ct);
+
+            return (await images.UploadAsync(id, buffer.ToArray(), form["altText"], ct))
+                .ToHttpResult(r => Results.Created(r.Url, r));
+        })
+        .WithSummary("Upload a product photo (JPG, PNG or WebP).");
+
+        admin.MapPost("/products/{id:guid}/images/{imageId:guid}/primary", async (
+            Guid id, Guid imageId, ProductImageService images, CancellationToken ct) =>
+            (await images.SetPrimaryAsync(id, imageId, ct)).ToHttpResult())
+        .WithSummary("Make an image the product's main photo.");
+
+        admin.MapDelete("/products/{id:guid}/images/{imageId:guid}", async (
+            Guid id, Guid imageId, ProductImageService images, CancellationToken ct) =>
+            (await images.RemoveAsync(id, imageId, ct)).ToHttpResult())
+        .WithSummary("Remove a product photo.");
 
         admin.MapPost("/products/{id:guid}/publish", async (Guid id, ProductService service, CancellationToken ct) =>
             (await service.PublishAsync(id, ct)).ToHttpResult())

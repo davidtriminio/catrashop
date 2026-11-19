@@ -71,3 +71,12 @@ public sealed class AddVariantRequestValidator : AbstractValidator<AddVariantReq
         RuleFor(x => x.Currency).NotEmpty().Must(store.IsStoreCurrency).WithMessage(store.CurrencyMessage);
     }
 }
+
+public sealed class UpdateVariantRequestValidator : AbstractValidator<UpdateVariantRequest>
+{
+    public UpdateVariantRequestValidator()
+    {
+        RuleFor(x => x.Name).NotEmpty().MaximumLength(150);
+        RuleFor(x => x.UnitPrice).GreaterThan(0).PrecisionScale(12, 2, false).LessThanOrEqualTo(PriceLimits.Max);
+    }
+}

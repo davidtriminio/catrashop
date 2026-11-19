@@ -11,6 +11,9 @@ namespace Catrashop.Modules.Catalog.Domain;
 /// </summary>
 public sealed class Product : AggregateRoot<Guid>
 {
+    /// <summary>Most images a single product can carry.</summary>
+    public const int MaxImages = 10;
+
     private readonly List<ProductVariant> _variants = new();
     private readonly List<ProductAttribute> _attributes = new();
     private readonly List<ProductImage> _images = new();
@@ -74,7 +77,7 @@ public sealed class Product : AggregateRoot<Guid>
         Touch();
     }
 
-    public void AddImage(string url, string? altText, int sortOrder, bool isPrimary)
+    public ProductImage AddImage(string url, string? altText, int sortOrder, bool isPrimary)
     {
         // Only one image can be primary; a new primary demotes the others.
         if (isPrimary)
@@ -83,8 +86,63 @@ public sealed class Product : AggregateRoot<Guid>
 
         // If this is the first image, it becomes primary by default.
         var makePrimary = isPrimary || _images.Count == 0;
-        _images.Add(new ProductImage(Guid.NewGuid(), Id, url.Trim(), altText?.Trim(), sortOrder, makePrimary));
+        var image = new ProductImage(Guid.NewGuid(), Id, url.Trim(), altText?.Trim(), sortOrder, makePrimary);
+        _images.Add(image);
         Touch();
+        return image;
+    }
+
+    /// <summary>Appends an uploaded image (after the existing ones), refusing more than <see cref="MaxImages"/>.</summary>
+    public Result<ProductImage> AttachImage(string url, string? altText)
+    {
+        if (_images.Count >= MaxImages)
+            return CatalogErrors.TooManyImages;
+
+        var next = _images.Count == 0 ? 0 : _images.Max(i => i.SortOrder) + 1;
+        return AddImage(url, altText, next, isPrimary: false);
+    }
+
+    /// <summary>Removes an image; if it was the primary one, the first remaining image becomes primary.</summary>
+    public Result<ProductImage> RemoveImage(Guid imageId)
+    {
+        var image = _images.FirstOrDefault(i => i.Id == imageId);
+        if (image is null)
+            return CatalogErrors.ImageNotFound;
+
+        _images.Remove(image);
+        if (image.IsPrimary)
+            _images.OrderBy(i => i.SortOrder).FirstOrDefault()?.SetPrimary(true);
+
+        Touch();
+        return image;
+    }
+
+    public Result SetPrimaryImage(Guid imageId)
+    {
+        if (_images.All(i => i.Id != imageId))
+            return CatalogErrors.ImageNotFound;
+
+        foreach (var image in _images)
+            image.SetPrimary(image.Id == imageId);
+
+        Touch();
+        return Result.Success();
+    }
+
+    /// <summary>Changes a variant's name, price and availability. SKU and currency never change after creation.</summary>
+    public Result UpdateVariant(Guid variantId, string name, decimal price, bool isActive)
+    {
+        var variant = _variants.FirstOrDefault(v => v.Id == variantId);
+        if (variant is null)
+            return CatalogErrors.VariantNotFound;
+
+        // A product on sale must keep something to sell: stopping the last variant would make it unbuyable.
+        if (!isActive && variant.IsActive && Status == ProductStatus.Active && _variants.Count(v => v.IsActive) == 1)
+            return CatalogErrors.CannotDeactivateLastVariant;
+
+        variant.Update(name.Trim(), price, isActive);
+        Touch();
+        return Result.Success();
     }
 
     public Result Publish()

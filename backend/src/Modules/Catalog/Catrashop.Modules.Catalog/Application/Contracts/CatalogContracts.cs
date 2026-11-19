@@ -23,6 +23,9 @@ public sealed record UpdateProductRequest(string Name, string Description, Guid 
 
 public sealed record AddVariantRequest(string Sku, string Name, decimal UnitPrice, string Currency);
 
+/// <summary>Changes a variant's name, price and availability (its SKU and currency are fixed).</summary>
+public sealed record UpdateVariantRequest(string Name, decimal UnitPrice, bool IsActive);
+
 // --- Responses ----------------------------------------------------------------------------------
 
 public sealed record CreatedResource(Guid Id, string Slug);
@@ -61,6 +64,29 @@ public sealed record ProductDetail(
     IReadOnlyList<ProductVariantResponse> Variants,
     IReadOnlyList<ProductAttributeResponse> Attributes,
     IReadOnlyList<ProductImageResponse> Images);
+
+/// <summary>An image as the back office sees it: with its id, so it can be removed or made primary.</summary>
+public sealed record AdminProductImage(Guid Id, string Url, string? AltText, int SortOrder, bool IsPrimary);
+
+/// <summary>A product in any state (Draft, Active or Archived), for the back office.</summary>
+public sealed record AdminProductDetail(
+    Guid Id,
+    string Name,
+    string Slug,
+    string Description,
+    string Status,
+    Guid CategoryId,
+    string CategoryName,
+    Guid? BrandId,
+    string? BrandName,
+    IReadOnlyList<ProductVariantResponse> Variants,
+    IReadOnlyList<ProductAttributeResponse> Attributes,
+    IReadOnlyList<AdminProductImage> Images,
+    DateTimeOffset CreatedAtUtc,
+    DateTimeOffset UpdatedAtUtc);
+
+/// <summary>Back-office product list: any status, optional text filter on name or SKU.</summary>
+public sealed record AdminProductSearchCriteria(string? Status, string? SearchTerm, int Page, int PageSize);
 
 // --- Search -------------------------------------------------------------------------------------
 

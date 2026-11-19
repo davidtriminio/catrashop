@@ -23,6 +23,15 @@ public sealed class CatalogQueryService
     public Task<PagedResult<ProductListItem>> SearchProductsAsync(ProductSearchCriteria criteria, CancellationToken ct = default) =>
         _readStore.SearchProductsAsync(criteria, ct);
 
+    public Task<PagedResult<ProductListItem>> SearchAdminProductsAsync(AdminProductSearchCriteria criteria, CancellationToken ct = default) =>
+        _readStore.SearchAdminProductsAsync(criteria, ct);
+
+    public async Task<Result<AdminProductDetail>> GetAdminProductAsync(Guid id, CancellationToken ct = default)
+    {
+        var product = await _readStore.GetAdminProductAsync(id, ct);
+        return product is null ? CatalogErrors.ProductNotFound : product;
+    }
+
     public Task<PriceRangeResponse> GetPriceRangeAsync(CancellationToken ct = default) =>
         _readStore.GetPriceRangeAsync(ct);
 
