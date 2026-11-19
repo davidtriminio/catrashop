@@ -656,6 +656,46 @@
       "yes": "Yes",
       "zone": "Zone",
       "zones": "Zones"
+    },
+    "access": {
+      "title": "Your access",
+      "roles": "Roles",
+      "can": "With your account you can:",
+      "none": "Your account has no management permissions."
+    },
+    "role": {
+      "Administrator": "Administrator",
+      "Customer": "Customer",
+      "SupportAgent": "Support agent",
+      "CatalogManager": "Catalog manager",
+      "InventoryManager": "Inventory manager",
+      "OrderManager": "Order manager"
+    },
+    "perm": {
+      "identity": {
+        "users": {
+          "read": "View users",
+          "manage_roles": "Manage user roles"
+        }
+      },
+      "catalog": {
+        "products": {
+          "manage": "Manage the catalog"
+        }
+      },
+      "inventory": {
+        "manage": "Manage inventory"
+      },
+      "orders": {
+        "read_all": "View all orders",
+        "manage": "Manage orders and payments"
+      },
+      "promotions": {
+        "manage": "Manage promotions"
+      },
+      "notifications": {
+        "manage": "Send notifications"
+      }
     }
   }
 }

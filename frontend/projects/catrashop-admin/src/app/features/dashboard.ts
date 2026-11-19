@@ -11,6 +11,7 @@ import { StatusBadge } from '@cs/ui/status-badge';
 import { MoneyPipe } from '@cs/util/money.pipe';
 import { ADMIN_NAV } from '../admin-permissions';
 import { Icon, IconName } from '../ui/icon';
+import { AccessCard } from './access-card';
 
 interface Kpi { status: string; label: string; hint: string; icon: IconName; featured?: boolean; color: string; }
 
@@ -32,7 +33,7 @@ const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, LocalDatePipe, MoneyPipe, StatusBadge, Icon, TranslocoPipe],
+  imports: [RouterLink, LocalDatePipe, MoneyPipe, StatusBadge, Icon, TranslocoPipe, AccessCard],
   template: `
     <div class="page-head">
       <div>
@@ -145,16 +146,7 @@ const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
       }
     </div>
 
-    @if (auth.user(); as u) {
-      <div class="card access">
-        <h2><cs-icon name="shield" [size]="16" /> Your access</h2>
-        <p class="muted">Roles: {{ u.roles.join(', ') || '—' }}</p>
-        <div class="chips">
-          @for (p of u.permissions; track p) { <span class="badge">{{ p }}</span> }
-          @if (u.permissions.length === 0) { <span class="muted">No management permissions granted.</span> }
-        </div>
-      </div>
-    }
+    <app-access-card />
   `,
   styles: [`
     .sub { margin: var(--space-1) 0 0; }
@@ -208,9 +200,6 @@ const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
     .tile strong { flex: 1; font-weight: 600; }
     .tile .go { color: var(--muted); transition: transform 0.15s; }
     .tile:hover .go { transform: translateX(3px); color: var(--primary); }
-    .access h2 { display: flex; align-items: center; gap: var(--space-2); }
-    .access .chips { margin-top: var(--space-2); }
-
     @media (max-width: 1000px) { .charts { grid-template-columns: 1fr; } }
     @media (max-width: 600px) {
       .today { display: none; }
