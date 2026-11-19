@@ -176,7 +176,7 @@ legend { padding: 0 var(--space-2); font-weight: 600; font-size: 0.85rem; }
 }
 
 /* ---- modal dialogs (receipt viewer, and any future dialog): overlay + panel + header ---- */
-.overlay { position: fixed; inset: 0; z-index: 60; display: grid; place-items: center; padding: var(--space-4); background: rgba(5, 9, 22, 0.68); backdrop-filter: blur(4px); animation: overlay-in 0.15s ease; }
+.overlay { position: fixed; inset: 0; z-index: 60; display: grid; grid-template-columns: minmax(0, 1fr); place-items: center; padding: var(--space-4); background: rgba(5, 9, 22, 0.68); backdrop-filter: blur(4px); animation: overlay-in 0.15s ease; }
 .dialog { display: flex; flex-direction: column; width: min(1100px, 100%); height: min(88vh, 820px); background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-raised); overflow: hidden; outline: none; }
 .dialog-head { display: flex; align-items: center; justify-content: space-between; gap: var(--space-3); padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4); border-bottom: 1px solid var(--border); }
 .dialog-head h2 { margin: 0; }
