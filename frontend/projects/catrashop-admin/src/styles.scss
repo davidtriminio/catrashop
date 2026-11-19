@@ -1,6 +1,151 @@
-/* Admin console: shared design system, wider layout. */
+/* Admin console: shared design system + an admin skin.
+   Direction: dark navy sidebar, cool off-white content, white cards with soft borders, Honduran blue (#003399) as the brand colour.
+   A dark theme swaps the same tokens (see ThemeService); components only ever use the tokens, never raw colours. */
 @use 'theme';
 
 :root {
-  --maxw: 1280px;
+  --maxw: 1320px;
+
+  /* surfaces */
+  --bg: #f1f4fb;
+  --surface: #ffffff;
+  --surface-2: #f6f8fd;
+  --border: #e3e8f3;
+  --border-strong: #cfd7e8;
+  --text: #0e1630;
+  --muted: #5f6d8f;
+
+  /* brand */
+  --primary: #003399;
+  --primary-600: #002a7d;
+  --accent: #dbe6ff;
+  --accent-ink: #00246b;
+  --ring: 0 0 0 3px rgba(0, 51, 153, 0.22);
+
+  /* sidebar */
+  --sidebar-bg: #0a1330;
+  --sidebar-text: #aab6d6;
+  --sidebar-strong: #ffffff;
+  --sidebar-hover: rgba(255, 255, 255, 0.07);
+  --sidebar-active: rgba(110, 150, 255, 0.18);
+  --sidebar-line: rgba(255, 255, 255, 0.08);
+  --sidebar-accent: #8fb0ff;
+
+  /* charts (categorical, validated against both surfaces) */
+  --chart-1: #1f4fd8;
+  --chart-2: #7ba3ff;
+  --chart-3: #e8a317;
+  --chart-4: #6d5bd0;
+  --chart-5: #16a34a;
+  --chart-grid: #e6ebf6;
+
+  --radius: 16px;
+  --radius-sm: 10px;
+  --shadow: 0 1px 2px rgba(14, 22, 48, 0.04), 0 1px 1px rgba(14, 22, 48, 0.02);
+  --shadow-raised: 0 12px 32px rgba(14, 22, 48, 0.12);
+}
+
+:root[data-theme='dark'] {
+  --bg: #0a0f1e;
+  --surface: #121a2e;
+  --surface-2: #17213a;
+  --border: #243050;
+  --border-strong: #33426a;
+  --text: #e8edf9;
+  --muted: #8f9dbd;
+
+  --primary: #3d6bff;
+  --primary-600: #2f58e0;
+  --accent: #1b2c5a;
+  --accent-ink: #bcd0ff;
+  --ring: 0 0 0 3px rgba(91, 134, 255, 0.4);
+
+  --success: #22c55e;
+  --danger: #dc2626;
+  --warning: #f59e0b;
+  --info: #5b9dff;
+
+  --tint-ok-bg: #11301f;      --tint-ok-fg: #86efac;
+  --tint-warn-bg: #38290b;    --tint-warn-fg: #fcd34d;
+  --tint-bad-bg: #3a1519;     --tint-bad-fg: #fca5a5;
+  --tint-info-bg: #172a5c;    --tint-info-fg: #b3caff;
+  --tint-neutral-bg: #232c45; --tint-neutral-fg: #c7d0e6;
+
+  --sidebar-bg: #070b17;
+  --sidebar-line: rgba(255, 255, 255, 0.06);
+
+  --chart-1: #5b86ff;
+  --chart-2: #9db9ff;
+  --chart-3: #fbbf24;
+  --chart-4: #a594ff;
+  --chart-5: #4ade80;
+  --chart-grid: #1f2a46;
+
+  --shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
+  --shadow-raised: 0 12px 32px rgba(0, 0, 0, 0.5);
+}
+
+/* ---- primitives: admin skin ---- */
+h1 { font-size: 1.6rem; }
+.btn { border-radius: var(--radius-sm); }
+.chip { border-radius: var(--radius-sm); }
+.chip:hover { border-color: var(--primary); }
+.card.flush { overflow: hidden; }
+
+/* tables: quiet header band, row hover */
+th { background: var(--surface-2); font-size: 0.72rem; }
+tbody tr { transition: background 0.12s; }
+tbody tr:hover { background: var(--surface-2); }
+td a:not(.btn) { color: var(--primary); font-weight: 600; }
+:root[data-theme='dark'] td a:not(.btn) { color: var(--accent-ink); }
+
+/* state badges carry a dot so state is never conveyed by colour alone */
+.badge { display: inline-flex; align-items: center; gap: 0.4rem; }
+.badge::before { content: ''; width: 6px; height: 6px; border-radius: 50%; background: currentColor; opacity: 0.8; }
+
+/* page header: every admin page starts with an h1, optionally followed by a muted one-line description */
+.content h1 { font-size: 1.6rem; margin-bottom: var(--space-2); }
+.content h1 + p.muted { margin-bottom: var(--space-5); max-width: 70ch; }
+.content h1:not(:has(+ p)) { margin-bottom: var(--space-5); }
+.content h2.section-title { margin: var(--space-6) 0 var(--space-2); }
+
+/* sections and cards stack with one consistent gap, whatever the page's own css says */
+.content section.card { margin-bottom: var(--space-4); }
+.content .cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr)); gap: var(--space-4); margin-bottom: var(--space-4); }
+.content .cols > .card { margin: 0; }
+
+/* tables inside a padded card run edge to edge and scroll sideways instead of breaking the page */
+.card:has(> table) { overflow-x: auto; }
+.card > table { width: calc(100% + 2 * var(--space-5)); margin: 0 calc(-1 * var(--space-5)) calc(-1 * var(--space-5)); }
+.card > table :is(th, td):first-child { padding-left: var(--space-5); }
+.card > table :is(th, td):last-child { padding-right: var(--space-5); }
+.card > table td { vertical-align: middle; }
+
+/* form rows wrap on narrow screens instead of squeezing fields */
+.row:has(> .field) { flex-wrap: wrap; }
+.row > .field { min-width: min(100%, 150px); }
+.check { display: inline-flex; align-items: center; gap: var(--space-2); font-size: 0.9rem; cursor: pointer; }
+input[type='checkbox'] { accent-color: var(--primary); width: 1rem; height: 1rem; }
+fieldset { border: 1px solid var(--border); border-radius: var(--radius-sm); padding: var(--space-3) var(--space-4); margin: var(--space-3) 0 var(--space-4); }
+legend { padding: 0 var(--space-2); font-weight: 600; font-size: 0.85rem; }
+
+/* status filter chips scroll sideways on phones */
+@media (max-width: 640px) {
+  .chips.filters { flex-wrap: nowrap; overflow-x: auto; padding-bottom: var(--space-2); }
+  .chips.filters .chip { flex-shrink: 0; }
+}
+
+/* ---- dark-mode fixes for colours the shared theme hard-codes ---- */
+:root[data-theme='dark'] {
+  .btn.accent:hover { background: #243a73; }
+  .btn.danger:hover { background: #ef4444; }
+  .btn.secondary:hover { background: var(--surface-2); border-color: var(--muted); }
+  .input:hover, select:hover, textarea:hover { border-color: #4a5b86; }
+  .input::placeholder, textarea::placeholder { color: #6b7aa0; }
+  select {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%238fb0ff' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  }
+  .alert.error { background: #2a1317; border-color: #5b1f26; }
+  .alert.success { background: #0f2a1b; border-color: #1f5a3a; }
+  .skeleton { background: linear-gradient(90deg, #17213a 25%, #1f2b48 37%, #17213a 63%); background-size: 400% 100%; }
 }
