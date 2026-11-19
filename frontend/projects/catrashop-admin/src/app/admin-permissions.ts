@@ -1,3 +1,5 @@
+import type { IconName } from './ui/icon';
+
 /** Permission strings the admin console gates on (mirror of the backend module permissions). */
 export const PERMISSIONS = {
   catalog: 'catalog.products.manage',
@@ -8,15 +10,15 @@ export const PERMISSIONS = {
   notifications: 'notifications.manage',
 } as const;
 
-export interface NavItem { label: string; path: string; permission?: string; }
+export interface NavItem { labelKey: string; path: string; icon: IconName; permission?: string; }
 
 export const ADMIN_NAV: NavItem[] = [
-  { label: 'Dashboard', path: '/dashboard' },
-  { label: 'Catalog', path: '/catalog', permission: PERMISSIONS.catalog },
-  { label: 'Inventory', path: '/inventory', permission: PERMISSIONS.inventory },
-  { label: 'Orders', path: '/orders', permission: PERMISSIONS.ordersRead },
-  { label: 'Payments', path: '/payments', permission: PERMISSIONS.ordersManage },
-  { label: 'Promotions', path: '/promotions', permission: PERMISSIONS.promotions },
-  { label: 'Shipping', path: '/shipping', permission: PERMISSIONS.ordersManage },
-  { label: 'Notifications', path: '/notifications', permission: PERMISSIONS.notifications },
+  { labelKey: 'admin.nav.dashboard', path: '/dashboard', icon: 'dashboard' },
+  { labelKey: 'admin.nav.catalog', path: '/catalog', icon: 'package', permission: PERMISSIONS.catalog },
+  { labelKey: 'admin.nav.inventory', path: '/inventory', icon: 'warehouse', permission: PERMISSIONS.inventory },
+  { labelKey: 'admin.nav.orders', path: '/orders', icon: 'bag', permission: PERMISSIONS.ordersRead },
+  { labelKey: 'admin.nav.payments', path: '/payments', icon: 'card', permission: PERMISSIONS.ordersManage },
+  { labelKey: 'admin.nav.promotions', path: '/promotions', icon: 'tag', permission: PERMISSIONS.promotions },
+  { labelKey: 'admin.nav.shipping', path: '/shipping', icon: 'truck', permission: PERMISSIONS.ordersManage },
+  { labelKey: 'admin.nav.notifications', path: '/notifications', icon: 'bell', permission: PERMISSIONS.notifications },
 ];

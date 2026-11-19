@@ -5,7 +5,18 @@
     <title>Catrashop Admin</title>
     <base href="/" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <meta name="theme-color" content="#003399" />
+    <meta name="theme-color" content="#0a1330" />
+    <script>
+      /* Apply the saved theme before first paint so a dark-mode user never sees a white flash. */
+      (function () {
+        try {
+          var m = localStorage.getItem('catrashop-admin-theme') || 'system';
+          var dark = m === 'dark' || (m === 'system' && matchMedia('(prefers-color-scheme: dark)').matches);
+          document.documentElement.dataset.theme = dark ? 'dark' : 'light';
+          document.documentElement.style.colorScheme = dark ? 'dark' : 'light';
+        } catch (e) {}
+      })();
+    </script>
     <link rel="icon" type="image/svg+xml" href="favicon.svg" />
     <link rel="icon" type="image/x-icon" sizes="48x48" href="favicon.ico" />
     <link rel="apple-touch-icon" href="apple-touch-icon.png" />

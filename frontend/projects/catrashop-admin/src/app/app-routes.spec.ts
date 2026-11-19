@@ -17,7 +17,7 @@ describe('admin route configuration', () => {
     for (const nav of ADMIN_NAV) {
       const path = nav.path.replace(/^\//, '');
       const route = byPath(path);
-      expect(route, `missing route for nav '${nav.label}'`).toBeDefined();
+      expect(route, `missing route for nav '${nav.labelKey}'`).toBeDefined();
       expect(route!.canActivate?.length ?? 0, `route '${path}' is not guarded`).toBeGreaterThan(0);
       expect(typeof route!.loadComponent).toBe('function');
     }

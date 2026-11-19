@@ -13,8 +13,7 @@ export const appConfig: ApplicationConfig = {
     provideZonelessChangeDetection(),
     provideRouter(routes, withInMemoryScrolling({ scrollPositionRestoration: 'top' })),
     provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
-    // The admin's own texts are still English (translated in PR-049); only the shared badge/timeline follow the language.
-    provideI18n({ defaultLang: 'en' }),
+    provideI18n({ defaultLang: 'es' }),
     { provide: API_BASE_URL, useValue: environment.apiBaseUrl },
   ],
 };
