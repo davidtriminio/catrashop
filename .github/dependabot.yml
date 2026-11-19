@@ -12,8 +12,12 @@ updates:
       dotnet:
         patterns: ["*"]
     # Microsoft.AspNetCore.OpenApi 10.x requires Microsoft.OpenApi < 3.0.0 (NU1608 fails the build).
+    # Microsoft.Extensions.* majors follow the .NET runtime: 11.x packages must not be mixed into a .NET 10 app,
+    # so bump them by hand when the project moves to .NET 11.
     ignore:
       - dependency-name: "Microsoft.OpenApi"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "Microsoft.Extensions.*"
         update-types: ["version-update:semver-major"]
     labels: ["dependencies", "backend"]
 
