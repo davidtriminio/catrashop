@@ -656,6 +656,46 @@
       "yes": "Sí",
       "zone": "Zona",
       "zones": "Zonas"
+    },
+    "access": {
+      "title": "Tu acceso",
+      "roles": "Roles",
+      "can": "Con tu cuenta puedes:",
+      "none": "Tu cuenta no tiene permisos de gestión asignados."
+    },
+    "role": {
+      "Administrator": "Administrador",
+      "Customer": "Cliente",
+      "SupportAgent": "Agente de soporte",
+      "CatalogManager": "Gestor de catálogo",
+      "InventoryManager": "Gestor de inventario",
+      "OrderManager": "Gestor de pedidos"
+    },
+    "perm": {
+      "identity": {
+        "users": {
+          "read": "Ver usuarios",
+          "manage_roles": "Gestionar los roles de los usuarios"
+        }
+      },
+      "catalog": {
+        "products": {
+          "manage": "Gestionar el catálogo"
+        }
+      },
+      "inventory": {
+        "manage": "Gestionar el inventario"
+      },
+      "orders": {
+        "read_all": "Ver todos los pedidos",
+        "manage": "Gestionar pedidos y pagos"
+      },
+      "promotions": {
+        "manage": "Gestionar promociones"
+      },
+      "notifications": {
+        "manage": "Enviar notificaciones"
+      }
     }
   }
 }
