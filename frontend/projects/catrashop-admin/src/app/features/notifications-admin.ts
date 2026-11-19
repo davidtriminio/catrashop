@@ -2,10 +2,11 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NotificationsAdminApi } from '@cs/api/notifications-admin.api';
 import { problemMessage } from '@cs/util/problem';
+import { Select } from '../ui/select';
 
 @Component({
   selector: 'app-notifications-admin',
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, Select],
   template: `
     <h1>Send a notification</h1>
     <p class="muted">Operational/manual send. In-app is always delivered; email is sent when an address is given and the recipient allows it.</p>
@@ -17,9 +18,7 @@ import { problemMessage } from '@cs/util/problem';
         <div class="field"><label>Recipient customer id (GUID)</label><input class="input" formControlName="recipientId" /></div>
         <div class="row">
           <div class="field" style="flex:1"><label>Type</label>
-            <select formControlName="type">
-              @for (t of types; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
-            </select>
+            <cs-select formControlName="type" [options]="types" />
           </div>
           <div class="field" style="flex:2"><label>Recipient email (optional)</label><input class="input" type="email" formControlName="recipientEmail" /></div>
         </div>

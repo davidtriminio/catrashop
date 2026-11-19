@@ -5,10 +5,11 @@ import { PromotionsAdminApi } from '@cs/api/promotions-admin.api';
 import { Coupon } from '@cs/api/models';
 import { MoneyPipe } from '@cs/util/money.pipe';
 import { problemMessage } from '@cs/util/problem';
+import { Select } from '../ui/select';
 
 @Component({
   selector: 'app-promotions-admin',
-  imports: [ReactiveFormsModule, MoneyPipe],
+  imports: [ReactiveFormsModule, MoneyPipe, Select],
   template: `
     <h1>Promotions</h1>
     @if (error()) { <div class="alert error">{{ error() }}</div> }
@@ -23,7 +24,7 @@ import { problemMessage } from '@cs/util/problem';
         </div>
         <div class="row">
           <div class="field" style="flex:1"><label>Type</label>
-            <select formControlName="discountType"><option [value]="0">Percentage</option><option [value]="1">Fixed amount</option></select>
+            <cs-select formControlName="discountType" [options]="discountTypes" />
           </div>
           <div class="field" style="flex:1"><label>Value</label><input class="input" type="number" min="0.01" step="0.01" formControlName="discountValue" /></div>
           <div class="field" style="flex:1"><label>Currency</label><input class="input" maxlength="3" formControlName="currency" readonly title="The store sells in one currency" /></div>
@@ -65,6 +66,7 @@ export class PromotionsAdmin implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly api = inject(PromotionsAdminApi);
 
+  readonly discountTypes = [{ value: 0, label: 'Percentage' }, { value: 1, label: 'Fixed amount' }];
   readonly coupons = signal<Coupon[]>([]);
   readonly error = signal<string | null>(null);
   readonly message = signal<string | null>(null);
