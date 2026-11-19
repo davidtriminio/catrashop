@@ -1,13 +1,16 @@
 import { TestBed } from '@angular/core/testing';
+import { ApplicationInitStatus } from '@angular/core';
 import { provideRouter } from '@angular/router';
+import { provideI18n } from '@cs/i18n/i18n';
 import { Forbidden } from './forbidden';
 
 describe('Forbidden component', () => {
-  it('renders the access-denied message and a link back to the dashboard', () => {
+  it('renders the access-denied message and a link back to the dashboard', async () => {
     TestBed.configureTestingModule({
       imports: [Forbidden],
-      providers: [provideRouter([])],
+      providers: [provideRouter([]), provideI18n({ defaultLang: 'en' })],
     });
+    await TestBed.inject(ApplicationInitStatus).donePromise;
 
     const fixture = TestBed.createComponent(Forbidden);
     fixture.detectChanges();

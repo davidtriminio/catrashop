@@ -4,26 +4,29 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { filter } from 'rxjs';
 import { AuthStore } from '@cs/auth/auth.store';
 import { ADMIN_NAV } from './admin-permissions';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { I18n } from '@cs/i18n/i18n';
+import { LanguageSwitcher } from '@cs/ui/language-switcher';
 import { Icon } from './ui/icon';
 import { ThemeService } from './ui/theme.service';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon],
+  imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, TranslocoPipe, LanguageSwitcher],
   template: `
     @if (auth.isAuthenticated()) {
       <div class="shell">
         @if (menuOpen()) { <div class="backdrop" (click)="menuOpen.set(false)"></div> }
-        <aside class="sidebar" [class.open]="menuOpen()" aria-label="Main">
+        <aside class="sidebar" [class.open]="menuOpen()" [attr.aria-label]="'admin.shell.main' | transloco">
           <a class="brand" routerLink="/dashboard">
             <span class="logo"><cs-icon name="bag" [size]="18" /></span>
             <span class="name">Catrashop<small>Admin</small></span>
           </a>
-          <p class="group">Menu</p>
+          <p class="group">{{ 'admin.shell.menu' | transloco }}</p>
           <nav>
             @for (item of visibleNav(); track item.path) {
               <a [routerLink]="item.path" routerLinkActive="active" ariaCurrentWhenActive="page">
-                <cs-icon [name]="item.icon" [size]="18" /><span>{{ item.label }}</span>
+                <cs-icon [name]="item.icon" [size]="18" /><span>{{ item.labelKey | transloco }}</span>
               </a>
             }
           </nav>
@@ -33,7 +36,7 @@ import { ThemeService } from './ui/theme.service';
               <strong>{{ auth.user()?.firstName || 'Admin' }}</strong>
               <small>{{ auth.user()?.email }}</small>
             </span>
-            <button type="button" class="icon-btn" title="Sign out" aria-label="Sign out" (click)="logout()">
+            <button type="button" class="icon-btn" [title]="'admin.shell.signOut' | transloco" [attr.aria-label]="'admin.shell.signOut' | transloco" (click)="logout()">
               <cs-icon name="logout" [size]="18" />
             </button>
           </div>
@@ -41,24 +44,25 @@ import { ThemeService } from './ui/theme.service';
 
         <div class="main">
           <header class="topbar">
-            <button type="button" class="icon-btn menu" aria-label="Open menu" (click)="menuOpen.set(true)">
+            <button type="button" class="icon-btn menu" [attr.aria-label]="'admin.shell.openMenu' | transloco" (click)="menuOpen.set(true)">
               <cs-icon name="menu" />
             </button>
             <span class="spacer"></span>
+            <cs-language-switcher />
             <button type="button" class="icon-btn theme" (click)="theme.cycle()"
-                    [title]="'Theme: ' + theme.mode()" [attr.aria-label]="'Theme: ' + theme.mode() + '. Click to change'">
+                    [title]="themeLabel()" [attr.aria-label]="themeLabel()">
               <cs-icon [name]="theme.mode() === 'system' ? 'monitor' : theme.mode() === 'dark' ? 'moon' : 'sun'" />
-              <span class="mode">{{ theme.mode() }}</span>
+              <span class="mode">{{ 'admin.shell.mode.' + theme.mode() | transloco }}</span>
             </button>
           </header>
           <div class="content"><router-outlet /></div>
         </div>
       </div>
     } @else {
-      <button type="button" class="icon-btn float-theme" (click)="theme.cycle()"
-              [title]="'Theme: ' + theme.mode()" [attr.aria-label]="'Theme: ' + theme.mode() + '. Click to change'">
+      <div class="float-tools"><cs-language-switcher /><button type="button" class="icon-btn" (click)="theme.cycle()"
+              [title]="themeLabel()" [attr.aria-label]="themeLabel()">
         <cs-icon [name]="theme.mode() === 'system' ? 'monitor' : theme.mode() === 'dark' ? 'moon' : 'sun'" />
-      </button>
+      </button></div>
       <router-outlet />
     }
   `,
@@ -110,9 +114,9 @@ import { ThemeService } from './ui/theme.service';
       border-radius: var(--radius-sm); cursor: pointer; font: inherit; font-size: 0.8rem; font-weight: 600;
     }
     .icon-btn:hover { background: var(--surface); border-color: var(--border); color: var(--text); }
-    .theme .mode { text-transform: capitalize; }
     .menu, .backdrop { display: none; }
-    .float-theme { position: fixed; top: var(--space-4); right: var(--space-4); z-index: 10; background: var(--surface); border-color: var(--border); }
+    .float-tools { position: fixed; top: var(--space-4); right: var(--space-4); z-index: 10; display: flex; align-items: center; gap: var(--space-2); }
+    .float-tools .icon-btn { background: var(--surface); border-color: var(--border); }
 
     @media (max-width: 900px) {
       .shell { grid-template-columns: 1fr; }
@@ -129,6 +133,12 @@ import { ThemeService } from './ui/theme.service';
 export class App {
   readonly auth = inject(AuthStore);
   readonly theme = inject(ThemeService);
+  private readonly i18n = inject(I18n);
+
+  readonly themeLabel = computed(() => {
+    this.i18n.lang(); // recompute when the language changes
+    return this.i18n.t('admin.shell.themeChange', { mode: this.i18n.t('admin.shell.mode.' + this.theme.mode()) });
+  });
   private readonly router = inject(Router);
 
   readonly menuOpen = signal(false);

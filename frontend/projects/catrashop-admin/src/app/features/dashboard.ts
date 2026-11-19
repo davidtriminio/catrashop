@@ -1,6 +1,8 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import { RouterLink } from '@angular/router';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { I18n, LOCALES, Lang } from '@cs/i18n/i18n';
+import { LocalDatePipe } from '@cs/util/local-date.pipe';
 import { forkJoin } from 'rxjs';
 import { OrdersAdminApi } from '@cs/api/orders-admin.api';
 import { OrderSummary } from '@cs/api/models';
@@ -13,11 +15,11 @@ import { Icon, IconName } from '../ui/icon';
 interface Kpi { status: string; label: string; hint: string; icon: IconName; featured?: boolean; color: string; }
 
 const KPIS: Kpi[] = [
-  { status: 'Paid', label: 'To process', hint: 'Paid, waiting for you', icon: 'bag', featured: true, color: 'var(--chart-1)' },
-  { status: 'Confirmed', label: 'To process (on delivery)', hint: 'Paid on delivery or in store', icon: 'clock', color: 'var(--chart-2)' },
-  { status: 'Processing', label: 'Processing', hint: 'Being prepared', icon: 'package', color: 'var(--chart-3)' },
-  { status: 'Shipped', label: 'Shipped', hint: 'On their way', icon: 'truck', color: 'var(--chart-4)' },
-  { status: 'Delivered', label: 'Delivered', hint: 'Completed', icon: 'check', color: 'var(--chart-5)' },
+  { status: 'Paid', label: 'admin.dashboard.kpi.toProcess', hint: 'admin.dashboard.kpi.toProcessHint', icon: 'bag', featured: true, color: 'var(--chart-1)' },
+  { status: 'Confirmed', label: 'admin.dashboard.kpi.toProcessCod', hint: 'admin.dashboard.kpi.toProcessCodHint', icon: 'clock', color: 'var(--chart-2)' },
+  { status: 'Processing', label: 'admin.dashboard.kpi.processing', hint: 'admin.dashboard.kpi.processingHint', icon: 'package', color: 'var(--chart-3)' },
+  { status: 'Shipped', label: 'admin.dashboard.kpi.shipped', hint: 'admin.dashboard.kpi.shippedHint', icon: 'truck', color: 'var(--chart-4)' },
+  { status: 'Delivered', label: 'admin.dashboard.kpi.delivered', hint: 'admin.dashboard.kpi.deliveredHint', icon: 'check', color: 'var(--chart-5)' },
 ];
 
 /** Cancelled or failed orders do not count as order value. */
@@ -30,14 +32,14 @@ const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, DatePipe, MoneyPipe, StatusBadge, Icon],
+  imports: [RouterLink, LocalDatePipe, MoneyPipe, StatusBadge, Icon, TranslocoPipe],
   template: `
     <div class="page-head">
       <div>
-        <h1>Welcome{{ auth.user() ? ', ' + auth.user()!.firstName : '' }}</h1>
-        <p class="muted sub">Here is what needs attention. You see only the sections your role permits.</p>
+        <h1>{{ 'admin.dashboard.welcome' | transloco }}{{ auth.user() ? ', ' + auth.user()!.firstName : '' }}</h1>
+        <p class="muted sub">{{ 'admin.dashboard.sub' | transloco }}</p>
       </div>
-      <span class="today muted">{{ today | date: 'EEEE, MMM d' }}</span>
+      <span class="today muted">{{ today | localDate: 'date' }}</span>
     </div>
 
     @if (canSeeOrders()) {
@@ -45,9 +47,9 @@ const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
         @for (k of kpis; track k.status) {
           <a class="card kpi" [class.featured]="k.featured" routerLink="/orders">
             <span class="ico" [style.--tone]="k.color"><cs-icon [name]="k.icon" [size]="18" /></span>
-            <span class="label">{{ k.label }}</span>
+            <span class="label">{{ k.label | transloco }}</span>
             <strong class="value">{{ counts()?.[k.status] ?? '–' }}</strong>
-            <span class="hint">{{ k.hint }}</span>
+            <span class="hint">{{ k.hint | transloco }}</span>
           </a>
         }
       </div>
@@ -56,14 +58,14 @@ const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
         <section class="card">
           <header class="card-head">
             <div>
-              <h2>Order value</h2>
-              <p class="muted small">Last {{ days }} days, from the latest {{ recent().length }} orders</p>
+              <h2>{{ 'admin.dashboard.orderValue' | transloco }}</h2>
+              <p class="muted small">{{ 'admin.dashboard.valueSub' | transloco: { days: days, count: recent().length } }}</p>
             </div>
             <strong class="total">{{ series().total | money: currency() }}</strong>
           </header>
           @if (loadedRecent()) {
             <svg class="area" [attr.viewBox]="'0 0 ' + W + ' ' + H" role="img"
-                 [attr.aria-label]="'Order value per day for the last ' + days + ' days'" preserveAspectRatio="none">
+                 [attr.aria-label]="'admin.dashboard.valueAria' | transloco: { days: days }" preserveAspectRatio="none">
               <defs>
                 <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" style="stop-color: var(--chart-1); stop-opacity: 0.32" />
@@ -86,22 +88,22 @@ const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
         </section>
 
         <section class="card">
-          <header class="card-head"><div><h2>Orders by status</h2><p class="muted small">Open and completed work</p></div></header>
+          <header class="card-head"><div><h2>{{ 'admin.dashboard.byStatus' | transloco }}</h2><p class="muted small">{{ 'admin.dashboard.byStatusSub' | transloco }}</p></div></header>
           <div class="donut-wrap">
-            <svg viewBox="0 0 180 180" class="donut" role="img" aria-label="Orders by status">
+            <svg viewBox="0 0 180 180" class="donut" role="img" [aria-label]="'admin.dashboard.byStatus' | transloco">
               <circle cx="90" cy="90" [attr.r]="R" class="ring-bg" />
               @for (s of segments(); track s.status) {
                 <circle cx="90" cy="90" [attr.r]="R" class="seg" [style.stroke]="s.color"
                         [attr.stroke-dasharray]="s.len + ' ' + (CIRC - s.len)" [attr.stroke-dashoffset]="-s.offset">
-                  <title>{{ s.label }}: {{ s.count }}</title>
+                  <title>{{ s.label | transloco }}: {{ s.count }}</title>
                 </circle>
               }
               <text x="90" y="88" text-anchor="middle" class="donut-n">{{ totalCount() }}</text>
-              <text x="90" y="108" text-anchor="middle" class="donut-l">orders</text>
+              <text x="90" y="108" text-anchor="middle" class="donut-l">{{ 'admin.dashboard.orders' | transloco }}</text>
             </svg>
             <ul class="legend">
               @for (k of kpis; track k.status) {
-                <li><i [style.background]="k.color"></i><span>{{ k.label }}</span><b>{{ counts()?.[k.status] ?? '–' }}</b></li>
+                <li><i [style.background]="k.color"></i><span>{{ k.label | transloco }}</span><b>{{ counts()?.[k.status] ?? '–' }}</b></li>
               }
             </ul>
           </div>
@@ -110,34 +112,34 @@ const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 
       <section class="card flush recent">
         <header class="card-head pad">
-          <div><h2>Recent orders</h2></div>
-          <a class="btn secondary sm" routerLink="/orders">View all <cs-icon name="arrow" [size]="14" /></a>
+          <div><h2>{{ 'admin.dashboard.recent' | transloco }}</h2></div>
+          <a class="btn secondary sm" routerLink="/orders">{{ 'admin.dashboard.viewAll' | transloco }} <cs-icon name="arrow" [size]="14" /></a>
         </header>
         <div class="scroll">
           <table>
-            <thead><tr><th>Order</th><th>Date</th><th>Status</th><th>Items</th><th class="right">Total</th></tr></thead>
+            <thead><tr><th>{{ 'admin.c.order' | transloco }}</th><th>{{ 'admin.c.date' | transloco }}</th><th>{{ 'admin.c.status' | transloco }}</th><th>{{ 'admin.c.items' | transloco }}</th><th class="right">{{ 'admin.c.total' | transloco }}</th></tr></thead>
             <tbody>
               @for (o of latest(); track o.id) {
                 <tr>
                   <td><a [routerLink]="['/orders', o.id]">{{ o.orderNumber }}</a></td>
-                  <td class="muted">{{ o.createdAtUtc | date: 'MMM d, h:mm a' }}</td>
+                  <td class="muted">{{ o.createdAtUtc | localDate: 'datetime' }}</td>
                   <td><cs-status-badge [status]="o.status" /></td>
                   <td>{{ o.itemCount }}</td>
                   <td class="right"><strong>{{ o.grandTotal | money: o.currency }}</strong></td>
                 </tr>
-              } @empty { <tr><td colspan="5" class="empty">{{ loadedRecent() ? 'No orders yet.' : 'Loading…' }}</td></tr> }
+              } @empty { <tr><td colspan="5" class="empty">{{ (loadedRecent() ? 'admin.dashboard.noOrders' : 'common.loading') | transloco }}</td></tr> }
             </tbody>
           </table>
         </div>
       </section>
     }
 
-    <h2 class="section">Manage</h2>
+    <h2 class="section">{{ 'admin.dashboard.manage' | transloco }}</h2>
     <div class="tiles">
       @for (item of sections(); track item.path) {
         <a class="card tile" [routerLink]="item.path">
           <span class="ico plain"><cs-icon [name]="item.icon" [size]="18" /></span>
-          <strong>{{ item.label }}</strong>
+          <strong>{{ item.labelKey | transloco }}</strong>
           <cs-icon class="go" name="arrow" [size]="16" />
         </a>
       }
@@ -221,6 +223,7 @@ const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 export class Dashboard implements OnInit {
   readonly auth = inject(AuthStore);
   private readonly orders = inject(OrdersAdminApi);
+  private readonly i18n = inject(I18n);
 
   readonly kpis = KPIS;
   readonly days = DAYS;
@@ -269,7 +272,7 @@ export class Dashboard implements OnInit {
       x: PAD_X + (i * (W - 2 * PAD_X)) / (DAYS - 1),
       y: PAD_TOP + innerH - (value / max) * innerH,
       value,
-      label: days[i].toLocaleDateString(undefined, { month: 'short', day: 'numeric' }),
+      label: days[i].toLocaleDateString(LOCALES[this.i18n.lang() as Lang], { month: 'short', day: 'numeric' }),
     }));
     const line = points.map((p, i) => `${i ? 'L' : 'M'}${p.x.toFixed(1)} ${p.y.toFixed(1)}`).join('');
     const base = PAD_TOP + innerH;

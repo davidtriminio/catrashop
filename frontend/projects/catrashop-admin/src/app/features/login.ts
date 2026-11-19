@@ -2,13 +2,14 @@ import { Component, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthStore } from '@cs/auth/auth.store';
-import { problemMessage } from '@cs/util/problem';
+import { TranslocoPipe } from '@jsverse/transloco';
+import { I18n } from '@cs/i18n/i18n';
 import { PasswordInput } from '@cs/ui/password-input';
 import { Icon } from '../ui/icon';
 
 @Component({
   selector: 'app-admin-login',
-  imports: [ReactiveFormsModule, PasswordInput, Icon],
+  imports: [ReactiveFormsModule, PasswordInput, Icon, TranslocoPipe],
   template: `
     <div class="split">
       <aside class="hero" aria-hidden="true">
@@ -17,25 +18,25 @@ import { Icon } from '../ui/icon';
           <span class="nm">Catrashop <small>Admin</small></span>
         </div>
         <div class="pitch">
-          <h2>Run the whole store from one place.</h2>
+          <h2>{{ 'admin.login.pitch' | transloco }}</h2>
           <ul>
-            <li><cs-icon name="bag" [size]="16" /> Orders, from payment to delivery</li>
-            <li><cs-icon name="card" [size]="16" /> Transfers, receipts and collections</li>
-            <li><cs-icon name="warehouse" [size]="16" /> Stock, catalog and promotions</li>
+            <li><cs-icon name="bag" [size]="16" /> {{ 'admin.login.p1' | transloco }}</li>
+            <li><cs-icon name="card" [size]="16" /> {{ 'admin.login.p2' | transloco }}</li>
+            <li><cs-icon name="warehouse" [size]="16" /> {{ 'admin.login.p3' | transloco }}</li>
           </ul>
         </div>
-        <small class="foot">Staff access only</small>
+        <small class="foot">{{ 'admin.login.staffOnly' | transloco }}</small>
       </aside>
 
       <main class="panel">
         <div class="box">
-          <h1>Sign in</h1>
-          <p class="muted">Use a staff account to manage the store.</p>
+          <h1>{{ 'admin.login.title' | transloco }}</h1>
+          <p class="muted">{{ 'admin.login.sub' | transloco }}</p>
           @if (error()) { <div class="alert error">{{ error() }}</div> }
           <form [formGroup]="form" (ngSubmit)="submit()">
-            <div class="field"><label for="email">Email</label><input id="email" class="input" type="email" autocomplete="username" formControlName="email" /></div>
-            <div class="field"><label for="password">Password</label><cs-password-input inputId="password" autocomplete="current-password" formControlName="password" /></div>
-            <button class="btn block" type="submit" [disabled]="form.invalid || busy()">{{ busy() ? 'Signing in…' : 'Sign in' }}</button>
+            <div class="field"><label for="email">{{ 'admin.login.email' | transloco }}</label><input id="email" class="input" type="email" autocomplete="username" formControlName="email" /></div>
+            <div class="field"><label for="password">{{ 'admin.login.password' | transloco }}</label><cs-password-input inputId="password" autocomplete="current-password" formControlName="password" /></div>
+            <button class="btn block" type="submit" [disabled]="form.invalid || busy()">{{ (busy() ? 'admin.login.signingIn' : 'admin.login.title') | transloco }}</button>
           </form>
         </div>
       </main>
@@ -77,6 +78,7 @@ export class AdminLogin {
   private readonly auth = inject(AuthStore);
   private readonly router = inject(Router);
   private readonly route = inject(ActivatedRoute);
+  private readonly i18n = inject(I18n);
 
   readonly busy = signal(false);
   readonly error = signal<string | null>(null);
@@ -92,7 +94,7 @@ export class AdminLogin {
     this.error.set(null);
     this.auth.login(this.form.getRawValue()).subscribe({
       next: () => this.router.navigateByUrl(this.route.snapshot.queryParamMap.get('returnUrl') ?? '/dashboard'),
-      error: (err) => { this.error.set(problemMessage(err, 'Invalid credentials.')); this.busy.set(false); },
+      error: (err) => { this.error.set(this.i18n.problem(err, 'admin.login.invalid')); this.busy.set(false); },
     });
   }
 }
