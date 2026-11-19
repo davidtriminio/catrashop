@@ -7,6 +7,7 @@ import { PaymentResponse } from '@cs/api/models';
 import { PaymentsAdminApi } from '@cs/api/payments-admin.api';
 import { StatusBadge } from '@cs/ui/status-badge';
 import { MoneyPipe } from '@cs/util/money.pipe';
+import { ReceiptViewer } from '../ui/receipt-viewer';
 
 type Queue = 'review' | 'transfer' | 'collect' | 'done';
 
@@ -17,7 +18,7 @@ type Queue = 'review' | 'transfer' | 'collect' | 'done';
  */
 @Component({
   selector: 'app-payments-admin',
-  imports: [RouterLink, LocalDatePipe, MoneyPipe, StatusBadge, TranslocoPipe],
+  imports: [RouterLink, LocalDatePipe, MoneyPipe, StatusBadge, TranslocoPipe, ReceiptViewer],
   template: `
     <div class="page-head">
       <div>
@@ -82,6 +83,11 @@ type Queue = 'review' | 'transfer' | 'collect' | 'done';
         </tbody>
       </table>
     </div>
+
+    @if (viewing(); as v) {
+      <app-receipt-viewer [payment]="v" [receipt]="receiptFile()" [error]="receiptError()" [busy]="busy()"
+                          (closed)="closeReceipt()" (approved)="approveFromViewer()" (rejected)="rejectFromViewer($event)" />
+    }
   `,
   styles: [`
     .count { margin: var(--space-1) 0 0; }
@@ -115,6 +121,9 @@ export class PaymentsAdmin implements OnInit {
   readonly message = signal<string | null>(null);
   readonly rejecting = signal<string | null>(null);
   readonly reason = signal('');
+  readonly viewing = signal<PaymentResponse | null>(null);
+  readonly receiptFile = signal<Blob | null>(null);
+  readonly receiptError = signal<string | null>(null);
 
   readonly visible = computed(() => {
     const rows = this.all();
@@ -153,15 +162,25 @@ export class PaymentsAdmin implements OnInit {
     });
   }
 
+  /** Opens the receipt in the viewer dialog (fetched with the bearer token, so never a plain link or pop-up). */
   viewReceipt(p: PaymentResponse): void {
+    this.viewing.set(p);
+    this.receiptFile.set(null);
+    this.receiptError.set(null);
     this.api.receipt(p.id).subscribe({
-      next: (blob) => {
-        const url = URL.createObjectURL(blob);
-        window.open(url, '_blank', 'noopener');
-        setTimeout(() => URL.revokeObjectURL(url), 60_000);
-      },
-      error: (e) => this.error.set(this.i18n.problem(e, 'admin.payments.receiptError')),
+      next: (blob) => { if (this.viewing()?.id === p.id) this.receiptFile.set(blob); },
+      error: (e) => { if (this.viewing()?.id === p.id) this.receiptError.set(this.i18n.problem(e, 'admin.payments.receiptError')); },
     });
+  }
+
+  closeReceipt(): void { this.viewing.set(null); this.receiptFile.set(null); }
+
+  approveFromViewer(): void { const p = this.viewing(); if (p) { this.closeReceipt(); this.approve(p); } }
+  rejectFromViewer(reason: string): void {
+    const p = this.viewing();
+    if (!p) return;
+    this.closeReceipt();
+    this.run(this.api.reject(p.id, reason), this.i18n.t('admin.payments.rejected'));
   }
 
   approve(p: PaymentResponse): void { this.run(this.api.approve(p.id), this.i18n.t('admin.payments.approved')); }
