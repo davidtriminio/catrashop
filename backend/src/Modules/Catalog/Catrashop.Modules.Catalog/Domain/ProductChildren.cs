@@ -42,6 +42,13 @@ public sealed class ProductVariant
     public bool IsActive { get; private set; }
 
     internal void Deactivate() => IsActive = false;
+
+    internal void Update(string name, decimal price, bool isActive)
+    {
+        Name = name;
+        Price = price;
+        IsActive = isActive;
+    }
 }
 
 /// <summary>A descriptive attribute of a product (e.g. Material = Cotton).</summary>
