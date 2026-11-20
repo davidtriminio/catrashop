@@ -696,6 +696,19 @@
       "notifications": {
         "manage": "Send notifications"
       }
+    },
+    "receipt": {
+      "title": "Receipt",
+      "close": "Close",
+      "zoom": "Zoom",
+      "zoomIn": "Zoom in",
+      "zoomOut": "Zoom out",
+      "fit": "Fit to window",
+      "hint": "Wheel or buttons to zoom · drag to move · double-click to enlarge",
+      "reference": "Reference",
+      "account": "Destination account",
+      "sent": "Sent",
+      "download": "Download"
     }
   }
 }

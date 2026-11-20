@@ -696,6 +696,19 @@
       "notifications": {
         "manage": "Enviar notificaciones"
       }
+    },
+    "receipt": {
+      "title": "Comprobante",
+      "close": "Cerrar",
+      "zoom": "Zoom",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar",
+      "fit": "Ajustar a la ventana",
+      "hint": "Rueda o botones para el zoom · arrastra para mover · doble clic para ampliar",
+      "reference": "Referencia",
+      "account": "Cuenta de destino",
+      "sent": "Enviado",
+      "download": "Descargar"
     }
   }
 }
