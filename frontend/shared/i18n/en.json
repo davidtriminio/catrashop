@@ -709,6 +709,58 @@
       "account": "Destination account",
       "sent": "Sent",
       "download": "Download"
+    },
+    "products": {
+      "new": "New product",
+      "count": "products",
+      "search": "Search by name or SKU",
+      "product": "Product",
+      "variantsCol": "Variants",
+      "empty": "No products match this filter.",
+      "taxonomy": "Categories and brands",
+      "filter": {
+        "All": "All",
+        "Active": "Active",
+        "Draft": "Drafts",
+        "Archived": "Archived"
+      },
+      "status": {
+        "Active": "Active",
+        "Draft": "Draft",
+        "Archived": "Archived"
+      },
+      "publish": "Publish",
+      "restore": "Restore",
+      "archive": "Archive",
+      "published": "Product published: it is now visible in the store.",
+      "restored": "Product restored: it is now visible in the store.",
+      "archivedDone": "Product archived.",
+      "createTitle": "New product",
+      "editTitle": "Edit product",
+      "details": "Details",
+      "saveDetails": "Save changes",
+      "create": "Create product",
+      "created": "Product created as a draft. You can now add photos and publish it.",
+      "saved": "Changes saved.",
+      "photos": "Photos",
+      "photosHint": "JPG, PNG or WebP, up to {{mb}} MB each (maximum {{max}}). The main one is shown in lists.",
+      "photosAfter": "Create the product and you can upload its photos.",
+      "drop": "Drop photos or click to choose",
+      "uploading": "Uploading {{n}} of {{total}}…",
+      "primary": "Main",
+      "makePrimary": "Make main",
+      "removePhoto": "Remove photo",
+      "primarySet": "Main photo updated.",
+      "photoRemoved": "Photo removed.",
+      "uploaded": "Photos uploaded: {{count}}.",
+      "errType": "\"{{name}}\" is not a JPG, PNG or WebP image.",
+      "errSize": "\"{{name}}\" is larger than {{mb}} MB.",
+      "errMax": "A product can have at most {{max}} photos.",
+      "variants": "Variants",
+      "saveVariant": "Save",
+      "addVariant": "Add",
+      "variantSaved": "Variant saved.",
+      "variantAdded": "Variant added."
     }
   }
 }
