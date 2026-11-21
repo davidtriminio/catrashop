@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { BusyButton } from '@cs/ui/busy-button';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -9,7 +10,7 @@ import { PasswordInput } from '@cs/ui/password-input';
 
 @Component({
   selector: 'app-register',
-  imports: [ReactiveFormsModule, RouterLink, TranslocoPipe, PasswordInput],
+  imports: [ReactiveFormsModule, RouterLink, TranslocoPipe, PasswordInput, BusyButton],
   template: `
     <div class="auth-wrap">
       <div class="card">
@@ -35,8 +36,8 @@ import { PasswordInput } from '@cs/ui/password-input';
             <cs-password-input inputId="password" autocomplete="new-password" formControlName="password" />
             <small class="muted">{{ 'auth.register.passwordHint' | transloco }}</small>
           </div>
-          <button class="btn block" type="submit" [disabled]="form.invalid || busy()">
-            {{ (busy() ? 'auth.register.busy' : 'auth.register.submit') | transloco }}
+          <button class="btn block" type="submit" [csBusy]="busy()" [disabled]="form.invalid || busy()">
+            {{ 'auth.register.submit' | transloco }}
           </button>
         </form>
         <p class="muted switch">{{ 'auth.register.haveAccount' | transloco }} <a routerLink="/login">{{ 'auth.login.title' | transloco }}</a></p>

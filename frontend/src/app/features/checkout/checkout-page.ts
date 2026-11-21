@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, effect, inject, signal, untracked } from '@angular/core';
+import { BusyButton } from '@cs/ui/busy-button';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -23,7 +24,7 @@ const plain = (text: string | null | undefined) =>
 
 @Component({
   selector: 'app-checkout-page',
-  imports: [ReactiveFormsModule, RouterLink, MoneyPipe, StatusBadge, TranslocoPipe],
+  imports: [ReactiveFormsModule, RouterLink, MoneyPipe, StatusBadge, TranslocoPipe, BusyButton],
   template: `
     <h1>{{ 'checkout.title' | transloco }}</h1>
 
@@ -34,8 +35,8 @@ const plain = (text: string | null | undefined) =>
         <p>{{ 'checkout.totalDue' | transloco }} <strong>{{ order.grandTotal | money: order.currency }}</strong></p>
         @if (payError()) { <div class="alert error">{{ payError() }}</div> }
         <div class="row">
-          <button class="btn" [disabled]="paying()" (click)="pay(order)">
-            {{ (paying() ? 'checkout.processing' : 'payment.panel.start') | transloco }}
+          <button class="btn" [csBusy]="paying()" [disabled]="paying()" (click)="pay(order)">
+            {{ 'payment.panel.start' | transloco }}
           </button>
           <a class="btn secondary" [routerLink]="['/orders', order.orderId]">{{ 'checkout.viewOrder' | transloco }}</a>
         </div>
@@ -132,8 +133,8 @@ const plain = (text: string | null | undefined) =>
             }
 
             @if (error()) { <div class="alert error">{{ error() }}</div> }
-            <button class="btn block" type="submit" [disabled]="!canSubmit() || placing()">
-              {{ (placing() ? 'checkout.placing' : 'checkout.placeOrder') | transloco }}
+            <button class="btn block" type="submit" [csBusy]="placing()" [disabled]="!canSubmit() || placing()">
+              {{ 'checkout.placeOrder' | transloco }}
             </button>
           </form>
 
@@ -145,7 +146,7 @@ const plain = (text: string | null | undefined) =>
               <label for="coupon">{{ 'checkout.couponCode' | transloco }}</label>
               <div class="row">
                 <input id="coupon" class="input" [value]="couponCode()" (input)="setCoupon($event)" [placeholder]="'checkout.couponPlaceholder' | transloco" />
-                <button type="button" class="btn secondary" [disabled]="!couponCode() || checking()" (click)="applyCoupon(c.subtotal, c.currency)">{{ 'checkout.apply' | transloco }}</button>
+                <button type="button" class="btn secondary" [csBusy]="checking()" [disabled]="!couponCode() || checking()" (click)="applyCoupon(c.subtotal, c.currency)">{{ 'checkout.apply' | transloco }}</button>
               </div>
               @if (couponError()) { <div class="alert error">{{ couponError() }}</div> }
               @if (quote(); as qz) { <div class="alert success">{{ 'checkout.couponApplied' | transloco: { code: qz.couponCode, amount: (qz.discountAmount | money: qz.currency) } }}</div> }
@@ -165,7 +166,7 @@ const plain = (text: string | null | undefined) =>
         </div>
       }
     } @else {
-      <p class="muted">{{ 'common.loading' | transloco }}</p>
+      <div class="card" role="status" aria-busy="true"><span class="skeleton sk-block" style="width: 35%; height: 1.2rem; margin-bottom: var(--space-4)"></span><span class="skeleton sk-block" style="width: 100%; height: 2.6rem; margin-bottom: var(--space-3)"></span><span class="skeleton sk-block" style="width: 100%; height: 2.6rem; margin-bottom: var(--space-3)"></span><span class="skeleton sk-block" style="width: 60%; height: 2.6rem; margin-bottom: var(--space-4)"></span><span class="skeleton sk-block" style="width: 8rem; height: 2.6rem; margin-bottom: var(--space-2)"></span></div>
     }
   `,
   styles: [`

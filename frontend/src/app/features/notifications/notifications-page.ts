@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { BusyButton } from '@cs/ui/busy-button';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { NotificationsApi } from '@cs/api/notifications.api';
 import { Notification, NotificationPreferences } from '@cs/api/models';
@@ -9,15 +10,18 @@ interface Topic { labelKey: string; value: number; name: string; }
 
 @Component({
   selector: 'app-notifications-page',
-  imports: [LocalDatePipe, TranslocoPipe],
+  imports: [LocalDatePipe, TranslocoPipe, BusyButton],
   template: `
     <div class="page-head">
       <h1>{{ 'notifications.title' | transloco }}</h1>
-      <button class="btn secondary sm" (click)="markAll()" [disabled]="busy()">{{ 'notifications.markAll' | transloco }}</button>
+      <button class="btn secondary sm" (click)="markAll()" [csBusy]="busy()" [disabled]="busy()">{{ 'notifications.markAll' | transloco }}</button>
     </div>
     @if (error()) { <div class="alert error">{{ error() }}</div> }
 
     <div class="card flush">
+      @if (!loaded()) {
+        <div role="status" aria-busy="true">@for (n of [1, 2, 3, 4]; track n) { <div class="list-row"><span class="skeleton sk-block" style="width: 60%; height: 1rem; margin-bottom: var(--space-2)"></span></div> }</div>
+      } @else {
       @for (n of items(); track n.id) {
         <div class="list-row" [class.unread]="!n.isRead">
           <div class="note-text">
@@ -28,11 +32,15 @@ interface Topic { labelKey: string; value: number; name: string; }
           @if (!n.isRead) { <button class="btn secondary sm" (click)="markRead(n)">{{ 'notifications.markRead' | transloco }}</button> }
         </div>
       } @empty { <p class="empty">{{ 'notifications.empty' | transloco }}</p> }
+      }
     </div>
 
     <div class="card">
       <h2>{{ 'notifications.preferences' | transloco }}</h2>
       <p class="muted">{{ 'notifications.preferencesNote' | transloco }}</p>
+      @if (!prefsLoaded()) {
+        <div role="status" aria-busy="true"><span class="skeleton sk-block" style="width: 100%; height: 2.6rem; margin-bottom: var(--space-2)"></span><span class="skeleton sk-block" style="width: 100%; height: 2.6rem; margin-bottom: var(--space-2)"></span></div>
+      } @else {
       <table>
         <thead><tr><th>{{ 'notifications.topic' | transloco }}</th>@for (c of channels; track c.value) { <th>{{ c.labelKey | transloco }}</th> }</tr></thead>
         <tbody>
@@ -53,6 +61,7 @@ interface Topic { labelKey: string; value: number; name: string; }
           }
         </tbody>
       </table>
+      }
     </div>
   `,
   styles: [`
@@ -74,6 +83,8 @@ export class NotificationsPage implements OnInit {
 
   readonly items = signal<Notification[]>([]);
   readonly preferences = signal<NotificationPreferences | null>(null);
+  readonly loaded = signal(false);
+  readonly prefsLoaded = signal(false);
   readonly error = signal<string | null>(null);
   readonly busy = signal(false);
 
@@ -89,13 +100,13 @@ export class NotificationsPage implements OnInit {
 
   ngOnInit(): void {
     this.load();
-    this.api.preferences().subscribe({ next: (p) => this.preferences.set(p), error: () => {} });
+    this.api.preferences().subscribe({ next: (p) => { this.preferences.set(p); this.prefsLoaded.set(true); }, error: () => this.prefsLoaded.set(true) });
   }
 
   private load(): void {
     this.api.list(false, 1, 50).subscribe({
-      next: (r) => this.items.set(r.items),
-      error: (err) => this.error.set(this.i18n.problem(err)),
+      next: (r) => { this.items.set(r.items); this.loaded.set(true); },
+      error: (err) => { this.error.set(this.i18n.problem(err)); this.loaded.set(true); },
     });
   }
 
