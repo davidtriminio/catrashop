@@ -11,7 +11,9 @@ export class NotificationsApi {
 
   list(unreadOnly = false, page = 1, pageSize = 20): Observable<Paged<Notification>> {
     const params = new HttpParams().set('unreadOnly', unreadOnly).set('page', page).set('pageSize', pageSize);
-    return this.http.get<Paged<Notification>>(`${this.base}/`, { params });
+    // No trailing slash: Vercel's /api rewrite does not match "/api/v1/notifications/" and answers with the SPA's index.html
+    // (HTTP 200, not JSON), which the app reported as a generic error. The API accepts both forms.
+    return this.http.get<Paged<Notification>>(this.base, { params });
   }
   unreadCount(): Observable<UnreadCount> { return this.http.get<UnreadCount>(`${this.base}/unread-count`); }
   markRead(id: string): Observable<void> { return this.http.post<void>(`${this.base}/${id}/read`, {}); }
