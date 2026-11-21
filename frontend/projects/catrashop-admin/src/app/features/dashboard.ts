@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { TableSkeleton } from '../ui/skeleton';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { I18n, LOCALES, Lang } from '@cs/i18n/i18n';
@@ -33,7 +34,7 @@ const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 
 @Component({
   selector: 'app-dashboard',
-  imports: [RouterLink, LocalDatePipe, MoneyPipe, StatusBadge, Icon, TranslocoPipe, AccessCard],
+  imports: [RouterLink, LocalDatePipe, MoneyPipe, StatusBadge, Icon, TranslocoPipe, AccessCard, TableSkeleton],
   template: `
     <div class="page-head">
       <div>
@@ -49,7 +50,7 @@ const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
           <a class="card kpi" [class.featured]="k.featured" routerLink="/orders">
             <span class="ico" [style.--tone]="k.color"><cs-icon [name]="k.icon" [size]="18" /></span>
             <span class="label">{{ k.label | transloco }}</span>
-            <strong class="value">{{ counts()?.[k.status] ?? '–' }}</strong>
+            @if (!countsLoaded()) { <span class="skeleton sk-value"></span> } @else { <strong class="value">{{ counts()?.[k.status] ?? '–' }}</strong> }
             <span class="hint">{{ k.hint | transloco }}</span>
           </a>
         }
@@ -60,9 +61,9 @@ const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
           <header class="card-head">
             <div>
               <h2>{{ 'admin.dashboard.orderValue' | transloco }}</h2>
-              <p class="muted small">{{ 'admin.dashboard.valueSub' | transloco: { days: days, count: recent().length } }}</p>
+              @if (loadedRecent()) { <p class="muted small">{{ 'admin.dashboard.valueSub' | transloco: { days: days, count: recent().length } }}</p> } @else { <span class="skeleton sk-text" style="width: 11rem"></span> }
             </div>
-            <strong class="total">{{ series().total | money: currency() }}</strong>
+            @if (loadedRecent()) { <strong class="total">{{ series().total | money: currency() }}</strong> } @else { <span class="skeleton sk-text" style="width: 6rem; height: 1.2rem"></span> }
           </header>
           @if (loadedRecent()) {
             <svg class="area" [attr.viewBox]="'0 0 ' + W + ' ' + H" role="img"
@@ -90,6 +91,9 @@ const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
 
         <section class="card">
           <header class="card-head"><div><h2>{{ 'admin.dashboard.byStatus' | transloco }}</h2><p class="muted small">{{ 'admin.dashboard.byStatusSub' | transloco }}</p></div></header>
+          @if (!countsLoaded()) {
+            <div class="donut-wrap" role="status" aria-busy="true"><span class="skeleton sk-donut"></span><span class="skeleton sk-block" style="flex: 1; min-width: 150px; height: 8rem"></span></div>
+          } @else {
           <div class="donut-wrap">
             <svg viewBox="0 0 180 180" class="donut" role="img" [aria-label]="'admin.dashboard.byStatus' | transloco">
               <circle cx="90" cy="90" [attr.r]="R" class="ring-bg" />
@@ -108,6 +112,7 @@ const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
               }
             </ul>
           </div>
+          }
         </section>
       </div>
 
@@ -116,6 +121,9 @@ const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
           <div><h2>{{ 'admin.dashboard.recent' | transloco }}</h2></div>
           <a class="btn secondary sm" routerLink="/orders">{{ 'admin.dashboard.viewAll' | transloco }} <cs-icon name="arrow" [size]="14" /></a>
         </header>
+        @if (!loadedRecent()) {
+          <app-table-skeleton [rows]="5" [cols]="5" />
+        } @else {
         <div class="scroll">
           <table>
             <thead><tr><th>{{ 'admin.c.order' | transloco }}</th><th>{{ 'admin.c.date' | transloco }}</th><th>{{ 'admin.c.status' | transloco }}</th><th>{{ 'admin.c.items' | transloco }}</th><th class="right">{{ 'admin.c.total' | transloco }}</th></tr></thead>
@@ -128,10 +136,11 @@ const dayKey = (d: Date) => `${d.getFullYear()}-${d.getMonth()}-${d.getDate()}`;
                   <td>{{ o.itemCount }}</td>
                   <td class="right"><strong>{{ o.grandTotal | money: o.currency }}</strong></td>
                 </tr>
-              } @empty { <tr><td colspan="5" class="empty">{{ (loadedRecent() ? 'admin.dashboard.noOrders' : 'common.loading') | transloco }}</td></tr> }
+              } @empty { <tr><td colspan="5" class="empty">{{ 'admin.dashboard.noOrders' | transloco }}</td></tr> }
             </tbody>
           </table>
         </div>
+        }
       </section>
     }
 
@@ -223,6 +232,7 @@ export class Dashboard implements OnInit {
   readonly counts = signal<Record<string, number> | null>(null);
   readonly recent = signal<OrderSummary[]>([]);
   readonly loadedRecent = signal(false);
+  readonly countsLoaded = signal(false);
   readonly canSeeOrders = computed(() => this.auth.hasPermission('orders.read_all'));
   readonly sections = computed(() =>
     ADMIN_NAV.filter((i) => i.path !== '/dashboard' && (!i.permission || this.auth.hasPermission(i.permission))));
@@ -273,8 +283,8 @@ export class Dashboard implements OnInit {
     if (!this.canSeeOrders()) return;
     // Count-only queries (page size 1) so the dashboard never downloads orders just to show a number.
     forkJoin(KPIS.map((k) => this.orders.search(k.status, 1, 1))).subscribe({
-      next: (pages) => this.counts.set(Object.fromEntries(KPIS.map((k, i) => [k.status, pages[i].totalCount]))),
-      error: () => this.counts.set(null),
+      next: (pages) => { this.counts.set(Object.fromEntries(KPIS.map((k, i) => [k.status, pages[i].totalCount]))); this.countsLoaded.set(true); },
+      error: () => { this.counts.set(null); this.countsLoaded.set(true); },
     });
     this.orders.search(undefined, 1, 100).subscribe({
       next: (page) => { this.recent.set(page.items); this.loadedRecent.set(true); },

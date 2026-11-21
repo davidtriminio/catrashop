@@ -1,4 +1,5 @@
 import { Component, ElementRef, OnDestroy, OnInit, computed, effect, inject, input, output, signal, viewChild } from '@angular/core';
+import { BusyButton } from './busy-button';
 import { DomSanitizer } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -18,7 +19,7 @@ const MIN = 0.5, MAX = 8, STEP = 1.2;
  */
 @Component({
   selector: 'app-receipt-viewer',
-  imports: [Icon, TranslocoPipe, MoneyPipe, LocalDatePipe, StatusBadge, RouterLink],
+  imports: [Icon, TranslocoPipe, MoneyPipe, LocalDatePipe, StatusBadge, RouterLink, BusyButton],
   template: `
     <div class="overlay" (mousedown)="onBackdrop($event)">
       <div #dialog class="dialog" role="dialog" aria-modal="true" aria-labelledby="rv-title" tabindex="-1"
@@ -52,7 +53,7 @@ const MIN = 0.5, MAX = 8, STEP = 1.2;
             } @else if (error()) {
               <p class="state alert error">{{ error() }}</p>
             } @else {
-              <p class="state muted">{{ 'common.loading' | transloco }}</p>
+              <div class="load" role="status" aria-busy="true" [attr.aria-label]="'common.loading' | transloco"><span class="skeleton"></span></div>
             }
           </div>
 
@@ -83,11 +84,11 @@ const MIN = 0.5, MAX = 8, STEP = 1.2;
                 @if (rejecting()) {
                   <textarea class="input" rows="3" maxlength="500" [value]="reason()" (input)="reason.set($any($event.target).value)"
                             [placeholder]="'admin.payments.rejectReason' | transloco"></textarea>
-                  <button type="button" class="btn danger" [disabled]="busy() || !reason().trim()" (click)="rejected.emit(reason().trim())">{{ 'admin.payments.sendBack' | transloco }}</button>
+                  <button type="button" class="btn danger" [csBusy]="busy()" [disabled]="busy() || !reason().trim()" (click)="rejected.emit(reason().trim())">{{ 'admin.payments.sendBack' | transloco }}</button>
                   <button type="button" class="btn secondary" (click)="rejecting.set(false)">{{ 'admin.c.cancel' | transloco }}</button>
                 } @else {
-                  <button type="button" class="btn" [disabled]="busy()" (click)="approved.emit()">{{ 'admin.payments.approve' | transloco }}</button>
-                  <button type="button" class="btn secondary danger-text" [disabled]="busy()" (click)="rejecting.set(true)">{{ 'admin.payments.reject' | transloco }}</button>
+                  <button type="button" class="btn" [csBusy]="busy()" [disabled]="busy()" (click)="approved.emit()">{{ 'admin.payments.approve' | transloco }}</button>
+                  <button type="button" class="btn secondary danger-text" [csBusy]="busy()" [disabled]="busy()" (click)="rejecting.set(true)">{{ 'admin.payments.reject' | transloco }}</button>
                 }
               </div>
             }
@@ -104,6 +105,8 @@ const MIN = 0.5, MAX = 8, STEP = 1.2;
     .stage img { max-width: 100%; max-height: 100%; object-fit: contain; transform-origin: center; will-change: transform; pointer-events: none; }
     .pdf { flex: 1; width: 100%; border: 0; background: #fff; }
     .state { margin: auto; padding: var(--space-4); }
+    .load { flex: 1; display: grid; place-items: center; }
+    .load .skeleton { width: min(60%, 320px); height: 72%; border-radius: var(--radius-sm); }
     .tools { position: absolute; left: 50%; bottom: var(--space-5); translate: -50% 0; display: flex; align-items: center; gap: var(--space-1); padding: var(--space-1); border-radius: var(--radius-sm); background: var(--surface); border: 1px solid var(--border); box-shadow: var(--shadow-raised); }
     .pct { min-width: 3.2rem; text-align: center; font-size: 0.8rem; font-weight: 650; }
     .hint { position: absolute; top: var(--space-3); left: 0; right: 0; margin: 0; text-align: center; font-size: 0.75rem; color: var(--muted); pointer-events: none; }

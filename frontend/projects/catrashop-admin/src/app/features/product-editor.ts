@@ -1,4 +1,5 @@
 import { Component, ElementRef, OnDestroy, OnInit, computed, inject, input, output, signal, viewChild } from '@angular/core';
+import { BusyButton } from '../ui/busy-button';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { concatMap, from } from 'rxjs';
@@ -22,7 +23,7 @@ interface VariantRow { id: string; sku: string; name: string; unitPrice: number;
  */
 @Component({
   selector: 'app-product-editor',
-  imports: [ReactiveFormsModule, FormsModule, TranslocoPipe, Icon, Select],
+  imports: [ReactiveFormsModule, FormsModule, TranslocoPipe, Icon, Select, BusyButton],
   template: `
     <div class="overlay" (mousedown)="onBackdrop($event)">
       <div #dialog class="dialog" role="dialog" aria-modal="true" aria-labelledby="pe-title" tabindex="-1" (keydown.escape)="closed.emit()">
@@ -32,13 +33,13 @@ interface VariantRow { id: string; sku: string; name: string; unitPrice: number;
           <span class="spacer"></span>
           @if (product(); as p) {
             @if (p.status !== 'Active') {
-              <button type="button" class="btn sm" [disabled]="busy()" (click)="setStatus(true)">
+              <button type="button" class="btn sm" [csBusy]="busy()" [disabled]="busy()" (click)="setStatus(true)">
                 <cs-icon [name]="p.status === 'Archived' ? 'restore' : 'check'" [size]="14" />
                 {{ (p.status === 'Archived' ? 'admin.products.restore' : 'admin.products.publish') | transloco }}
               </button>
             }
             @if (p.status !== 'Archived') {
-              <button type="button" class="btn secondary sm" [disabled]="busy()" (click)="setStatus(false)"><cs-icon name="archive" [size]="14" /> {{ 'admin.products.archive' | transloco }}</button>
+              <button type="button" class="btn secondary sm" [csBusy]="busy()" [disabled]="busy()" (click)="setStatus(false)"><cs-icon name="archive" [size]="14" /> {{ 'admin.products.archive' | transloco }}</button>
             }
           }
           <button type="button" class="icon-btn" [attr.aria-label]="'admin.receipt.close' | transloco" (click)="closed.emit()"><cs-icon name="close" /></button>
@@ -48,6 +49,17 @@ interface VariantRow { id: string; sku: string; name: string; unitPrice: number;
           @if (error()) { <div class="alert error">{{ error() }}</div> }
           @if (message()) { <div class="alert success">{{ message() }}</div> }
 
+          @if (loadingProduct() && !error()) {
+            <div role="status" aria-busy="true">
+              <span class="skeleton sk-text" style="width: 6rem; margin-bottom: var(--space-3)"></span>
+              <span class="skeleton sk-block" style="height: 2.7rem; margin-bottom: var(--space-4)"></span>
+              <span class="skeleton sk-block" style="height: 5.5rem; margin-bottom: var(--space-4)"></span>
+              <div class="row"><span class="skeleton sk-block" style="height: 2.7rem; flex: 1"></span><span class="skeleton sk-block" style="height: 2.7rem; flex: 1"></span></div>
+              <span class="skeleton sk-text" style="width: 5rem; margin: var(--space-6) 0 var(--space-3)"></span>
+              <div class="photos">@for (n of [1, 2, 3]; track n) { <span class="skeleton sk-block ph"></span> }</div>
+            </div>
+          }
+          <div [class.hide]="loadingProduct()">
           <section>
             <h3>{{ 'admin.products.details' | transloco }}</h3>
             <form [formGroup]="form" (ngSubmit)="saveDetails()">
@@ -69,7 +81,7 @@ interface VariantRow { id: string; sku: string; name: string; unitPrice: number;
                   <div class="field"><label>{{ 'admin.catalog.price' | transloco }}</label><input class="input" type="number" min="0.01" step="0.01" formControlName="unitPrice" /></div>
                 </div>
               }
-              <button class="btn" [disabled]="busy() || form.invalid || (!id() && first.invalid)">{{ (id() ? 'admin.products.saveDetails' : 'admin.products.create') | transloco }}</button>
+              <button class="btn" [csBusy]="busy()" [disabled]="busy() || form.invalid || (!id() && first.invalid)">{{ (id() ? 'admin.products.saveDetails' : 'admin.products.create') | transloco }}</button>
             </form>
           </section>
 
@@ -84,12 +96,13 @@ interface VariantRow { id: string; sku: string; name: string; unitPrice: number;
                     @if (img.isPrimary) { <span class="tag"><cs-icon name="star" [size]="12" /> {{ 'admin.products.primary' | transloco }}</span> }
                     <figcaption>
                       @if (!img.isPrimary) {
-                        <button type="button" class="icon-btn" [disabled]="busy()" [title]="'admin.products.makePrimary' | transloco" [attr.aria-label]="'admin.products.makePrimary' | transloco" (click)="makePrimary(img.id)"><cs-icon name="star" [size]="16" /></button>
+                        <button type="button" class="icon-btn" [csBusy]="busy()" [disabled]="busy()" [title]="'admin.products.makePrimary' | transloco" [attr.aria-label]="'admin.products.makePrimary' | transloco" (click)="makePrimary(img.id)"><cs-icon name="star" [size]="16" /></button>
                       }
-                      <button type="button" class="icon-btn del" [disabled]="busy()" [title]="'admin.products.removePhoto' | transloco" [attr.aria-label]="'admin.products.removePhoto' | transloco" (click)="removePhoto(img.id)"><cs-icon name="trash" [size]="16" /></button>
+                      <button type="button" class="icon-btn del" [csBusy]="busy()" [disabled]="busy()" [title]="'admin.products.removePhoto' | transloco" [attr.aria-label]="'admin.products.removePhoto' | transloco" (click)="removePhoto(img.id)"><cs-icon name="trash" [size]="16" /></button>
                     </figcaption>
                   </figure>
                 }
+                @for (n of pending(); track n) { <span class="skeleton sk-block ph" aria-hidden="true"></span> }
                 @if (p.images.length < MAX) {
                   <label class="drop" [class.over]="over()" (dragover)="$event.preventDefault(); over.set(true)" (dragleave)="over.set(false)" (drop)="onDrop($event)">
                     <input #file type="file" accept="image/jpeg,image/png,image/webp" multiple hidden (change)="onPick($event)" />
@@ -112,7 +125,7 @@ interface VariantRow { id: string; sku: string; name: string; unitPrice: number;
                         <td><input class="input sm" [(ngModel)]="v.name" [ngModelOptions]="{ standalone: true }" /></td>
                         <td class="num"><input class="input sm" type="number" min="0.01" step="0.01" [(ngModel)]="v.unitPrice" [ngModelOptions]="{ standalone: true }" /></td>
                         <td><input type="checkbox" [(ngModel)]="v.isActive" [ngModelOptions]="{ standalone: true }" [attr.aria-label]="'admin.promotions.active' | transloco" /></td>
-                        <td class="right"><button type="button" class="btn secondary sm" [disabled]="busy() || !dirty(v)" (click)="saveVariant(v)">{{ 'admin.products.saveVariant' | transloco }}</button></td>
+                        <td class="right"><button type="button" class="btn secondary sm" [csBusy]="busy()" [disabled]="busy() || !dirty(v)" (click)="saveVariant(v)">{{ 'admin.products.saveVariant' | transloco }}</button></td>
                       </tr>
                     }
                     <tr class="add">
@@ -120,7 +133,7 @@ interface VariantRow { id: string; sku: string; name: string; unitPrice: number;
                       <td><input class="input sm" [placeholder]="'admin.catalog.variantName' | transloco" [(ngModel)]="newVariant.name" [ngModelOptions]="{ standalone: true }" /></td>
                       <td class="num"><input class="input sm" type="number" min="0.01" step="0.01" [(ngModel)]="newVariant.unitPrice" [ngModelOptions]="{ standalone: true }" /></td>
                       <td></td>
-                      <td class="right"><button type="button" class="btn sm" [disabled]="busy() || !canAddVariant()" (click)="addVariant()"><cs-icon name="plus" [size]="14" /> {{ 'admin.products.addVariant' | transloco }}</button></td>
+                      <td class="right"><button type="button" class="btn sm" [csBusy]="busy()" [disabled]="busy() || !canAddVariant()" (click)="addVariant()"><cs-icon name="plus" [size]="14" /> {{ 'admin.products.addVariant' | transloco }}</button></td>
                     </tr>
                   </tbody>
                 </table>
@@ -129,6 +142,7 @@ interface VariantRow { id: string; sku: string; name: string; unitPrice: number;
           } @else {
             <p class="muted small"><cs-icon name="image" [size]="14" /> {{ 'admin.products.photosAfter' | transloco }}</p>
           }
+          </div>
         </div>
       </div>
     </div>
@@ -154,6 +168,8 @@ interface VariantRow { id: string; sku: string; name: string; unitPrice: number;
     .drop { display: grid; place-content: center; justify-items: center; gap: var(--space-2); aspect-ratio: 1; padding: var(--space-3); text-align: center; font-size: 0.82rem; color: var(--muted); border: 2px dashed var(--border-strong); border-radius: var(--radius-sm); cursor: pointer; }
     .drop:hover, .drop.over { border-color: var(--primary); color: var(--primary); background: var(--accent); }
     .scroll { overflow-x: auto; }
+    .hide { display: none; }
+    .ph { aspect-ratio: 1; }
     .input.sm { padding: 0.4rem 0.6rem; min-width: 90px; }
     td.num .input { max-width: 120px; }
     tr.add td { background: var(--surface-2); }
@@ -189,6 +205,13 @@ export class ProductEditor implements OnInit, OnDestroy {
   readonly message = signal<string | null>(null);
   newVariant = { sku: '', name: '', unitPrice: 0 };
 
+  /** Editing an existing product whose data has not arrived yet. */
+  readonly loadingProduct = computed(() => !!this.id() && !this.product());
+  /** Photos still waiting in the upload queue, drawn as placeholders next to the finished ones. */
+  readonly pending = computed(() => {
+    const p = this.progress();
+    return this.uploading() ? Array.from({ length: Math.max(p.total - (p.done - 1), 0) }, (_, i) => i) : [];
+  });
   readonly categoryOptions = computed<SelectOption[]>(() => this.categories().map((c) => ({ value: c.id, label: c.name })));
   readonly brandOptions = computed<SelectOption[]>(() => {
     this.i18n.lang(); // recompute when the language changes

@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { TableSkeleton } from '../ui/skeleton';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { I18n } from '@cs/i18n/i18n';
@@ -11,7 +12,7 @@ import { buildPages } from '@cs/util/pagination';
 
 @Component({
   selector: 'app-orders-admin',
-  imports: [RouterLink, LocalDatePipe, MoneyPipe, StatusBadge, TranslocoPipe],
+  imports: [RouterLink, LocalDatePipe, MoneyPipe, StatusBadge, TranslocoPipe, TableSkeleton],
   template: `
     <div class="page-head">
       <div>
@@ -58,6 +59,8 @@ import { buildPages } from '@cs/util/pagination';
           <button class="btn secondary sm" type="button" [disabled]="!r.hasNext" (click)="go(r.page + 1)">{{ 'pagination.next' | transloco }}</button>
         </nav>
       }
+    } @else if (!error()) {
+      <div class="card flush"><app-table-skeleton [rows]="8" [cols]="6" /></div>
     }
   `,
   styles: [`
