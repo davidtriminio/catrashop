@@ -1,5 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { BusyButton } from '../ui/busy-button';
+import { BusyButton } from '@cs/ui/busy-button';
 import { TableSkeleton } from '../ui/skeleton';
 import { FormsModule } from '@angular/forms';
 import { InventoryAdminApi } from '@cs/api/inventory-admin.api';

@@ -1,5 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
-import { BusyButton } from '../ui/busy-button';
+import { BusyButton } from '@cs/ui/busy-button';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthStore } from '@cs/auth/auth.store';
