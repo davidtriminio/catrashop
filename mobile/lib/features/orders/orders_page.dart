@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/loading.dart';
 import '../../core/providers.dart';
 import '../../core/theme.dart';
 import 'order_detail_page.dart';
@@ -16,12 +17,14 @@ class OrdersPage extends ConsumerWidget {
     final filter = ref.watch(statusFilterProvider);
     final theme = Theme.of(context);
 
-    Widget skeleton() => ListView.separated(
-          physics: const NeverScrollableScrollPhysics(),
-          padding: const EdgeInsets.fromLTRB(Gap.s4, 0, Gap.s4, Gap.s5),
-          itemCount: 6,
-          separatorBuilder: (_, _) => const SizedBox(height: Gap.s2),
-          itemBuilder: (_, _) => const OrderCardSkeleton(),
+    Widget skeleton() => SkeletonScreen(
+          child: ListView.separated(
+            physics: const NeverScrollableScrollPhysics(),
+            padding: const EdgeInsets.fromLTRB(Gap.s4, 0, Gap.s4, Gap.s5),
+            itemCount: 6,
+            separatorBuilder: (_, _) => const SizedBox(height: Gap.s2),
+            itemBuilder: (_, _) => const OrderCardSkeleton(),
+          ),
         );
 
     return Scaffold(

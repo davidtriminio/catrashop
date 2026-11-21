@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { BusyButton } from '@cs/ui/busy-button';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { AuthStore } from '@cs/auth/auth.store';
@@ -9,7 +10,7 @@ import { Icon } from '../ui/icon';
 
 @Component({
   selector: 'app-admin-login',
-  imports: [ReactiveFormsModule, PasswordInput, Icon, TranslocoPipe],
+  imports: [ReactiveFormsModule, PasswordInput, Icon, TranslocoPipe, BusyButton],
   template: `
     <div class="split">
       <aside class="hero" aria-hidden="true">
@@ -36,7 +37,7 @@ import { Icon } from '../ui/icon';
           <form [formGroup]="form" (ngSubmit)="submit()">
             <div class="field"><label for="email">{{ 'admin.login.email' | transloco }}</label><input id="email" class="input" type="email" autocomplete="username" formControlName="email" /></div>
             <div class="field"><label for="password">{{ 'admin.login.password' | transloco }}</label><cs-password-input inputId="password" autocomplete="current-password" formControlName="password" /></div>
-            <button class="btn block" type="submit" [disabled]="form.invalid || busy()">{{ (busy() ? 'admin.login.signingIn' : 'admin.login.title') | transloco }}</button>
+            <button class="btn block" type="submit" [csBusy]="busy()" [disabled]="form.invalid || busy()">{{ 'admin.login.title' | transloco }}</button>
           </form>
         </div>
       </main>

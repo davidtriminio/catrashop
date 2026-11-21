@@ -193,3 +193,27 @@ tr:last-child td { border-bottom: none; }
 }
 .list-row:last-child { border-bottom: none; }
 .list-row.unread { background: var(--surface-2); box-shadow: inset 3px 0 0 var(--accent); }
+
+/* ---- loading feedback ---- */
+/* A button that is working keeps its size; the label hides and a small ring turns in its place. */
+.busy { position: relative; pointer-events: none; color: transparent !important; }
+.busy > * { opacity: 0; }
+.busy::after {
+  content: ''; position: absolute; inset: 0; margin: auto; width: 1.05em; height: 1.05em; border-radius: 50%;
+  border: 2px solid var(--spin, rgba(255, 255, 255, 0.92)); border-right-color: transparent; animation: spin 0.7s linear infinite;
+}
+.btn.secondary.busy, .btn.accent.busy { --spin: var(--muted); }
+.btn.busy:disabled { opacity: 0.9; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .busy::after { animation-duration: 2.4s; } }
+
+/* thin bar across the top while a page change takes longer than a moment */
+.route-bar { position: fixed; z-index: 80; top: 0; left: 0; right: 0; height: 3px; overflow: hidden; pointer-events: none; }
+.route-bar::before { content: ''; position: absolute; inset: 0; width: 40%; background: linear-gradient(90deg, transparent, var(--primary), transparent); animation: route-bar 1.1s ease-in-out infinite; }
+@keyframes route-bar { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+@media (prefers-reduced-motion: reduce) { .route-bar::before { animation: none; width: 100%; opacity: 0.6; } }
+
+/* placeholder shapes */
+.sk-text { display: block; height: 0.9rem; }
+.sk-title { display: block; height: 1.6rem; width: 14rem; max-width: 60%; margin-bottom: var(--space-3); }
+.sk-block { display: block; border-radius: var(--radius-sm); }

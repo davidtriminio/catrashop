@@ -100,6 +100,20 @@ public sealed class ProductService
         return new ProductVariantResponse(v.Id, v.Sku, v.Name, v.Price, v.Currency, v.IsActive);
     }
 
+    public async Task<Result> UpdateVariantAsync(Guid productId, Guid variantId, UpdateVariantRequest request, CancellationToken ct = default)
+    {
+        var product = await _products.GetByIdAsync(productId, ct);
+        if (product is null)
+            return CatalogErrors.ProductNotFound;
+
+        var result = product.UpdateVariant(variantId, request.Name, request.UnitPrice, request.IsActive);
+        if (result.IsFailure)
+            return result;
+
+        await _unitOfWork.SaveChangesAsync(ct);
+        return Result.Success();
+    }
+
     public async Task<Result> PublishAsync(Guid id, CancellationToken ct = default)
     {
         var product = await _products.GetByIdAsync(id, ct);

@@ -1,4 +1,5 @@
 import { Component, effect, inject, input, output, signal, untracked } from '@angular/core';
+import { BusyButton } from '@cs/ui/busy-button';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { BankAccount, OrderDetail, PaymentResponse } from '@cs/api/models';
 import { PaymentsApi } from '@cs/api/payments.api';
@@ -15,7 +16,7 @@ const RECEIPT_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
  */
 @Component({
   selector: 'app-payment-panel',
-  imports: [StatusBadge, TranslocoPipe],
+  imports: [StatusBadge, TranslocoPipe, BusyButton],
   template: `
     @if (order().paymentMethod; as method) {
       <div class="card">
@@ -28,7 +29,7 @@ const RECEIPT_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
           <!-- The payment was not started (e.g. the connection dropped right after checkout). It is idempotent. -->
           @if (awaiting()) {
             @if (error()) { <div class="alert error">{{ error() }}</div> }
-            <button class="btn" [disabled]="busy()" (click)="start()">{{ 'payment.panel.start' | transloco }}</button>
+            <button class="btn" [csBusy]="busy()" [disabled]="busy()" (click)="start()">{{ 'payment.panel.start' | transloco }}</button>
           }
         } @else if (payment(); as p) {
           <p class="line"><span class="muted">{{ 'payment.panel.status' | transloco }}</span> <cs-status-badge [status]="p.status" /></p>
@@ -65,8 +66,8 @@ const RECEIPT_TYPES = ['image/jpeg', 'image/png', 'application/pdf'];
                         <input id="receipt" class="input" type="file" accept="image/jpeg,image/png,application/pdf" (change)="pick($event)" />
                       </div>
                       @if (error()) { <div class="alert error">{{ error() }}</div> }
-                      <button class="btn" type="submit" [disabled]="busy() || !reference().trim() || !file()">
-                        {{ (busy() ? 'payment.panel.sending' : 'payment.panel.send') | transloco }}
+                      <button class="btn" type="submit" [csBusy]="busy()" [disabled]="busy() || !reference().trim() || !file()">
+                        {{ 'payment.panel.send' | transloco }}
                       </button>
                     </form>
                   }

@@ -146,4 +146,77 @@ public sealed class CatalogReadStore : ICatalogReadStore
             product.Images.OrderBy(i => i.SortOrder)
                 .Select(i => new ProductImageResponse(i.Url, i.AltText, i.SortOrder, i.IsPrimary)).ToArray());
     }
+
+    public async Task<PagedResult<ProductListItem>> SearchAdminProductsAsync(AdminProductSearchCriteria criteria, CancellationToken ct = default)
+    {
+        var page = new PageRequest(criteria.Page, criteria.PageSize);
+        var query = _context.Products.AsNoTracking().AsQueryable();
+
+        // An unknown status is ignored (same leniency as the customer search) rather than failing the page.
+        if (Enum.TryParse<ProductStatus>(criteria.Status, ignoreCase: true, out var status))
+            query = query.Where(p => p.Status == status);
+
+        var term = criteria.SearchTerm?.Trim();
+        if (!string.IsNullOrEmpty(term))
+        {
+            // Escape LIKE wildcards so a search for "50%" or "a_b" matches literally (backslash is Postgres' default escape).
+            var pattern = $"%{term.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_")}%";
+            query = query.Where(p => EF.Functions.ILike(p.Name, pattern) || p.Variants.Any(v => EF.Functions.ILike(v.Sku, pattern)));
+        }
+
+        var total = await query.LongCountAsync(ct);
+
+        var rows = await query
+            .OrderByDescending(p => p.UpdatedAtUtc)
+            .ThenBy(p => p.Name)
+            .Skip(page.Skip)
+            .Take(page.PageSize)
+            .Select(p => new
+            {
+                p.Id,
+                p.Name,
+                p.Slug,
+                p.Status,
+                CategoryName = _context.Categories.Where(c => c.Id == p.CategoryId).Select(c => c.Name).FirstOrDefault(),
+                BrandName = _context.Brands.Where(b => b.Id == p.BrandId).Select(b => b.Name).FirstOrDefault(),
+                PrimaryImageUrl = p.Images.Where(i => i.IsPrimary).Select(i => i.Url).FirstOrDefault(),
+                VariantCount = p.Variants.Count,
+                MinPrice = p.Variants.Min(v => (decimal?)v.Price),
+                MaxPrice = p.Variants.Max(v => (decimal?)v.Price),
+                Currency = p.Variants.Select(v => v.Currency).FirstOrDefault()
+            })
+            .ToListAsync(ct);
+
+        var items = rows
+            .Select(r => new ProductListItem(
+                r.Id, r.Name, r.Slug, r.CategoryName ?? string.Empty, r.BrandName,
+                r.PrimaryImageUrl, r.VariantCount, r.Status.ToString(), r.MinPrice, r.MaxPrice, r.Currency))
+            .ToArray();
+
+        return new PagedResult<ProductListItem>(items, page.Page, page.PageSize, total);
+    }
+
+    public async Task<AdminProductDetail?> GetAdminProductAsync(Guid id, CancellationToken ct = default)
+    {
+        var product = await _context.Products.AsNoTracking().FirstOrDefaultAsync(p => p.Id == id, ct);
+        if (product is null)
+            return null;
+
+        var categoryName = await _context.Categories
+            .Where(c => c.Id == product.CategoryId).Select(c => c.Name).FirstOrDefaultAsync(ct) ?? string.Empty;
+
+        string? brandName = product.BrandId is { } brandId
+            ? await _context.Brands.Where(b => b.Id == brandId).Select(b => b.Name).FirstOrDefaultAsync(ct)
+            : null;
+
+        return new AdminProductDetail(
+            product.Id, product.Name, product.Slug, product.Description, product.Status.ToString(),
+            product.CategoryId, categoryName, product.BrandId, brandName,
+            product.Variants.OrderBy(v => v.Sku)
+                .Select(v => new ProductVariantResponse(v.Id, v.Sku, v.Name, v.Price, v.Currency, v.IsActive)).ToArray(),
+            product.Attributes.Select(a => new ProductAttributeResponse(a.Name, a.Value)).ToArray(),
+            product.Images.OrderBy(i => i.SortOrder)
+                .Select(i => new AdminProductImage(i.Id, i.Url, i.AltText, i.SortOrder, i.IsPrimary)).ToArray(),
+            product.CreatedAtUtc, product.UpdatedAtUtc);
+    }
 }

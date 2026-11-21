@@ -196,6 +196,17 @@ export interface CreateProductRequest {
   variants: ProductVariantInput[];
 }
 export interface AddVariantRequest { sku: string; name: string; unitPrice: number; currency: string; }
+export interface UpdateProductRequest { name: string; description: string; categoryId: string; brandId?: string | null; }
+export interface UpdateVariantRequest { name: string; unitPrice: number; isActive: boolean; }
+/** A photo as the back office sees it (with its id, so it can be removed or made primary). */
+export interface AdminProductImage { id: string; url: string; altText: string | null; sortOrder: number; isPrimary: boolean; }
+/** A product in any status (Draft, Active, Archived), for the back office. */
+export interface AdminProductDetail {
+  id: string; name: string; slug: string; description: string; status: string;
+  categoryId: string; categoryName: string; brandId: string | null; brandName: string | null;
+  variants: ProductVariant[]; attributes: ProductAttribute[]; images: AdminProductImage[];
+  createdAtUtc: string; updatedAtUtc: string;
+}
 
 // --- Inventory (admin) --------------------------------------------------------------------------
 export interface InventoryItem {

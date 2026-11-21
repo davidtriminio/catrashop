@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/loading.dart';
 import '../../core/providers.dart';
 import '../../core/theme.dart';
 import 'brand.dart';
@@ -105,11 +106,10 @@ class _LoginPageState extends ConsumerState<LoginPage> {
                           ),
                         ],
                         const SizedBox(height: Gap.s5),
-                        FilledButton(
-                          onPressed: _busy ? null : _submit,
-                          child: _busy
-                              ? SizedBox(height: 20, width: 20, child: CircularProgressIndicator(strokeWidth: 2, color: scheme.onPrimary))
-                              : const Text('Iniciar sesión'),
+                        BusyButton(
+                          onPressed: _submit,
+                          busy: _busy,
+                          label: 'Iniciar sesión',
                         ),
                       ]),
                     ),

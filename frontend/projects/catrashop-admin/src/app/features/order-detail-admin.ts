@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { BusyButton } from '@cs/ui/busy-button';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { I18n } from '@cs/i18n/i18n';
@@ -14,10 +15,28 @@ type Action = 'process' | 'ship' | 'deliver' | 'cancel';
 
 @Component({
   selector: 'app-order-detail-admin',
-  imports: [LocalDatePipe, RouterLink, MoneyPipe, StatusBadge, Timeline, TranslocoPipe],
+  imports: [LocalDatePipe, RouterLink, MoneyPipe, StatusBadge, Timeline, TranslocoPipe, BusyButton],
   template: `
     @if (error()) { <div class="alert error">{{ error() }}</div> }
     @if (message()) { <div class="alert success">{{ message() }}</div> }
+
+    @if (!order() && !error()) {
+      <div role="status" aria-busy="true">
+        <span class="skeleton sk-text" style="width: 8rem; margin-bottom: var(--space-3)"></span>
+        <span class="skeleton sk-title"></span>
+        <span class="skeleton sk-text" style="width: 18rem; margin-bottom: var(--space-5)"></span>
+        <div class="cols grids">
+          <div class="card">
+            @for (n of [1, 2, 3]; track n) { <div class="item"><span class="skeleton sk-text" style="width: 55%"></span><span class="skeleton sk-text" style="width: 4rem"></span></div> }
+            <span class="skeleton sk-text" style="width: 40%; margin-top: var(--space-4)"></span>
+          </div>
+          <div class="side">
+            <div class="card"><span class="skeleton sk-text" style="width: 60%"></span><span class="skeleton sk-text" style="width: 80%; margin-top: var(--space-3)"></span><span class="skeleton sk-text" style="width: 50%; margin-top: var(--space-2)"></span></div>
+            <div class="card"><span class="skeleton sk-text" style="width: 45%"></span><span class="skeleton sk-text" style="width: 70%; margin-top: var(--space-3)"></span></div>
+          </div>
+        </div>
+      </div>
+    }
 
     @if (order(); as o) {
       <nav class="crumbs" [aria-label]="'admin.orderDetail.breadcrumb' | transloco">
@@ -31,10 +50,10 @@ type Action = 'process' | 'ship' | 'deliver' | 'cancel';
         </div>
         <div class="actions">
           @if (next(o.status); as n) {
-            <button class="btn" [disabled]="busy()" (click)="act(n.action, o)">{{ n.label | transloco }}</button>
+            <button class="btn" [csBusy]="busy()" [disabled]="busy()" (click)="act(n.action, o)">{{ n.label | transloco }}</button>
           }
           @if (canCancel(o.status)) {
-            <button class="btn secondary danger-text" [disabled]="busy()" (click)="act('cancel', o)">{{ 'admin.orderDetail.cancelOrder' | transloco }}</button>
+            <button class="btn secondary danger-text" [csBusy]="busy()" [disabled]="busy()" (click)="act('cancel', o)">{{ 'admin.orderDetail.cancelOrder' | transloco }}</button>
           }
         </div>
       </div>
@@ -78,7 +97,7 @@ type Action = 'process' | 'ship' | 'deliver' | 'cancel';
                 @if (p.status === 'UnderReview') { <a class="btn secondary sm" routerLink="/payments">{{ 'admin.orderDetail.verify' | transloco }}</a> }
                 @if (p.status === 'Pending' && o.paymentMethod !== 'TRANSFERENCIA') {
                   @if (o.status === 'Delivered') {
-                    <button class="btn sm" [disabled]="busy()" (click)="collect(p)">{{ 'admin.orderDetail.markCollected' | transloco }}</button>
+                    <button class="btn sm" [csBusy]="busy()" [disabled]="busy()" (click)="collect(p)">{{ 'admin.orderDetail.markCollected' | transloco }}</button>
                   } @else { <p class="muted">{{ 'admin.orderDetail.collectedHint' | transloco }}</p> }
                 }
               } @else { <p class="muted">{{ 'admin.orderDetail.notStarted' | transloco }}</p> }

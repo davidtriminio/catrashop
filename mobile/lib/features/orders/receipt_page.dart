@@ -6,6 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:open_filex/open_filex.dart';
 import 'package:path_provider/path_provider.dart';
 
+import '../../core/loading.dart';
 import '../../core/providers.dart';
 import 'widgets.dart';
 
@@ -43,7 +44,7 @@ class _ReceiptPageState extends ConsumerState<ReceiptPage> {
       body: FutureBuilder(
         future: _file,
         builder: (context, snap) {
-          if (snap.connectionState != ConnectionState.done) return const Center(child: CircularProgressIndicator());
+          if (snap.connectionState != ConnectionState.done) return const ReceiptSkeleton();
           if (snap.hasError) {
             return LoadError(
               title: 'No se pudo abrir el comprobante',

@@ -46,4 +46,24 @@ public interface ICatalogReadStore
     Task<PagedResult<ProductListItem>> SearchProductsAsync(ProductSearchCriteria criteria, CancellationToken ct = default);
     Task<ProductDetail?> GetProductBySlugAsync(string slug, CancellationToken ct = default);
     Task<PriceRangeResponse> GetPriceRangeAsync(CancellationToken ct = default);
+
+    /// <summary>Back-office list: products in every status (Draft, Active, Archived).</summary>
+    Task<PagedResult<ProductListItem>> SearchAdminProductsAsync(AdminProductSearchCriteria criteria, CancellationToken ct = default);
+
+    Task<AdminProductDetail?> GetAdminProductAsync(Guid id, CancellationToken ct = default);
+}
+
+/// <summary>An image file opened for reading, with its media type.</summary>
+public sealed record StoredImage(Stream Content, string ContentType);
+
+/// <summary>Where uploaded product images live. Implementations generate the key; callers never choose a file name.</summary>
+public interface IProductImageStore
+{
+    /// <summary>Saves the bytes and returns the key (a generated file name).</summary>
+    Task<string> SaveAsync(byte[] content, string extension, CancellationToken ct = default);
+
+    /// <summary>Opens an image, or returns null when the key is unknown or does not resolve inside the store.</summary>
+    Task<StoredImage?> OpenAsync(string key, CancellationToken ct = default);
+
+    Task DeleteAsync(string key, CancellationToken ct = default);
 }

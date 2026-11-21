@@ -2,7 +2,9 @@ using Catrashop.BuildingBlocks.Modularity;
 using Catrashop.Infrastructure.Persistence;
 using Catrashop.Modules.Catalog.Api;
 using Catrashop.Modules.Catalog.Application.Abstractions;
+using Catrashop.Modules.Catalog.Application.Configuration;
 using Catrashop.Modules.Catalog.Application.Services;
+using Catrashop.Modules.Catalog.Infrastructure;
 using Catrashop.Modules.Catalog.Infrastructure.Persistence;
 using FluentValidation;
 using Microsoft.AspNetCore.Routing;
@@ -28,12 +30,16 @@ public sealed class CatalogModule : IModule
         services.AddScoped<IProductRepository, ProductRepository>();
         services.AddScoped<ICatalogReadStore, CatalogReadStore>();
 
+        services.Configure<CatalogOptions>(configuration.GetSection(CatalogOptions.SectionName));
+        services.AddSingleton<IProductImageStore, FileSystemProductImageStore>();
+
         // Public in-process query consumed by the Cart module to capture prices at add-to-cart.
         services.AddScoped<Contracts.IProductCatalogQuery, ProductCatalogQuery>();
 
         services.AddScoped<CategoryService>();
         services.AddScoped<BrandService>();
         services.AddScoped<ProductService>();
+        services.AddScoped<ProductImageService>();
         services.AddScoped<CatalogQueryService>();
 
         services.TryAddSingleton(TimeProvider.System);

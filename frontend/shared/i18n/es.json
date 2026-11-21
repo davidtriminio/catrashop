@@ -696,6 +696,71 @@
       "notifications": {
         "manage": "Enviar notificaciones"
       }
+    },
+    "receipt": {
+      "title": "Comprobante",
+      "close": "Cerrar",
+      "zoom": "Zoom",
+      "zoomIn": "Acercar",
+      "zoomOut": "Alejar",
+      "fit": "Ajustar a la ventana",
+      "hint": "Rueda o botones para el zoom · arrastra para mover · doble clic para ampliar",
+      "reference": "Referencia",
+      "account": "Cuenta de destino",
+      "sent": "Enviado",
+      "download": "Descargar"
+    },
+    "products": {
+      "new": "Nuevo producto",
+      "count": "productos",
+      "search": "Buscar por nombre o SKU",
+      "product": "Producto",
+      "variantsCol": "Variantes",
+      "empty": "No hay productos con este filtro.",
+      "taxonomy": "Categorías y marcas",
+      "filter": {
+        "All": "Todos",
+        "Active": "Activos",
+        "Draft": "Borradores",
+        "Archived": "Archivados"
+      },
+      "status": {
+        "Active": "Activo",
+        "Draft": "Borrador",
+        "Archived": "Archivado"
+      },
+      "publish": "Publicar",
+      "restore": "Restaurar",
+      "archive": "Archivar",
+      "published": "Producto publicado: ya es visible en la tienda.",
+      "restored": "Producto restaurado: ya es visible en la tienda.",
+      "archivedDone": "Producto archivado.",
+      "createTitle": "Nuevo producto",
+      "editTitle": "Editar producto",
+      "details": "Detalles",
+      "saveDetails": "Guardar cambios",
+      "create": "Crear producto",
+      "created": "Producto creado como borrador. Ahora puedes agregar fotos y publicarlo.",
+      "saved": "Cambios guardados.",
+      "photos": "Fotos",
+      "photosHint": "JPG, PNG o WebP, hasta {{mb}} MB cada una (máximo {{max}}). La principal es la que se ve en las listas.",
+      "photosAfter": "Crea el producto y podrás subir sus fotos.",
+      "drop": "Arrastra fotos o haz clic para elegirlas",
+      "uploading": "Subiendo {{n}} de {{total}}…",
+      "primary": "Principal",
+      "makePrimary": "Hacer principal",
+      "removePhoto": "Quitar foto",
+      "primarySet": "Foto principal actualizada.",
+      "photoRemoved": "Foto eliminada.",
+      "uploaded": "Fotos subidas: {{count}}.",
+      "errType": "\"{{name}}\" no es una imagen JPG, PNG o WebP.",
+      "errSize": "\"{{name}}\" supera los {{mb}} MB.",
+      "errMax": "Un producto admite como máximo {{max}} fotos.",
+      "variants": "Variantes",
+      "saveVariant": "Guardar",
+      "addVariant": "Agregar",
+      "variantSaved": "Variante guardada.",
+      "variantAdded": "Variante agregada."
     }
   }
 }
