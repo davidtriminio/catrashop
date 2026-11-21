@@ -1,5 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
-import { BusyButton } from '../ui/busy-button';
+import { BusyButton } from '@cs/ui/busy-button';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { I18n } from '@cs/i18n/i18n';

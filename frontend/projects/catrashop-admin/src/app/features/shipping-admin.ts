@@ -1,5 +1,5 @@
 import { STORE_CURRENCY } from '@cs/util/store';
-import { BusyButton } from '../ui/busy-button';
+import { BusyButton } from '@cs/ui/busy-button';
 import { TableSkeleton } from '../ui/skeleton';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';

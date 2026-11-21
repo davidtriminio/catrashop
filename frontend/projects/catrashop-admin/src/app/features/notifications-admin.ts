@@ -2,7 +2,7 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NotificationsAdminApi } from '@cs/api/notifications-admin.api';
 import { TranslocoPipe } from '@jsverse/transloco';
-import { BusyButton } from '../ui/busy-button';
+import { BusyButton } from '@cs/ui/busy-button';
 import { I18n } from '@cs/i18n/i18n';
 import { Select } from '../ui/select';
 

@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnDestroy, OnInit, computed, inject, input, output, signal, viewChild } from '@angular/core';
-import { BusyButton } from '../ui/busy-button';
+import { BusyButton } from '@cs/ui/busy-button';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { concatMap, from } from 'rxjs';

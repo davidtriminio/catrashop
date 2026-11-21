@@ -1,5 +1,5 @@
 import { Component, ElementRef, OnDestroy, OnInit, computed, effect, inject, input, output, signal, viewChild } from '@angular/core';
-import { BusyButton } from './busy-button';
+import { BusyButton } from '@cs/ui/busy-button';
 import { DomSanitizer } from '@angular/platform-browser';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
