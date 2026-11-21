@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/format.dart';
 import '../../core/insets.dart';
+import '../../core/loading.dart';
 import '../../core/providers.dart';
 import '../../core/theme.dart';
 import 'order_models.dart';
@@ -58,8 +59,8 @@ class _OrderDetailPageState extends ConsumerState<OrderDetailPage> {
     return Scaffold(
       appBar: AppBar(title: Text(order?.orderNumber ?? 'Pedido')),
       body: detail.when(
-        loading: () => const Center(child: CircularProgressIndicator()),
-        error: (e, _) => detail.isLoading ? const Center(child: CircularProgressIndicator()) : LoadError(
+        loading: () => const OrderDetailSkeleton(),
+        error: (e, _) => detail.isLoading ? const OrderDetailSkeleton() : LoadError(
           title: 'No se pudo cargar el pedido',
           error: e,
           onRetry: () => ref.invalidate(orderDetailProvider(widget.orderId)),
@@ -104,12 +105,11 @@ class _ActionBar extends StatelessWidget {
             if (next != null)
               Expanded(
                 flex: 3,
-                child: FilledButton.icon(
-                  onPressed: busy ? null : () => onAction(next),
-                  icon: busy
-                      ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-                      : Icon(next.icon, size: 20),
-                  label: Text(next.label),
+                child: BusyButton(
+                  onPressed: () => onAction(next),
+                  busy: busy,
+                  icon: next.icon,
+                  label: next.label,
                 ),
               ),
           ]),
@@ -467,12 +467,11 @@ class _TransferActionsState extends ConsumerState<_TransferActions> {
       ),
       const SizedBox(width: Gap.s3),
       Expanded(
-        child: FilledButton.icon(
-          onPressed: _busy ? null : _approve,
-          icon: _busy
-              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-              : const Icon(Icons.verified_outlined, size: 20),
-          label: const Text('Aprobar'),
+        child: BusyButton(
+          onPressed: _approve,
+          busy: _busy,
+          icon: Icons.verified_outlined,
+          label: 'Aprobar',
         ),
       ),
     ]);
@@ -607,12 +606,11 @@ class _CollectActionState extends ConsumerState<_CollectAction> {
   @override
   Widget build(BuildContext context) => SizedBox(
         width: double.infinity,
-        child: FilledButton.icon(
-          onPressed: _busy ? null : _collect,
-          icon: _busy
-              ? const SizedBox(width: 18, height: 18, child: CircularProgressIndicator(strokeWidth: 2))
-              : const Icon(Icons.payments_outlined, size: 20),
-          label: const Text('Registrar cobro'),
+        child: BusyButton(
+          onPressed: _collect,
+          busy: _busy,
+          icon: Icons.payments_outlined,
+          label: 'Registrar cobro',
         ),
       );
 }

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../core/loading.dart';
 import '../../core/providers.dart';
 import '../../core/theme.dart';
 import '../orders/order_models.dart';
@@ -26,9 +27,9 @@ class SummaryPage extends ConsumerWidget {
           await ref.read(summaryProvider.future);
         },
         child: summary.when(
-          loading: () => const Center(child: CircularProgressIndicator()),
+          loading: () => const SummarySkeleton(),
           // While a retry is under way Riverpod still reports the previous error: show the spinner instead.
-          error: (e, _) => summary.isLoading ? const Center(child: CircularProgressIndicator()) : ListView(children: [
+          error: (e, _) => summary.isLoading ? const SummarySkeleton() : ListView(children: [
             SizedBox(
               height: MediaQuery.sizeOf(context).height * 0.6,
               child: LoadError(
