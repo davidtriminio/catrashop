@@ -1,4 +1,6 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { BusyButton } from '../ui/busy-button';
+import { TableSkeleton } from '../ui/skeleton';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { I18n } from '@cs/i18n/i18n';
@@ -18,7 +20,7 @@ type Queue = 'review' | 'transfer' | 'collect' | 'done';
  */
 @Component({
   selector: 'app-payments-admin',
-  imports: [RouterLink, LocalDatePipe, MoneyPipe, StatusBadge, TranslocoPipe, ReceiptViewer],
+  imports: [RouterLink, LocalDatePipe, MoneyPipe, StatusBadge, TranslocoPipe, ReceiptViewer, BusyButton, TableSkeleton],
   template: `
     <div class="page-head">
       <div>
@@ -36,7 +38,10 @@ type Queue = 'review' | 'transfer' | 'collect' | 'done';
     @if (error()) { <div class="alert error">{{ error() }}</div> }
     @if (message()) { <div class="alert success">{{ message() }}</div> }
 
-    <div class="card flush" [class.dim]="loading()">
+    @if (showSkeleton()) {
+      <div class="card flush"><app-table-skeleton [rows]="5" [cols]="7" /></div>
+    } @else {
+    <div class="card flush" [class.dim]="loading() || busy()">
       <table>
         <thead><tr><th>{{ 'admin.c.order' | transloco }}</th><th>{{ 'admin.c.date' | transloco }}</th><th>{{ 'admin.c.method' | transloco }}</th><th>{{ 'admin.orderDetail.transfer' | transloco }}</th><th>{{ 'admin.c.status' | transloco }}</th><th class="right">{{ 'admin.c.amount' | transloco }}</th><th></th></tr></thead>
         <tbody>
@@ -55,13 +60,13 @@ type Queue = 'review' | 'transfer' | 'collect' | 'done';
               <td class="right"><strong>{{ p.amount | money: p.currency }}</strong></td>
               <td class="right actions">
                 @if (p.status === 'UnderReview') {
-                  <button class="btn secondary sm" type="button" [disabled]="busy()" (click)="viewReceipt(p)">{{ 'admin.payments.receipt' | transloco }}</button>
-                  <button class="btn sm" type="button" [disabled]="busy()" (click)="approve(p)">{{ 'admin.payments.approve' | transloco }}</button>
-                  <button class="btn secondary sm danger-text" type="button" [disabled]="busy()" (click)="startReject(p)">{{ 'admin.payments.reject' | transloco }}</button>
+                  <button class="btn secondary sm" type="button" [csBusy]="busy()" [disabled]="busy()" (click)="viewReceipt(p)">{{ 'admin.payments.receipt' | transloco }}</button>
+                  <button class="btn sm" type="button" [csBusy]="busy()" [disabled]="busy()" [csBusy]="busy()" (click)="approve(p)">{{ 'admin.payments.approve' | transloco }}</button>
+                  <button class="btn secondary sm danger-text" type="button" [csBusy]="busy()" [disabled]="busy()" (click)="startReject(p)">{{ 'admin.payments.reject' | transloco }}</button>
                 } @else if (p.status === 'Pending' && p.method !== 'TRANSFERENCIA') {
-                  <button class="btn sm" type="button" [disabled]="busy()" (click)="collect(p)">{{ 'admin.payments.markCollected' | transloco }}</button>
+                  <button class="btn sm" type="button" [csBusy]="busy()" [disabled]="busy()" [csBusy]="busy()" (click)="collect(p)">{{ 'admin.payments.markCollected' | transloco }}</button>
                 } @else if (p.hasReceipt) {
-                  <button class="btn secondary sm" type="button" [disabled]="busy()" (click)="viewReceipt(p)">{{ 'admin.payments.receipt' | transloco }}</button>
+                  <button class="btn secondary sm" type="button" [csBusy]="busy()" [disabled]="busy()" (click)="viewReceipt(p)">{{ 'admin.payments.receipt' | transloco }}</button>
                 }
               </td>
             </tr>
@@ -71,7 +76,7 @@ type Queue = 'review' | 'transfer' | 'collect' | 'done';
                   <div class="reject">
                     <input class="input" [placeholder]="'admin.payments.rejectReason' | transloco" maxlength="500"
                            [value]="reason()" (input)="reason.set($any($event.target).value)" />
-                    <button class="btn sm danger" type="button" [disabled]="busy() || !reason().trim()" (click)="confirmReject(p)">{{ 'admin.payments.sendBack' | transloco }}</button>
+                    <button class="btn sm danger" type="button" [csBusy]="busy()" [disabled]="busy() || !reason().trim()" (click)="confirmReject(p)">{{ 'admin.payments.sendBack' | transloco }}</button>
                     <button class="btn secondary sm" type="button" (click)="rejecting.set(null)">{{ 'admin.c.cancel' | transloco }}</button>
                   </div>
                 </td>
@@ -83,6 +88,7 @@ type Queue = 'review' | 'transfer' | 'collect' | 'done';
         </tbody>
       </table>
     </div>
+    }
 
     @if (viewing(); as v) {
       <app-receipt-viewer [payment]="v" [receipt]="receiptFile()" [error]="receiptError()" [busy]="busy()"
@@ -121,6 +127,8 @@ export class PaymentsAdmin implements OnInit {
   readonly message = signal<string | null>(null);
   readonly rejecting = signal<string | null>(null);
   readonly reason = signal('');
+  /** First load of a queue with nothing to show yet: placeholder rows instead of the "empty" message. */
+  readonly showSkeleton = computed(() => this.loading() && this.all().length === 0);
   readonly viewing = signal<PaymentResponse | null>(null);
   readonly receiptFile = signal<Blob | null>(null);
   readonly receiptError = signal<string | null>(null);
