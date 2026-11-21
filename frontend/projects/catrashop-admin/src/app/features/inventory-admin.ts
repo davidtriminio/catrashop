@@ -1,4 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { BusyButton } from '../ui/busy-button';
+import { TableSkeleton } from '../ui/skeleton';
 import { FormsModule } from '@angular/forms';
 import { InventoryAdminApi } from '@cs/api/inventory-admin.api';
 import { InventoryItem, Paged } from '@cs/api/models';
@@ -7,7 +9,7 @@ import { I18n } from '@cs/i18n/i18n';
 
 @Component({
   selector: 'app-inventory-admin',
-  imports: [FormsModule, TranslocoPipe],
+  imports: [FormsModule, TranslocoPipe, BusyButton, TableSkeleton],
   template: `
     <h1>{{ 'admin.nav.inventory' | transloco }}</h1>
     @if (error()) { <div class="alert error">{{ error() }}</div> }
@@ -21,7 +23,7 @@ import { I18n } from '@cs/i18n/i18n';
           <div class="field" style="flex:1"><label>{{ 'admin.inventory.initial' | transloco }}</label><input class="input" type="number" min="0" max="1000000" [(ngModel)]="newOnHand" /></div>
           <div class="field" style="flex:1"><label>{{ 'admin.inventory.lowThreshold' | transloco }}</label><input class="input" type="number" min="0" max="1000000" [(ngModel)]="newThreshold" /></div>
         </div>
-        <button class="btn sm" [disabled]="!newSku || busy()" (click)="createItem()">{{ 'admin.inventory.createItem' | transloco }}</button>
+        <button class="btn sm" [csBusy]="busy()" [disabled]="!newSku || busy()" (click)="createItem()">{{ 'admin.inventory.createItem' | transloco }}</button>
       </section>
 
       <section class="card">
@@ -29,9 +31,9 @@ import { I18n } from '@cs/i18n/i18n';
         <div class="field"><label>{{ 'admin.c.sku' | transloco }}</label><input class="input" [(ngModel)]="opSku" /></div>
         <div class="field"><label>{{ 'admin.inventory.qty' | transloco }}</label><input class="input" type="number" min="-1000000" max="1000000" [(ngModel)]="opQty" /></div>
         <div class="row">
-          <button class="btn sm" [disabled]="!opSku || busy()" (click)="receive()">{{ 'admin.inventory.receive' | transloco }}</button>
-          <button class="btn secondary sm" [disabled]="!opSku || busy()" (click)="adjust()">{{ 'admin.inventory.adjust' | transloco }}</button>
-          <button class="btn secondary sm" [disabled]="!opSku || busy()" (click)="setThreshold()">{{ 'admin.inventory.setThreshold' | transloco }}</button>
+          <button class="btn sm" [csBusy]="busy()" [disabled]="!opSku || busy()" (click)="receive()">{{ 'admin.inventory.receive' | transloco }}</button>
+          <button class="btn secondary sm" [csBusy]="busy()" [disabled]="!opSku || busy()" (click)="adjust()">{{ 'admin.inventory.adjust' | transloco }}</button>
+          <button class="btn secondary sm" [csBusy]="busy()" [disabled]="!opSku || busy()" (click)="setThreshold()">{{ 'admin.inventory.setThreshold' | transloco }}</button>
         </div>
       </section>
     </div>
@@ -50,6 +52,8 @@ import { I18n } from '@cs/i18n/i18n';
             } @empty { <tr><td colspan="6" class="muted">{{ 'admin.inventory.noItems' | transloco }}</td></tr> }
           </tbody>
         </table>
+      } @else {
+        <app-table-skeleton [rows]="6" [cols]="6" />
       }
     </section>
   `,

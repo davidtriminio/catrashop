@@ -2,12 +2,13 @@ import { Component, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { NotificationsAdminApi } from '@cs/api/notifications-admin.api';
 import { TranslocoPipe } from '@jsverse/transloco';
+import { BusyButton } from '../ui/busy-button';
 import { I18n } from '@cs/i18n/i18n';
 import { Select } from '../ui/select';
 
 @Component({
   selector: 'app-notifications-admin',
-  imports: [ReactiveFormsModule, Select, TranslocoPipe],
+  imports: [ReactiveFormsModule, Select, TranslocoPipe, BusyButton],
   template: `
     <h1>{{ 'admin.notifications.title' | transloco }}</h1>
     <p class="muted">{{ 'admin.notifications.sub' | transloco }}</p>
@@ -24,7 +25,7 @@ import { Select } from '../ui/select';
           <div class="field" style="flex:2"><label>{{ 'admin.notifications.email' | transloco }}</label><input class="input" type="email" formControlName="recipientEmail" /></div>
         </div>
         <div class="field"><label>{{ 'admin.notifications.message' | transloco }}</label><input class="input" formControlName="message" /></div>
-        <button class="btn" [disabled]="form.invalid || busy()">{{ 'admin.c.send' | transloco }}</button>
+        <button class="btn" [csBusy]="busy()" [disabled]="form.invalid || busy()">{{ 'admin.c.send' | transloco }}</button>
       </form>
     </section>
   `,

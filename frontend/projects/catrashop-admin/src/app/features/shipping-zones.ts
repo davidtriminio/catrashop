@@ -1,4 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { BusyButton } from '../ui/busy-button';
+import { TableSkeleton } from '../ui/skeleton';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ShippingAdminApi } from '@cs/api/shipping-admin.api';
 import { PickupStore, ShippingZone } from '@cs/api/models';
@@ -12,7 +14,7 @@ import { Select } from '../ui/select';
 /** Delivery zones (cost, lead time, cash-on-delivery coverage, departments) and the stores that offer pickup. */
 @Component({
   selector: 'app-shipping-zones',
-  imports: [ReactiveFormsModule, MoneyPipe, Select, TranslocoPipe],
+  imports: [ReactiveFormsModule, MoneyPipe, Select, TranslocoPipe, BusyButton, TableSkeleton],
   template: `
     @if (error()) { <div class="alert error">{{ error() }}</div> }
     @if (message()) { <div class="alert success">{{ message() }}</div> }
@@ -39,7 +41,7 @@ import { Select } from '../ui/select';
           }
         </fieldset>
         <div class="row">
-          <button class="btn" [disabled]="zoneForm.invalid || selected().size === 0 || busy()">{{ (editingZone() ? 'admin.zones.saveZone' : 'admin.zones.createZone') | transloco }}</button>
+          <button class="btn" [csBusy]="busy()" [disabled]="zoneForm.invalid || selected().size === 0 || busy()">{{ (editingZone() ? 'admin.zones.saveZone' : 'admin.zones.createZone') | transloco }}</button>
           @if (editingZone()) { <button class="btn secondary" type="button" (click)="resetZone()">{{ 'admin.c.cancel' | transloco }}</button> }
         </div>
       </form>
@@ -47,6 +49,7 @@ import { Select } from '../ui/select';
 
     <section class="card">
       <h2>{{ 'admin.zones.zones' | transloco }}</h2>
+      @if (!zonesLoaded()) { <app-table-skeleton [rows]="3" [cols]="6" /> } @else {
       <table>
         <thead><tr><th>{{ 'admin.zones.zone' | transloco }}</th><th>{{ 'admin.c.cost' | transloco }}</th><th>{{ 'admin.zones.days' | transloco }}</th><th>{{ 'admin.zones.codCol' | transloco }}</th><th>{{ 'admin.zones.departments' | transloco }}</th><th></th></tr></thead>
         <tbody>
@@ -59,12 +62,13 @@ import { Select } from '../ui/select';
               <td class="small">{{ names(z) }}</td>
               <td class="right">
                 <button class="btn secondary sm" (click)="editZone(z)">{{ 'admin.c.edit' | transloco }}</button>
-                <button class="btn secondary sm" (click)="setZoneActive(z, !z.isActive)">{{ (z.isActive ? 'admin.c.deactivate' : 'admin.c.activate') | transloco }}</button>
+                <button class="btn secondary sm" [csBusy]="busy()" [csBusy]="busy()" [disabled]="busy()" (click)="setZoneActive(z, !z.isActive)">{{ (z.isActive ? 'admin.c.deactivate' : 'admin.c.activate') | transloco }}</button>
               </td>
             </tr>
           } @empty { <tr><td colspan="6" class="muted">{{ 'admin.zones.none' | transloco }}</td></tr> }
         </tbody>
       </table>
+      }
       @if (unassigned().length) { <p class="muted small">{{ 'admin.zones.unassigned' | transloco }} {{ unassigned().join(', ') }}.</p> }
     </section>
 
@@ -85,7 +89,7 @@ import { Select } from '../ui/select';
         </div>
         <div class="field"><label>{{ 'admin.c.hours' | transloco }}</label><input class="input" formControlName="hours" [placeholder]="'admin.zones.hoursExample' | transloco" /></div>
         <div class="row">
-          <button class="btn" [disabled]="storeForm.invalid || busy()">{{ (editingStore() ? 'admin.zones.saveStore' : 'admin.zones.createStore') | transloco }}</button>
+          <button class="btn" [csBusy]="busy()" [disabled]="storeForm.invalid || busy()">{{ (editingStore() ? 'admin.zones.saveStore' : 'admin.zones.createStore') | transloco }}</button>
           @if (editingStore()) { <button class="btn secondary" type="button" (click)="resetStore()">{{ 'admin.c.cancel' | transloco }}</button> }
         </div>
       </form>
@@ -93,6 +97,7 @@ import { Select } from '../ui/select';
 
     <section class="card">
       <h2>{{ 'admin.zones.stores' | transloco }}</h2>
+      @if (!storesLoaded()) { <app-table-skeleton [rows]="3" [cols]="4" /> } @else {
       <table>
         <thead><tr><th>{{ 'admin.zones.store' | transloco }}</th><th>{{ 'admin.c.address' | transloco }}</th><th>{{ 'admin.zones.hoursCol' | transloco }}</th><th></th></tr></thead>
         <tbody>
@@ -103,12 +108,13 @@ import { Select } from '../ui/select';
               <td class="small">{{ s.hours || '—' }}</td>
               <td class="right">
                 <button class="btn secondary sm" (click)="editStore(s)">{{ 'admin.c.edit' | transloco }}</button>
-                <button class="btn secondary sm" (click)="setStoreActive(s, !s.isActive)">{{ (s.isActive ? 'admin.zones.disable' : 'admin.zones.enable') | transloco }}</button>
+                <button class="btn secondary sm" [csBusy]="busy()" [csBusy]="busy()" [disabled]="busy()" (click)="setStoreActive(s, !s.isActive)">{{ (s.isActive ? 'admin.zones.disable' : 'admin.zones.enable') | transloco }}</button>
               </td>
             </tr>
           } @empty { <tr><td colspan="4" class="muted">{{ 'admin.zones.noStores' | transloco }}</td></tr> }
         </tbody>
       </table>
+      }
     </section>
   `,
   styles: [`
@@ -127,6 +133,8 @@ export class ShippingZones implements OnInit {
   readonly departments = HONDURAS_DEPARTMENTS;
   readonly departmentOptions = HONDURAS_DEPARTMENTS.map((d) => ({ value: d.code, label: d.name }));
   readonly zones = signal<ShippingZone[]>([]);
+  readonly zonesLoaded = signal(false);
+  readonly storesLoaded = signal(false);
   readonly stores = signal<PickupStore[]>([]);
   readonly selected = signal<ReadonlySet<string>>(new Set());
   readonly editingZone = signal<ShippingZone | null>(null);
@@ -157,8 +165,8 @@ export class ShippingZones implements OnInit {
   ngOnInit(): void { this.load(); }
 
   private load(): void {
-    this.api.zones().subscribe({ next: (z) => this.zones.set(z), error: (e) => this.error.set(this.i18n.problem(e)) });
-    this.api.pickupStores().subscribe({ next: (s) => this.stores.set(s), error: (e) => this.error.set(this.i18n.problem(e)) });
+    this.api.zones().subscribe({ next: (z) => { this.zones.set(z); this.zonesLoaded.set(true); }, error: (e) => { this.error.set(this.i18n.problem(e)); this.zonesLoaded.set(true); } });
+    this.api.pickupStores().subscribe({ next: (s) => { this.stores.set(s); this.storesLoaded.set(true); }, error: (e) => { this.error.set(this.i18n.problem(e)); this.storesLoaded.set(true); } });
   }
   private ok(text: string): void { this.message.set(text); this.error.set(null); this.busy.set(false); this.load(); }
   private fail(e: unknown): void { this.error.set(this.i18n.problem(e)); this.message.set(null); this.busy.set(false); }

@@ -1,4 +1,6 @@
 import { STORE_CURRENCY } from '@cs/util/store';
+import { BusyButton } from '../ui/busy-button';
+import { TableSkeleton } from '../ui/skeleton';
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { PromotionsAdminApi } from '@cs/api/promotions-admin.api';
@@ -10,7 +12,7 @@ import { Select } from '../ui/select';
 
 @Component({
   selector: 'app-promotions-admin',
-  imports: [ReactiveFormsModule, MoneyPipe, Select, TranslocoPipe],
+  imports: [ReactiveFormsModule, MoneyPipe, Select, TranslocoPipe, BusyButton, TableSkeleton],
   template: `
     <h1>{{ 'admin.nav.promotions' | transloco }}</h1>
     @if (error()) { <div class="alert error">{{ error() }}</div> }
@@ -35,12 +37,13 @@ import { Select } from '../ui/select';
           <div class="field" style="flex:1"><label>{{ 'admin.promotions.usageLimit' | transloco }}</label><input class="input" type="number" min="1" formControlName="usageLimit" placeholder="∞" /></div>
           <div class="field" style="flex:1"><label>{{ 'admin.promotions.perCustomer' | transloco }}</label><input class="input" type="number" min="1" formControlName="perCustomerLimit" placeholder="∞" /></div>
         </div>
-        <button class="btn" [disabled]="form.invalid || busy()">{{ 'admin.promotions.create' | transloco }}</button>
+        <button class="btn" [csBusy]="busy()" [disabled]="form.invalid || busy()">{{ 'admin.promotions.create' | transloco }}</button>
       </form>
     </section>
 
     <section class="card">
       <h2>{{ 'admin.promotions.coupons' | transloco }}</h2>
+      @if (!loaded()) { <app-table-skeleton [rows]="4" [cols]="6" /> } @else {
       <table>
         <thead><tr><th>{{ 'admin.c.code' | transloco }}</th><th>{{ 'admin.c.type' | transloco }}</th><th>{{ 'admin.promotions.value' | transloco }}</th><th>{{ 'admin.promotions.redeemed' | transloco }}</th><th>{{ 'admin.promotions.active' | transloco }}</th><th></th></tr></thead>
         <tbody>
@@ -52,13 +55,14 @@ import { Select } from '../ui/select';
               <td>{{ c.timesRedeemed }}@if (c.usageLimit) { / {{ c.usageLimit }} }</td>
               <td>@if (c.isActive) { <span class="badge ok">{{ 'admin.promotions.active' | transloco }}</span> } @else { <span class="badge bad">{{ 'admin.promotions.off' | transloco }}</span> }</td>
               <td class="right">
-                @if (c.isActive) { <button class="btn secondary sm" (click)="setActive(c, false)">{{ 'admin.c.deactivate' | transloco }}</button> }
-                @else { <button class="btn secondary sm" (click)="setActive(c, true)">{{ 'admin.c.activate' | transloco }}</button> }
+                @if (c.isActive) { <button class="btn secondary sm" [csBusy]="busy()" [csBusy]="busy()" [disabled]="busy()" (click)="setActive(c, false)">{{ 'admin.c.deactivate' | transloco }}</button> }
+                @else { <button class="btn secondary sm" [csBusy]="busy()" [csBusy]="busy()" [disabled]="busy()" (click)="setActive(c, true)">{{ 'admin.c.activate' | transloco }}</button> }
               </td>
             </tr>
           } @empty { <tr><td colspan="6" class="muted">{{ 'admin.promotions.none' | transloco }}</td></tr> }
         </tbody>
       </table>
+      }
     </section>
   `,
   styles: [`section { margin-bottom: 1.25rem; }`],
@@ -78,6 +82,7 @@ export class PromotionsAdmin implements OnInit {
     return this.i18n.t(type === 'Percentage' ? 'admin.promotions.percentage' : 'admin.promotions.fixed');
   }
   readonly coupons = signal<Coupon[]>([]);
+  readonly loaded = signal(false);
   readonly error = signal<string | null>(null);
   readonly message = signal<string | null>(null);
   readonly busy = signal(false);
@@ -94,7 +99,7 @@ export class PromotionsAdmin implements OnInit {
   });
 
   ngOnInit(): void { this.load(); }
-  private load(): void { this.api.list().subscribe({ next: (c) => this.coupons.set(c), error: (e) => this.error.set(this.i18n.problem(e)) }); }
+  private load(): void { this.api.list().subscribe({ next: (c) => { this.coupons.set(c); this.loaded.set(true); }, error: (e) => { this.error.set(this.i18n.problem(e)); this.loaded.set(true); } }); }
   private ok(m: string): void { this.message.set(m); this.error.set(null); this.busy.set(false); this.load(); }
   private fail(e: unknown): void { this.error.set(this.i18n.problem(e)); this.busy.set(false); }
 

@@ -188,3 +188,36 @@ legend { padding: 0 var(--space-2); font-weight: 600; font-size: 0.85rem; }
 .icon-btn { display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2); height: 36px; min-width: 36px; padding: 0 var(--space-2); border: 1px solid transparent; border-radius: var(--radius-sm); background: transparent; color: var(--muted); font: inherit; font-size: 0.8rem; font-weight: 600; cursor: pointer; }
 .icon-btn:hover { background: var(--surface-2); border-color: var(--border); color: var(--text); }
 .icon-btn:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+
+/* ---- loading states ---- */
+/* A button that is working keeps its size; the label hides and a small ring turns in its place. */
+.busy { position: relative; pointer-events: none; color: transparent !important; }
+.busy > * { opacity: 0; }
+.busy::after {
+  content: ''; position: absolute; inset: 0; margin: auto; width: 1.05em; height: 1.05em; border-radius: 50%;
+  border: 2px solid var(--spin, rgba(255, 255, 255, 0.92)); border-right-color: transparent; animation: spin 0.7s linear infinite;
+}
+.btn.secondary.busy, .btn.accent.busy, .icon-btn.busy { --spin: var(--muted); }
+.btn.busy:disabled { opacity: 0.9; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { .busy::after { animation-duration: 2.4s; } }
+
+/* thin bar across the top while a page chunk or route is loading */
+.route-bar { position: fixed; z-index: 80; top: 0; left: 0; right: 0; height: 3px; overflow: hidden; pointer-events: none; }
+.route-bar::before { content: ''; position: absolute; inset: 0; width: 40%; background: linear-gradient(90deg, transparent, var(--primary), transparent); animation: route-bar 1.1s ease-in-out infinite; }
+@keyframes route-bar { from { transform: translateX(-100%); } to { transform: translateX(260%); } }
+@media (prefers-reduced-motion: reduce) { .route-bar::before { animation: none; width: 100%; opacity: 0.6; } }
+
+/* generic placeholders shaped like the content they stand in for */
+.sk-text { display: block; height: 0.9rem; }
+.sk-title { display: block; height: 1.6rem; width: 14rem; max-width: 60%; margin-bottom: var(--space-3); }
+.sk-btn { display: inline-block; height: 2.1rem; width: 6.5rem; border-radius: var(--radius-sm); }
+.sk-block { display: block; border-radius: var(--radius); }
+
+/* skeleton shapes used by the pages */
+.sk-value { display: block; height: 2rem; width: 4.5rem; margin: 0.35rem 0; }
+.sk-donut { display: block; width: 170px; height: 170px; border-radius: 50%; flex-shrink: 0; }
+app-table-skeleton { display: block; }
+.card:not(.flush) > app-table-skeleton { margin: 0 calc(-1 * var(--space-5)) calc(-1 * var(--space-5)); }
+.card app-table-skeleton.mini { margin: 0 0 var(--space-4); }
+.card app-table-skeleton.mini .sk-row { padding: 0.5rem 0; border: 0; }

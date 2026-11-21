@@ -1,7 +1,6 @@
 import { Component, computed, inject, signal } from '@angular/core';
-import { NavigationEnd, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
+import { NavigationCancel, NavigationEnd, NavigationError, NavigationStart, Router, RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { filter } from 'rxjs';
 import { AuthStore } from '@cs/auth/auth.store';
 import { ADMIN_NAV } from './admin-permissions';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -14,6 +13,7 @@ import { ThemeService } from './ui/theme.service';
   selector: 'app-root',
   imports: [RouterOutlet, RouterLink, RouterLinkActive, Icon, TranslocoPipe, LanguageSwitcher],
   template: `
+    @if (navigating()) { <div class="route-bar" aria-hidden="true"></div> }
     @if (auth.isAuthenticated()) {
       <div class="shell">
         @if (menuOpen()) { <div class="backdrop" (click)="menuOpen.set(false)"></div> }
@@ -142,6 +142,9 @@ export class App {
   private readonly router = inject(Router);
 
   readonly menuOpen = signal(false);
+  /** True once a page change has been running for a moment (fast ones never flash the bar). */
+  readonly navigating = signal(false);
+  private navTimer: ReturnType<typeof setTimeout> | undefined;
 
   readonly visibleNav = computed(() =>
     ADMIN_NAV.filter((item) => !item.permission || this.auth.hasPermission(item.permission)));
@@ -154,8 +157,16 @@ export class App {
 
   constructor() {
     // Close the mobile drawer after navigating.
-    this.router.events.pipe(filter((e) => e instanceof NavigationEnd), takeUntilDestroyed())
-      .subscribe(() => this.menuOpen.set(false));
+    this.router.events.pipe(takeUntilDestroyed()).subscribe((e) => {
+      if (e instanceof NavigationStart) {
+        clearTimeout(this.navTimer);
+        this.navTimer = setTimeout(() => this.navigating.set(true), 150);
+      } else if (e instanceof NavigationEnd || e instanceof NavigationCancel || e instanceof NavigationError) {
+        clearTimeout(this.navTimer);
+        this.navigating.set(false);
+        if (e instanceof NavigationEnd) this.menuOpen.set(false);
+      }
+    });
   }
 
   logout(): void {

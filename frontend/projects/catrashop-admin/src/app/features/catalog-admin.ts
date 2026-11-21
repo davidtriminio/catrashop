@@ -1,4 +1,6 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { BusyButton } from '../ui/busy-button';
+import { TableSkeleton } from '../ui/skeleton';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { CatalogApi } from '@cs/api/catalog.api';
@@ -14,7 +16,7 @@ const FILTERS: Filter[] = ['All', 'Active', 'Draft', 'Archived'];
 
 @Component({
   selector: 'app-catalog-admin',
-  imports: [ReactiveFormsModule, TranslocoPipe, MoneyPipe, Icon, ProductEditor],
+  imports: [ReactiveFormsModule, TranslocoPipe, MoneyPipe, Icon, ProductEditor, BusyButton, TableSkeleton],
   template: `
     <div class="page-head">
       <div>
@@ -36,6 +38,9 @@ const FILTERS: Filter[] = ['All', 'Active', 'Draft', 'Archived'];
       <input class="input search" type="search" [placeholder]="'admin.products.search' | transloco" [value]="q()" (input)="onSearch($any($event.target).value)" />
     </div>
 
+    @if (!result()) {
+      <div class="card flush"><app-table-skeleton [rows]="6" [cols]="6" /></div>
+    } @else {
     <div class="card flush" [class.dim]="loading()">
       <div class="scroll">
         <table>
@@ -52,9 +57,9 @@ const FILTERS: Filter[] = ['All', 'Active', 'Draft', 'Archived'];
                 <td>{{ p.variantCount }}</td>
                 <td><span class="badge" [class]="tone(p.status)">{{ 'admin.products.status.' + p.status | transloco }}</span></td>
                 <td class="right actions" (click)="$event.stopPropagation()">
-                  @if (p.status === 'Draft') { <button class="btn secondary sm" type="button" (click)="setStatus(p, true)">{{ 'admin.products.publish' | transloco }}</button> }
-                  @if (p.status === 'Archived') { <button class="btn secondary sm" type="button" (click)="setStatus(p, true)"><cs-icon name="restore" [size]="14" /> {{ 'admin.products.restore' | transloco }}</button> }
-                  @if (p.status === 'Active') { <button class="btn secondary sm" type="button" (click)="setStatus(p, false)">{{ 'admin.products.archive' | transloco }}</button> }
+                  @if (p.status === 'Draft') { <button class="btn secondary sm" type="button" [csBusy]="busy()" [csBusy]="busy()" [disabled]="busy()" (click)="setStatus(p, true)">{{ 'admin.products.publish' | transloco }}</button> }
+                  @if (p.status === 'Archived') { <button class="btn secondary sm" type="button" [csBusy]="busy()" [csBusy]="busy()" [disabled]="busy()" (click)="setStatus(p, true)"><cs-icon name="restore" [size]="14" /> {{ 'admin.products.restore' | transloco }}</button> }
+                  @if (p.status === 'Active') { <button class="btn secondary sm" type="button" [csBusy]="busy()" [csBusy]="busy()" [disabled]="busy()" (click)="setStatus(p, false)">{{ 'admin.products.archive' | transloco }}</button> }
                   <button class="btn secondary sm" type="button" (click)="open(p.id)"><cs-icon name="pencil" [size]="14" /> {{ 'admin.c.edit' | transloco }}</button>
                 </td>
               </tr>
@@ -65,6 +70,7 @@ const FILTERS: Filter[] = ['All', 'Active', 'Draft', 'Archived'];
         </table>
       </div>
     </div>
+    }
 
     @if (result(); as r) {
       @if (r.totalPages > 1) {
@@ -80,21 +86,25 @@ const FILTERS: Filter[] = ['All', 'Active', 'Draft', 'Archived'];
     <div class="cols">
       <section class="card">
         <h2>{{ 'admin.catalog.categories' | transloco }}</h2>
+        @if (!catsLoaded()) { <app-table-skeleton class="mini" [head]="false" [rows]="3" [cols]="1" /> } @else {
         <ul class="list">@for (c of categories(); track c.id) { <li>{{ c.name }} <span class="muted">/{{ c.slug }}</span></li> } @empty { <li class="muted">{{ 'admin.catalog.noneYet' | transloco }}</li> }</ul>
+        }
         <form [formGroup]="categoryForm" (ngSubmit)="createCategory()">
           <div class="field"><label>{{ 'admin.c.name' | transloco }}</label><input class="input" formControlName="name" /></div>
           <div class="field"><label>{{ 'admin.c.description' | transloco }}</label><input class="input" formControlName="description" /></div>
-          <button class="btn sm" [disabled]="categoryForm.invalid || busy()">{{ 'admin.catalog.addCategory' | transloco }}</button>
+          <button class="btn sm" [csBusy]="busy()" [disabled]="categoryForm.invalid || busy()">{{ 'admin.catalog.addCategory' | transloco }}</button>
         </form>
       </section>
 
       <section class="card">
         <h2>{{ 'admin.catalog.brands' | transloco }}</h2>
+        @if (!brandsLoaded()) { <app-table-skeleton class="mini" [head]="false" [rows]="3" [cols]="1" /> } @else {
         <ul class="list">@for (b of brands(); track b.id) { <li>{{ b.name }} <span class="muted">/{{ b.slug }}</span></li> } @empty { <li class="muted">{{ 'admin.catalog.noneYet' | transloco }}</li> }</ul>
+        }
         <form [formGroup]="brandForm" (ngSubmit)="createBrand()">
           <div class="field"><label>{{ 'admin.c.name' | transloco }}</label><input class="input" formControlName="name" /></div>
           <div class="field"><label>{{ 'admin.c.description' | transloco }}</label><input class="input" formControlName="description" /></div>
-          <button class="btn sm" [disabled]="brandForm.invalid || busy()">{{ 'admin.catalog.addBrand' | transloco }}</button>
+          <button class="btn sm" [csBusy]="busy()" [disabled]="brandForm.invalid || busy()">{{ 'admin.catalog.addBrand' | transloco }}</button>
         </form>
       </section>
     </div>
@@ -133,6 +143,8 @@ export class CatalogAdmin implements OnInit {
 
   readonly categories = signal<Category[]>([]);
   readonly brands = signal<Brand[]>([]);
+  readonly catsLoaded = signal(false);
+  readonly brandsLoaded = signal(false);
   readonly result = signal<Paged<ProductListItem> | null>(null);
   readonly loading = signal(false);
   readonly editing = signal<{ id: string | null } | null>(null);
@@ -148,8 +160,8 @@ export class CatalogAdmin implements OnInit {
   tone(status: string): string { return status === 'Active' ? 'ok' : status === 'Draft' ? 'warn' : ''; }
 
   private reloadRefs(): void {
-    this.api.listCategories().subscribe({ next: (c) => this.categories.set(c), error: () => {} });
-    this.api.listBrands().subscribe({ next: (b) => this.brands.set(b), error: () => {} });
+    this.api.listCategories().subscribe({ next: (c) => { this.categories.set(c); this.catsLoaded.set(true); }, error: () => this.catsLoaded.set(true) });
+    this.api.listBrands().subscribe({ next: (b) => { this.brands.set(b); this.brandsLoaded.set(true); }, error: () => this.brandsLoaded.set(true) });
   }
 
   reload(): void {

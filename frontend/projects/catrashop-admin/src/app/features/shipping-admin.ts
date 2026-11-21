@@ -1,4 +1,6 @@
 import { STORE_CURRENCY } from '@cs/util/store';
+import { BusyButton } from '../ui/busy-button';
+import { TableSkeleton } from '../ui/skeleton';
 import { Component, OnInit, inject, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { ShippingApi } from '@cs/api/shipping.api';
@@ -11,7 +13,7 @@ import { I18n } from '@cs/i18n/i18n';
 
 @Component({
   selector: 'app-shipping-admin',
-  imports: [ReactiveFormsModule, MoneyPipe, ShippingZones, TranslocoPipe],
+  imports: [ReactiveFormsModule, MoneyPipe, ShippingZones, TranslocoPipe, BusyButton, TableSkeleton],
   template: `
     <h1>{{ 'admin.nav.shipping' | transloco }}</h1>
     <app-shipping-zones />
@@ -32,24 +34,26 @@ import { I18n } from '@cs/i18n/i18n';
           <div class="field" style="flex:1"><label>{{ 'admin.c.currency' | transloco }}</label><input class="input" maxlength="3" formControlName="currency" readonly [title]="'admin.c.oneCurrency' | transloco" /></div>
           <div class="field" style="flex:1"><label>{{ 'admin.shipping.estDays' | transloco }}</label><input class="input" type="number" formControlName="estimatedDays" /></div>
         </div>
-        <button class="btn" [disabled]="form.invalid || busy()">{{ 'admin.shipping.createMethod' | transloco }}</button>
+        <button class="btn" [csBusy]="busy()" [disabled]="form.invalid || busy()">{{ 'admin.shipping.createMethod' | transloco }}</button>
       </form>
     </section>
 
     <section class="card">
       <h2>{{ 'admin.shipping.activeMethods' | transloco }}</h2>
       <p class="muted">{{ 'admin.shipping.activeSub' | transloco }}</p>
+      @if (!loaded()) { <app-table-skeleton [rows]="3" [cols]="5" /> } @else {
       <table>
         <thead><tr><th>{{ 'admin.c.code' | transloco }}</th><th>{{ 'admin.c.name' | transloco }}</th><th>{{ 'admin.c.cost' | transloco }}</th><th>{{ 'admin.shipping.est' | transloco }}</th><th></th></tr></thead>
         <tbody>
           @for (m of methods(); track m.id) {
             <tr>
               <td>{{ m.code }}</td><td>{{ m.name }}</td><td>{{ m.cost | money: m.currency }}</td><td>{{ m.estimatedDays }}d</td>
-              <td class="right"><button class="btn secondary sm" (click)="deactivate(m)">{{ 'admin.c.deactivate' | transloco }}</button></td>
+              <td class="right"><button class="btn secondary sm" [csBusy]="busy()" [csBusy]="busy()" [disabled]="busy()" (click)="deactivate(m)">{{ 'admin.c.deactivate' | transloco }}</button></td>
             </tr>
           } @empty { <tr><td colspan="5" class="muted">{{ 'admin.shipping.noMethods' | transloco }}</td></tr> }
         </tbody>
       </table>
+      }
     </section>
   `,
   styles: [`section { margin-bottom: 1.25rem; }`],
@@ -61,6 +65,7 @@ export class ShippingAdmin implements OnInit {
   private readonly i18n = inject(I18n);
 
   readonly methods = signal<ShippingMethod[]>([]);
+  readonly loaded = signal(false);
   readonly error = signal<string | null>(null);
   readonly message = signal<string | null>(null);
   readonly busy = signal(false);
@@ -74,7 +79,7 @@ export class ShippingAdmin implements OnInit {
   });
 
   ngOnInit(): void { this.load(); }
-  private load(): void { this.publicApi.methods().subscribe({ next: (m) => this.methods.set(m), error: (e) => this.error.set(this.i18n.problem(e)) }); }
+  private load(): void { this.publicApi.methods().subscribe({ next: (m) => { this.methods.set(m); this.loaded.set(true); }, error: (e) => { this.error.set(this.i18n.problem(e)); this.loaded.set(true); } }); }
   private ok(m: string): void { this.message.set(m); this.error.set(null); this.busy.set(false); this.load(); }
   private fail(e: unknown): void { this.error.set(this.i18n.problem(e)); this.busy.set(false); }
 
