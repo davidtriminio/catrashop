@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../core/api_client.dart';
 import '../../core/format.dart';
+import '../../core/loading.dart';
 import '../../core/providers.dart';
 import '../../core/theme.dart';
 import 'order_models.dart';
@@ -91,20 +92,14 @@ class OrderCardSkeleton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final base = Theme.of(context).colorScheme.outlineVariant;
-    Widget bar(double w, double h) => Container(
-          width: w,
-          height: h,
-          decoration: BoxDecoration(color: base, borderRadius: BorderRadius.circular(6)),
-        );
-    return Card(
+    return const Card(
       child: Padding(
-        padding: const EdgeInsets.all(Gap.s4),
+        padding: EdgeInsets.all(Gap.s4),
         child: Row(children: [
-          Container(width: 44, height: 44, decoration: BoxDecoration(color: base, shape: BoxShape.circle)),
-          const SizedBox(width: Gap.s3),
-          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [bar(130, 14), const SizedBox(height: 8), bar(90, 11)])),
-          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [bar(70, 14), const SizedBox(height: 8), bar(56, 18)]),
+          SkeletonBox(width: 44, circle: true),
+          SizedBox(width: Gap.s3),
+          Expanded(child: Column(crossAxisAlignment: CrossAxisAlignment.start, children: [SkeletonBox(width: 130, height: 14), SizedBox(height: 8), SkeletonBox(width: 90, height: 11)])),
+          Column(crossAxisAlignment: CrossAxisAlignment.end, children: [SkeletonBox(width: 70, height: 14), SizedBox(height: 8), SkeletonBox(width: 56, height: 18)]),
         ]),
       ),
     );
