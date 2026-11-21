@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { BusyButton } from '@cs/ui/busy-button';
 import { FormsModule } from '@angular/forms';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { ShippingApi } from '@cs/api/shipping.api';
@@ -9,16 +10,20 @@ import { I18n } from '@cs/i18n/i18n';
 
 @Component({
   selector: 'app-tracking-page',
-  imports: [FormsModule, StatusBadge, Timeline, TranslocoPipe],
+  imports: [FormsModule, StatusBadge, Timeline, TranslocoPipe, BusyButton],
   template: `
     <div class="page-head"><h1>{{ 'tracking.title' | transloco }}</h1></div>
     <div class="card">
       <div class="row finder">
         <input class="input" [placeholder]="'tracking.placeholder' | transloco" [attr.aria-label]="'tracking.number' | transloco" [(ngModel)]="trackingNumber" (keyup.enter)="track()" />
-        <button class="btn" (click)="track()" [disabled]="!trackingNumber || busy()">{{ 'tracking.track' | transloco }}</button>
+        <button class="btn" (click)="track()" [csBusy]="busy()" [disabled]="!trackingNumber || busy()">{{ 'tracking.track' | transloco }}</button>
       </div>
       @if (error()) { <div class="alert error">{{ error() }}</div> }
     </div>
+
+    @if (busy()) {
+      <div class="card" role="status" aria-busy="true"><span class="skeleton sk-block" style="width: 45%; height: 1.2rem; margin-bottom: var(--space-2)"></span><span class="skeleton sk-block" style="width: 30%; height: 0.9rem; margin-bottom: var(--space-5)"></span><span class="skeleton sk-block" style="width: 70%; height: 0.9rem; margin-bottom: var(--space-2)"></span><span class="skeleton sk-block" style="width: 55%; height: 0.9rem; margin-bottom: var(--space-2)"></span><span class="skeleton sk-block" style="width: 62%; height: 0.9rem; margin-bottom: var(--space-2)"></span></div>
+    }
 
     @if (result(); as t) {
       <div class="card">

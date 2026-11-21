@@ -1,4 +1,5 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
+import { BusyButton } from '@cs/ui/busy-button';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
@@ -11,7 +12,7 @@ import { MoneyPipe } from '@cs/util/money.pipe';
 
 @Component({
   selector: 'app-account-page',
-  imports: [ReactiveFormsModule, RouterLink, LocalDatePipe, MoneyPipe, TranslocoPipe],
+  imports: [ReactiveFormsModule, RouterLink, LocalDatePipe, MoneyPipe, TranslocoPipe, BusyButton],
   template: `
     <h1>{{ 'account.title' | transloco }}</h1>
     @if (error()) { <div class="alert error">{{ error() }}</div> }
@@ -27,13 +28,18 @@ import { MoneyPipe } from '@cs/util/money.pipe';
             <div class="field" style="flex:1"><label>{{ 'auth.lastName' | transloco }}</label><input class="input" formControlName="lastName" /></div>
           </div>
           <div class="field" style="max-width:260px"><label>{{ 'account.phone' | transloco }}</label><input class="input" formControlName="phone" /></div>
-          <button class="btn" type="submit" [disabled]="profileForm.invalid || busy()">{{ 'account.saveProfile' | transloco }}</button>
+          <button class="btn" type="submit" [csBusy]="busy()" [disabled]="profileForm.invalid || busy()">{{ 'account.saveProfile' | transloco }}</button>
         </form>
+      } @else if (!error()) {
+        <div role="status" aria-busy="true"><span class="skeleton sk-block" style="width: 55%; height: 0.9rem; margin-bottom: var(--space-3)"></span><div class="row"><span class="skeleton sk-block" style="width: 100%; height: 2.6rem; margin-bottom: var(--space-3)"></span><span class="skeleton sk-block" style="width: 100%; height: 2.6rem; margin-bottom: var(--space-3)"></span></div><span class="skeleton sk-block" style="width: 40%; height: 2.6rem; margin-bottom: var(--space-4)"></span><span class="skeleton sk-block" style="width: 7rem; height: 2.4rem; margin-bottom: var(--space-5)"></span></div>
       }
     </section>
 
     <section class="card">
       <h2>{{ 'account.addresses' | transloco }}</h2>
+      @if (!addressesLoaded()) {
+        <div role="status" aria-busy="true"><span class="skeleton sk-block" style="width: 100%; height: 3rem; margin-bottom: var(--space-2)"></span><span class="skeleton sk-block" style="width: 100%; height: 3rem; margin-bottom: var(--space-2)"></span></div>
+      } @else {
       @for (a of addresses(); track a.id) {
         <div class="addr">
           <div>
@@ -43,12 +49,13 @@ import { MoneyPipe } from '@cs/util/money.pipe';
             <div class="muted">{{ a.recipientName }} — {{ a.line1 }}, {{ a.city }} {{ a.postalCode }}, {{ a.country }}</div>
           </div>
           <div class="row">
-            @if (!a.isDefaultShipping) { <button class="btn secondary sm" (click)="defaultShipping(a)">{{ 'account.setShipping' | transloco }}</button> }
-            @if (!a.isDefaultBilling) { <button class="btn secondary sm" (click)="defaultBilling(a)">{{ 'account.setBilling' | transloco }}</button> }
-            <button class="btn danger sm" (click)="removeAddress(a)">{{ 'account.delete' | transloco }}</button>
+            @if (!a.isDefaultShipping) { <button class="btn secondary sm" [csBusy]="busy()" [csBusy]="busy()" [disabled]="busy()" (click)="defaultShipping(a)">{{ 'account.setShipping' | transloco }}</button> }
+            @if (!a.isDefaultBilling) { <button class="btn secondary sm" [csBusy]="busy()" [csBusy]="busy()" [disabled]="busy()" (click)="defaultBilling(a)">{{ 'account.setBilling' | transloco }}</button> }
+            <button class="btn danger sm" [csBusy]="busy()" [csBusy]="busy()" [disabled]="busy()" (click)="removeAddress(a)">{{ 'account.delete' | transloco }}</button>
           </div>
         </div>
       } @empty { <p class="muted">{{ 'account.noAddresses' | transloco }}</p> }
+      }
 
       <details class="new">
         <summary>{{ 'account.addAddress' | transloco }}</summary>
@@ -68,13 +75,16 @@ import { MoneyPipe } from '@cs/util/money.pipe';
             <div class="field" style="flex:1"><label>{{ 'account.country' | transloco }}</label><input class="input" maxlength="2" formControlName="country" /></div>
             <div class="field" style="flex:1"><label>{{ 'account.phone' | transloco }}</label><input class="input" formControlName="phone" /></div>
           </div>
-          <button class="btn" type="submit" [disabled]="addressForm.invalid || busy()">{{ 'account.addAddressSubmit' | transloco }}</button>
+          <button class="btn" type="submit" [csBusy]="busy()" [disabled]="addressForm.invalid || busy()">{{ 'account.addAddressSubmit' | transloco }}</button>
         </form>
       </details>
     </section>
 
     <section class="card">
       <h2>{{ 'account.wishlist' | transloco }}</h2>
+      @if (!wishlistFetched()) {
+        <div role="status" aria-busy="true"><span class="skeleton sk-block" style="width: 100%; height: 4rem; margin-bottom: var(--space-2)"></span><span class="skeleton sk-block" style="width: 100%; height: 4rem; margin-bottom: var(--space-2)"></span></div>
+      } @else {
       @for (w of wishlist(); track w.productId) {
         @let p = products()[w.productId];
         <div class="wish-row">
@@ -95,9 +105,10 @@ import { MoneyPipe } from '@cs/util/money.pipe';
               <div class="muted wish-date">{{ 'account.added' | transloco: { date: (w.addedAtUtc | localDate: 'date') } }}</div>
             </div>
           }
-          <button class="btn secondary sm" (click)="removeWishlist(w)">{{ 'cart.remove' | transloco }}</button>
+          <button class="btn secondary sm" [csBusy]="busy()" [csBusy]="busy()" [disabled]="busy()" (click)="removeWishlist(w)">{{ 'cart.remove' | transloco }}</button>
         </div>
       } @empty { <p class="muted">{{ 'account.wishlistEmpty' | transloco }}</p> }
+      }
     </section>
   `,
   styles: [`
@@ -128,6 +139,8 @@ export class AccountPage implements OnInit {
   readonly wishlist = signal<WishlistItem[]>([]);
   readonly products = signal<Record<string, ProductListItem>>({});
   readonly wishlistLoaded = signal(false);
+  readonly wishlistFetched = signal(false);
+  readonly addressesLoaded = signal(false);
   readonly error = signal<string | null>(null);
   readonly message = signal<string | null>(null);
   readonly busy = signal(false);
@@ -157,8 +170,8 @@ export class AccountPage implements OnInit {
     });
     this.loadAddresses();
     this.api.wishlist().subscribe({
-      next: (w) => { this.wishlist.set(w); this.loadWishlistProducts(w); },
-      error: () => this.wishlistLoaded.set(true),
+      next: (w) => { this.wishlist.set(w); this.wishlistFetched.set(true); this.loadWishlistProducts(w); },
+      error: () => { this.wishlistLoaded.set(true); this.wishlistFetched.set(true); },
     });
   }
 
@@ -177,7 +190,7 @@ export class AccountPage implements OnInit {
   }
 
   private loadAddresses(): void {
-    this.api.addresses().subscribe({ next: (a) => this.addresses.set(a), error: () => {} });
+    this.api.addresses().subscribe({ next: (a) => { this.addresses.set(a); this.addressesLoaded.set(true); }, error: () => this.addressesLoaded.set(true) });
   }
 
   private ok(msg: string): void { this.message.set(msg); this.error.set(null); this.busy.set(false); }

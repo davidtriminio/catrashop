@@ -1,4 +1,5 @@
 import { Component, OnInit, computed, inject, signal } from '@angular/core';
+import { BusyButton } from '@cs/ui/busy-button';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { TranslocoPipe } from '@jsverse/transloco';
 import { OrderDetail, Tracking } from '@cs/api/models';
@@ -14,7 +15,7 @@ import { PaymentPanel } from './payment-panel';
 
 @Component({
   selector: 'app-order-detail',
-  imports: [LocalDatePipe, RouterLink, MoneyPipe, PaymentPanel, StatusBadge, Timeline, TranslocoPipe],
+  imports: [LocalDatePipe, RouterLink, MoneyPipe, PaymentPanel, StatusBadge, Timeline, TranslocoPipe, BusyButton],
   template: `
     @if (loading()) { <div class="card"><div class="skeleton" style="height:1.4rem;width:40%"></div></div> }
     @if (error()) { <div class="alert error">{{ error() }}</div> }
@@ -30,8 +31,8 @@ import { PaymentPanel } from './payment-panel';
           <cs-status-badge [status]="o.status" />
         </div>
         <div class="actions">
-          @if (canPay()) { <button class="btn" [disabled]="busy()" (click)="pay(o)">{{ 'orderDetail.payNow' | transloco }}</button> }
-          @if (canCancel()) { <button class="btn secondary danger-text" [disabled]="busy()" (click)="cancel(o)">{{ 'orderDetail.cancel' | transloco }}</button> }
+          @if (canPay()) { <button class="btn" [csBusy]="busy()" [disabled]="busy()" (click)="pay(o)">{{ 'orderDetail.payNow' | transloco }}</button> }
+          @if (canCancel()) { <button class="btn secondary danger-text" [csBusy]="busy()" [disabled]="busy()" (click)="cancel(o)">{{ 'orderDetail.cancel' | transloco }}</button> }
         </div>
       </div>
       <p class="muted placed">{{ 'orderDetail.placed' | transloco: { date: (o.createdAtUtc | localDate: 'long') } }}</p>
