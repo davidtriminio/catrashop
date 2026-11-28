@@ -14,10 +14,16 @@ updates:
     # Microsoft.AspNetCore.OpenApi 10.x requires Microsoft.OpenApi < 3.0.0 (NU1608 fails the build).
     # Microsoft.Extensions.* majors follow the .NET runtime: 11.x packages must not be mixed into a .NET 10 app,
     # so bump them by hand when the project moves to .NET 11.
+    # Npgsql 11 depends on Microsoft.Extensions.* 11 (NU1605 package downgrade fails the build) and must move together
+    # with Npgsql.EntityFrameworkCore.PostgreSQL, which is still on 10.x.
     ignore:
       - dependency-name: "Microsoft.OpenApi"
         update-types: ["version-update:semver-major"]
       - dependency-name: "Microsoft.Extensions.*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "Npgsql"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "Npgsql.EntityFrameworkCore.PostgreSQL"
         update-types: ["version-update:semver-major"]
     labels: ["dependencies", "backend"]
 
