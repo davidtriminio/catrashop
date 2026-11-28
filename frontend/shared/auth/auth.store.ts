@@ -11,17 +11,21 @@ const STORAGE_KEY = 'cs_auth_tokens';
 export class AuthStore {
   private readonly api = inject(AuthApi);
 
-  private readonly tokens = signal<AuthTokens | null>(this.restore());
+  private readonly tokens = signal<AuthTokens | null>(this.readStored());
   readonly user = signal<UserProfile | null>(null);
 
   readonly isAuthenticated = computed(() => this.tokens() !== null);
   readonly permissions = computed(() => this.user()?.permissions ?? []);
 
-  constructor() {
-    if (this.tokens()) {
-      // A transient failure (offline, 5xx) keeps the session; only an auth rejection ends it.
-      this.loadProfile().subscribe({ error: (e: unknown) => { if (isSessionRejected(e)) this.clear(); } });
-    }
+  /**
+   * Reloads the profile of a session restored from storage. Not done in the constructor: the auth interceptor injects
+   * this store, so a request made while the store is still being built hits a circular dependency and silently never
+   * leaves. Call it once at startup (see SessionWatcher), when the HTTP stack is ready.
+   */
+  restore(): void {
+    if (!this.tokens()) return;
+    // A transient failure (offline, 5xx) keeps the session; only an auth rejection ends it.
+    this.loadProfile().subscribe({ error: (e: unknown) => { if (isSessionRejected(e)) this.clear(); } });
   }
 
   accessToken(): string | null { return this.tokens()?.accessToken ?? null; }
@@ -64,7 +68,7 @@ export class AuthStore {
     try { localStorage.removeItem(STORAGE_KEY); } catch { /* storage unavailable */ }
   }
 
-  private restore(): AuthTokens | null {
+  private readStored(): AuthTokens | null {
     try {
       const raw = localStorage.getItem(STORAGE_KEY);
       return raw ? (JSON.parse(raw) as AuthTokens) : null;
